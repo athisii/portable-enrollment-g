@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.1"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.ARCNoController">
+
+    <BorderPane prefHeight="778.0" prefWidth="1024.0">
+        <left>
+            <AnchorPane prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: #fff;"
+                        BorderPane.alignment="CENTER">
+
+                <AnchorPane layoutY="711.0" prefHeight="57.0" prefWidth="1366.0"
+                            style="-fx-background-color: #1990ea;"/>
+                <AnchorPane layoutY="151.0" prefHeight="74.0" prefWidth="1366.0" style="-fx-background-color: #04127b;">
+
+                    <Label layoutX="13.0" layoutY="26.0" prefHeight="20.0" prefWidth="163.0" text="INPUT ARC Number"
+                           textFill="WHITE">
+                        <font>
+                            <Font size="16.0"/>
+                        </font>
+                    </Label>
+                    <TextField fx:id="txtARCno" layoutX="186.0" layoutY="23.0" prefHeight="26.0" prefWidth="267.0"/>
+                    <Label layoutX="588.0" layoutY="27.0" prefHeight="20.0" prefWidth="135.0" text="BARCODE SCAN"
+                           textFill="WHITE" visible="false">
+                        <font>
+                            <Font size="16.0"/>
+                        </font>
+                    </Label>
+                    <TextField fx:id="txtARCBarcode" layoutX="731.0" layoutY="24.0" onAction="#barcodescan"
+                               visible="false"/>
+                    <Button layoutX="462.0" layoutY="16.0" mnemonicParsing="false" onAction="#showARCDetails"
+                            prefHeight="43.0" prefWidth="50.0"
+                            style="-fx-background-image: url('file:/usr/share/enrollment/img/muted_manual_down.png');"/>
+                    <Button fx:id="barcodearcbutton" layoutX="915.0" layoutY="18.0" mnemonicParsing="false"
+                            onAction="#showDetailsBarcode" prefHeight="40.0" prefWidth="40.0"
+                            style="-fx-background-image: url('file:/usr/share/enrollment/img/muted_barcode.png');"
+                            visible="false"/>
+
+                </AnchorPane>
+                <Label layoutX="8.0" layoutY="118.0" prefHeight="26.0" prefWidth="334.0" text="ENTER ARC NUMBER"
+                       textFill="#04127b">
+                    <font>
+                        <Font size="22.0"/>
+                    </font>
+                </Label>
+                <AnchorPane layoutX="296.0" layoutY="322.0" minHeight="0.0" minWidth="0.0" prefHeight="322.0"
+                            prefWidth="754.0" style="-fx-background-color: #fff;">
+
+                    <Label fx:id="lblName1" layoutX="17.0" layoutY="49.0" text="Name" textFill="#04127b">
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <Label fx:id="lblUnit1" layoutX="17.0" layoutY="114.0" text="Unit" textFill="#04127b">
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <Label fx:id="lblDlink1" layoutX="17.0" layoutY="180.0" text="Detail Link" textFill="#04127b"
+                           visible="false">
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <Label fx:id="lblRank1" layoutX="243.0" layoutY="49.0" text="Rank" textFill="#04127b">
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <Label fx:id="lblFinger1" layoutX="243.0" layoutY="114.0" text="Exceptions in Finger"
+                           textFill="#04127b">
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <Label fx:id="lblarcstatus1" layoutX="243.0" layoutY="180.0" text="ARC No" textFill="#04127b"
+                           visible="false">
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <Label fx:id="lblapp1" layoutX="475.0" layoutY="49.0" text="Application ID" textFill="#04127b">
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <Label fx:id="lblIris1" layoutX="476.0" layoutY="114.0" text="Exceptions in Iris"
+                           textFill="#04127b">
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <Label fx:id="lblerrcode1" layoutX="245.0" layoutY="180.0" text="ARC Status" textFill="#04127b">
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <Hyperlink fx:id="txtDlink" layoutX="18.0" layoutY="199.0" onAction="#showDlink" prefHeight="24.0"
+                               prefWidth="205.0" text="Hyperlink" visible="false"/>
+                    <Button fx:id="fingerprintcapture" disable="true" layoutX="374.0" layoutY="272.0" maxHeight="36.0"
+                            maxWidth="212.0" minHeight="36.0" minWidth="148.0" mnemonicParsing="false"
+                            onAction="#showFingerPrint" prefHeight="36.0" prefWidth="148.0"
+                            style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="CONTINUE"
+                            textFill="WHITE">
+                        <font>
+                            <Font name="System Bold" size="14.0"/>
+                        </font>
+                    </Button>
+                    <Button fx:id="show_arcdetails_prev1" layoutX="203.0" layoutY="272.0" maxHeight="36.0"
+                            maxWidth="150.0" minHeight="36.0" minWidth="150.0" mnemonicParsing="false"
+                            onAction="#showHome" prefHeight="36.0" prefWidth="150.0"
+                            style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;" text="BACK"
+                            textFill="WHITE">
+                        <font>
+                            <Font name="System Bold" size="14.0"/>
+                        </font>
+                    </Button>
+                    <Label fx:id="txtName" layoutX="17.0" layoutY="69.0" prefHeight="23.0" prefWidth="195.0"
+                           style="-fx-border-color: #dad3d3; -fx-border-style: solid;"/>
+                    <Label fx:id="txtUnit" layoutX="17.0" layoutY="134.0" prefHeight="23.0" prefWidth="195.0"
+                           style="-fx-border-color: #dad3d3; -fx-border-style: solid;"/>
+                    <Label fx:id="txtRank" layoutX="241.0" layoutY="70.0" prefHeight="23.0" prefWidth="195.0"
+                           style="-fx-border-color: #dad3d3; -fx-border-style: solid;"/>
+                    <Label fx:id="txtFinger" layoutX="241.0" layoutY="135.0" prefHeight="23.0" prefWidth="195.0"
+                           style="-fx-border-color: #dad3d3; -fx-border-style: solid;"/>
+                    <Label fx:id="txtapp" layoutX="475.0" layoutY="70.0" prefHeight="23.0" prefWidth="195.0"
+                           style="-fx-border-color: #dad3d3; -fx-border-style: solid;"/>
+                    <Label fx:id="txtiris" layoutX="475.0" layoutY="135.0" prefHeight="23.0" prefWidth="195.0"
+                           style="-fx-border-color: #dad3d3; -fx-border-style: solid;"/>
+                    <Label fx:id="txtarcno" layoutX="241.0" layoutY="200.0" prefHeight="23.0" prefWidth="195.0"
+                           style="-fx-border-color: #dad3d3; -fx-border-style: solid;" visible="false"/>
+                    <Label fx:id="txtarcstatus" layoutX="245.0" layoutY="200.0" prefHeight="23.0" prefWidth="195.0"
+                           style="-fx-border-color: #dad3d3; -fx-border-style: solid;"/>
+
+                </AnchorPane>
+                <Label fx:id="lblStatus" alignment="CENTER" layoutX="224.0" layoutY="677.0" prefHeight="19.0"
+                       prefWidth="912.0" text="Enter ARC Number and Click Down Arrow Icon">
+                    <font>
+                        <Font name="System Bold" size="15.0"/>
+                    </font>
+                </Label>
+                <AnchorPane prefHeight="100.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
+
+                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="17.0" layoutY="3.0" pickOnBounds="true"
+                               preserveRatio="true">
+
+                        <Image url="@img/navylogo.png"/>
+
+                    </ImageView>
+                    <Label alignment="CENTER" layoutX="876.0" layoutY="42.0" prefHeight="31.0" prefWidth="108.0"
+                           style="-fx-background-color: #fff; -fx-background-radius: 0 20 20 0; -fx-border-width: 1; -fx-border-color: #00aaff; -fx-border-radius: 0 20 20 0;"
+                           text="INS INDIA" textAlignment="CENTER" visible="false"/>
+
+                </AnchorPane>
+                <AnchorPane layoutX="160.0" layoutY="227.0" prefHeight="60.0" prefWidth="1024.0"
+                            style="-fx-background-color: #fff;">
+
+                    <ProgressBar layoutX="129.0" layoutY="23.0" prefHeight="14.0" prefWidth="783.0" progress="0.0"/>
+                    <Circle fill="WHITE" layoutX="123.0" layoutY="29.0" radius="14.0" stroke="BLACK" strokeType="INSIDE"
+                            strokeWidth="0.0" style="-fx-fill: #04127b;"/>
+                    <Label layoutX="119.0" layoutY="22.0" prefHeight="16.0" prefWidth="22.0" text="1" textFill="WHITE"/>
+                    <Circle fill="WHITE" layoutX="325.0" layoutY="31.0" radius="14.0" stroke="BLACK" strokeType="INSIDE"
+                            strokeWidth="0.0" style="-fx-fill: #bbb5b5;"/>
+                    <Label layoutX="321.0" layoutY="24.0" prefHeight="16.0" prefWidth="22.0" text="2"/>
+                    <Circle fill="WHITE" layoutX="526.0" layoutY="29.0" radius="14.0" stroke="BLACK" strokeType="INSIDE"
+                            strokeWidth="0.0" style="-fx-fill: #bbb5b5;"/>
+                    <Label layoutX="522.0" layoutY="22.0" prefHeight="16.0" prefWidth="22.0" text="3"/>
+                    <Circle fill="WHITE" layoutX="722.0" layoutY="32.0" radius="14.0" stroke="BLACK" strokeType="INSIDE"
+                            strokeWidth="0.0" style="-fx-fill: #bbb5b5;"/>
+                    <Label layoutX="718.0" layoutY="25.0" prefHeight="16.0" prefWidth="22.0" text="4"/>
+                    <Circle fill="WHITE" layoutX="899.0" layoutY="31.0" radius="14.0" stroke="BLACK" strokeType="INSIDE"
+                            strokeWidth="0.0" style="-fx-fill: #bbb5b5;"/>
+                    <Label layoutX="895.0" layoutY="24.0" prefHeight="16.0" prefWidth="22.0" text="5"/>
+
+                </AnchorPane>
+                <Label fx:id="lblarcstatus11" layoutX="315.0" layoutY="499.0" prefHeight="18.0" prefWidth="129.0"
+                       text="Biometric Options" textFill="#04127b">
+                    <font>
+                        <Font size="14.0"/>
+                    </font>
+                </Label>
+                <Label fx:id="txtbiometricoptions" layoutX="316.0" layoutY="519.0" prefHeight="23.0" prefWidth="195.0"
+                       style="-fx-border-color: #dad3d3; -fx-border-style: solid;"/>
+
+            </AnchorPane>
+        </left>
+    </BorderPane>
+
+</VBox>

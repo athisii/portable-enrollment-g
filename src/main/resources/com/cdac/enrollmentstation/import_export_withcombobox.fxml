@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.1"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.ImportExportController">
+
+    <BorderPane prefHeight="778.0" prefWidth="1024.0">
+        <left>
+            <AnchorPane prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: #fff;"
+                        BorderPane.alignment="CENTER">
+
+                <AnchorPane layoutX="362.0" layoutY="250.0" prefHeight="186.0" prefWidth="265.0"
+                            style="-fx-background-color: #fff;">
+
+                    <Text fill="#04127b" layoutX="10.0" layoutY="180.0" strokeType="OUTSIDE" strokeWidth="0.0"
+                          text="UNIT :">
+                        <font>
+                            <Font name="System Bold" size="13.0"/>
+                        </font>
+                    </Text>
+                    <ImageView fitHeight="125.0" fitWidth="100.0" layoutX="82.0" layoutY="35.0" pickOnBounds="true"
+                               preserveRatio="true">
+
+                        <Image url="@img/import.jpeg"/>
+
+                    </ImageView>
+                    <Button fx:id="importData" layoutX="1.0" layoutY="192.0" maxHeight="35.0" maxWidth="262.0"
+                            minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#importData"
+                            prefHeight="35.0" prefWidth="262.0"
+                            style="-fx-background-color: #04127b; -fx-background-radius: 10 10 10 10;"
+                            text="IMPORT DEMOGRAPHIC DATA" textFill="WHITE">
+                        <font>
+                            <Font name="System Bold" size="14.0"/>
+                        </font>
+                    </Button>
+                    <ImageView fx:id="refreshicon" fitHeight="29.0" fitWidth="33.0" layoutX="213.0" layoutY="155.0"
+                               onMouseClicked="#fetchunitdetails" pickOnBounds="true" preserveRatio="true">
+
+                        <Image url="@img/refresh.png"/>
+
+                    </ImageView>
+                    <ComboBox fx:id="comboUnitId" editable="true" layoutX="60.0" layoutY="160.0" prefHeight="26.0"
+                              prefWidth="148.0" visibleRowCount="3"/>
+
+                </AnchorPane>
+                <AnchorPane layoutX="738.0" layoutY="250.0" prefHeight="236.0" prefWidth="289.0"
+                            style="-fx-background-color: #fff;">
+
+                    <ImageView fitHeight="94.0" fitWidth="109.0" layoutX="100.0" layoutY="44.0" pickOnBounds="true"
+                               preserveRatio="true">
+
+                        <Image url="@img/export.jpeg"/>
+
+                    </ImageView>
+                    <Button fx:id="exportData" layoutX="7.0" layoutY="193.0" maxHeight="44.0" maxWidth="275.0"
+                            minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#exportData"
+                            prefHeight="37.0" prefWidth="275.0"
+                            style="-fx-background-color: #04127b; -fx-background-radius: 10 10 10 10;"
+                            text="EXPORT BIOMETRIC DATA" textFill="WHITE">
+                        <font>
+                            <Font name="System Bold" size="14.0"/>
+                        </font>
+                    </Button>
+
+                </AnchorPane>
+                <AnchorPane prefHeight="100.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
+
+                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="17.0" layoutY="3.0" pickOnBounds="true"
+                               preserveRatio="true">
+
+                        <Image url="@img/navylogo.png"/>
+
+                    </ImageView>
+                    <Label alignment="CENTER" layoutX="876.0" layoutY="42.0" prefHeight="31.0" prefWidth="108.0"
+                           style="-fx-background-color: #fff; -fx-background-radius: 0 20 20 0; -fx-border-width: 1; -fx-border-color: #00aaff; -fx-border-radius: 0 20 20 0;"
+                           text="INS INDIA" textAlignment="CENTER" textFill="#111010" visible="false"/>
+
+                </AnchorPane>
+                <AnchorPane layoutY="711.0" prefHeight="57.0" prefWidth="1366.0"
+                            style="-fx-background-color: #1990ea;"/>
+                <Label fx:id="lblStatus" alignment="CENTER" layoutX="204.0" layoutY="598.0" prefHeight="21.0"
+                       prefWidth="931.0">
+                    <font>
+                        <Font name="System Bold" size="17.0"/>
+                    </font>
+                </Label>
+                <Button fx:id="exportback" layoutX="497.0" layoutY="642.0" maxHeight="36.0" maxWidth="150.0"
+                        minHeight="36.0" minWidth="150.0" mnemonicParsing="false" onAction="#showImportExportBack"
+                        prefHeight="36.0" prefWidth="150.0"
+                        style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;" text="Back"
+                        textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="14.0"/>
+                    </font>
+                </Button>
+                <Button fx:id="exporthome" layoutX="717.0" layoutY="642.0" maxHeight="35.0" maxWidth="150.0"
+                        minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#showImportExportHome"
+                        prefHeight="35.0" prefWidth="150.0"
+                        style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="Home"
+                        textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="14.0"/>
+                    </font>
+                </Button>
+                <Button fx:id="FetchUnitButton" layoutX="352.0" layoutY="535.0" maxHeight="35.0" maxWidth="150.0"
+                        minHeight="29.0" minWidth="72.0" mnemonicParsing="false" onAction="#fetchunitdetails"
+                        prefHeight="29.0" prefWidth="72.0"
+                        style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="FETCH"
+                        textFill="WHITE" visible="false">
+                    <font>
+                        <Font name="System Bold" size="14.0"/>
+                    </font>
+                </Button>
+
+            </AnchorPane>
+        </left>
+    </BorderPane>
+
+</VBox>

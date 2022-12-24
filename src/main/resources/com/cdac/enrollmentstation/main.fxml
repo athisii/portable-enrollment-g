@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.1"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.LoginController">
+
+    <BorderPane>
+        <center>
+            <AnchorPane prefHeight="768.0" prefWidth="1366.0" style="-fx-background-color: #fff;"
+                        BorderPane.alignment="CENTER">
+
+                <AnchorPane layoutX="322.0" layoutY="250.0" prefHeight="258.0" prefWidth="257.0"
+                            style="-fx-background-color: #fff; -fx-border-color: #04127b;">
+
+                    <ImageView fitHeight="90.0" fitWidth="100.0" layoutX="73.0" layoutY="83.0" pickOnBounds="true"
+                               preserveRatio="true">
+
+                        <Image url="@img/showtoken.jpeg"/>
+
+                    </ImageView>
+                    <Button fx:id="offlinelogin" layoutX="49.0" layoutY="196.0" maxHeight="35.0" maxWidth="262.0"
+                            minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#offlineLogin"
+                            prefHeight="35.0" prefWidth="167.0"
+                            style="-fx-background-color: #04127b; -fx-background-radius: 10 10 10 10;"
+                            text="I-CARD LOGIN" textFill="WHITE">
+                        <font>
+                            <Font name="System Bold" size="14.0"/>
+                        </font>
+                    </Button>
+
+                </AnchorPane>
+                <AnchorPane layoutX="774.0" layoutY="252.0" prefHeight="255.0" prefWidth="278.0"
+                            style="-fx-background-color: #fff; -fx-border-color: #04127b;">
+
+                    <ImageView fitHeight="75.0" fitWidth="109.0" layoutX="110.0" layoutY="104.0" pickOnBounds="true"
+                               preserveRatio="true">
+
+                        <Image url="@img/loginn.jpg"/>
+
+                    </ImageView>
+                    <Button fx:id="onlinelogin" layoutX="69.0" layoutY="192.0" maxHeight="44.0" maxWidth="275.0"
+                            minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#onlineLogin"
+                            prefHeight="37.0" prefWidth="160.0"
+                            style="-fx-background-color: #04127b; -fx-background-radius: 10 10 10 10;" text="NUD LOGIN"
+                            textFill="WHITE">
+                        <font>
+                            <Font name="System Bold" size="14.0"/>
+                        </font>
+                    </Button>
+
+                </AnchorPane>
+                <AnchorPane fx:id="anchorheader" layoutY="-8.0" prefHeight="108.0" prefWidth="1366.0"
+                            style="-fx-background-color: #1990ea;">
+
+                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="17.0" layoutY="3.0" pickOnBounds="true"
+                               preserveRatio="true">
+
+                        <Image url="@img/navylogo.png"/>
+
+                    </ImageView>
+                    <Label alignment="CENTER" layoutX="876.0" layoutY="42.0" prefHeight="31.0" prefWidth="108.0"
+                           style="-fx-background-color: #fff; -fx-background-radius: 0 20 20 0; -fx-border-width: 1; -fx-border-color: #00aaff; -fx-border-radius: 0 20 20 0;"
+                           text="INS INDIA" textAlignment="CENTER" textFill="#111010" visible="false"/>
+
+                </AnchorPane>
+                <AnchorPane layoutY="720.0" prefHeight="50.0" prefWidth="1366.0"
+                            style="-fx-background-color: #1990ea;"/>
+                <Label fx:id="lblStatus" alignment="CENTER" layoutX="234.0" layoutY="598.0" prefHeight="21.0"
+                       prefWidth="931.0">
+                    <font>
+                        <Font name="System Bold" size="17.0"/>
+                    </font>
+                </Label>
+                <AnchorPane layoutY="100.0" prefHeight="60.0" prefWidth="1366.0"
+                            style="-fx-background-color: #04127b;"/>
+                <Label fx:id="statusMsg1" alignment="CENTER" layoutX="492.0" layoutY="117.0" prefHeight="33.0"
+                       prefWidth="373.0" text="LOGIN  PAGE" textFill="#fffefe">
+                    <font>
+                        <Font name="System Bold" size="15.0"/>
+                    </font>
+                </Label>
+
+            </AnchorPane>
+        </center>
+    </BorderPane>
+
+</VBox>

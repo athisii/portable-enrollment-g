@@ -30,10 +30,7 @@ import javax.crypto.SecretKey;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ResourceBundle;
@@ -332,34 +329,44 @@ public class FXHelloCVController implements Initializable {
                                     public void run() {
                                         message.setText(croppedm);
 
+
                                         if (croppedm.contains("Face Going out of frame")) {
-                                            Image imageToShow_tick = new Image("/facecode/outofframecolor.png");
+                                            InputStream inputStream1 = FXHelloCVController.class.getResourceAsStream("/facecode/outofframecolor.png");
+                                            Image imageToShow_tick = new Image(inputStream1);
                                             updateImageView(msgicon, imageToShow_tick);
                                         }
+
                                         if (croppedm.contains("ROTATE Face CLOCK")) {
-                                            Image imageToShow_tick = new Image("/facecode/clockcolor.png");
+                                            InputStream inputStream2 = FXHelloCVController.class.getResourceAsStream("/facecode/clockcolor.png");
+                                            Image imageToShow_tick = new Image(inputStream2);
                                             updateImageView(msgicon, imageToShow_tick);
                                         }
                                         if (croppedm.contains("ROTATE Face ANTI")) {
-                                            Image imageToShow_tick = new Image("/facecode/anticlockcolor.png");
+                                            InputStream inputStream3 = FXHelloCVController.class.getResourceAsStream("/facecode/clockcoloranticlockcolor.png");
+                                            Image imageToShow_tick = new Image(inputStream3);
                                             updateImageView(msgicon, imageToShow_tick);
                                         }
                                         if (croppedm.contains("ROTATE Face RIGHT")) {
-                                            Image imageToShow_tick = new Image("/facecode/rightrotatecolor.png");
+                                            InputStream inputStream4 = FXHelloCVController.class.getResourceAsStream("/facecode/rightrotatecolor.png");
+                                            Image imageToShow_tick = new Image(inputStream4);
                                             updateImageView(msgicon, imageToShow_tick);
                                         }
                                         if (croppedm.contains("ROTATE Face LEFT")) {
-                                            Image imageToShow_tick = new Image("/facecode/leftrotatecolor.png");
+                                            InputStream inputStream5 = FXHelloCVController.class.getResourceAsStream("/facecode/leftrotatecolor.png");
+                                            Image imageToShow_tick = new Image(inputStream5);
                                             updateImageView(msgicon, imageToShow_tick);
                                         }
                                         if (croppedm.contains("CHIN DOWN")) {
-                                            Image imageToShow_tick = new Image("/facecode/chindowncolored.png");
+                                            InputStream inputStream6 = FXHelloCVController.class.getResourceAsStream("/facecode/chindowncolored.png");
+                                            Image imageToShow_tick = new Image(inputStream6);
                                             updateImageView(msgicon, imageToShow_tick);
                                         }
                                         if (croppedm.contains("CHIN UP")) {
-                                            Image imageToShow_tick = new Image("/facecode/chinupcolor.png");
+                                            InputStream inputStream7 = FXHelloCVController.class.getResourceAsStream("/facecode/chinupcolor.png");
+                                            Image imageToShow_tick = new Image(inputStream7);
                                             updateImageView(msgicon, imageToShow_tick);
                                         }
+
                                     }
                                 });
                                 if (croppedm.contains("Single")) {
@@ -370,7 +377,8 @@ public class FXHelloCVController implements Initializable {
 //                                                String filered = "/home/boss/NetBeansProjects/src/main/resources/facecode/camera.png"; 
 //                                                Mat matrix_red = imageCodecs.imread(filered);
                             //Image imageToShow_tick = Utils.mat2Image(matrix_red);
-                            Image imageToShow_tick = new Image("/facecode/camera.png");
+                            InputStream inputStream8 = FXHelloCVController.class.getResourceAsStream("/facecode/camera.png");
+                            Image imageToShow_tick = new Image(inputStream8);
                             updateImageView(iconFrame, imageToShow_tick);
                         }
                         if (line.contains("Valid")) {
@@ -390,7 +398,8 @@ public class FXHelloCVController implements Initializable {
 //                                                String filetick = "/home/boss/NetBeansProjects/src/main/resources/facecode/tickgreen.jpg"; 
 //                                                Mat matrix_tick = imageCodecs.imread(filetick);
 //                                                Image imageToShow_tick = Utils.mat2Image(matrix_tick);
-                                Image imageToShow_tick = new Image("/facecode/tickgreen.jpg");
+                                InputStream inputStream9 = FXHelloCVController.class.getResourceAsStream("/facecode/tickgreen.jpg");
+                                Image imageToShow_tick = new Image(inputStream9);
 
                                 updateImageView(iconFrame, imageToShow_tick);
                                 Platform.runLater(new Runnable() {
@@ -412,7 +421,8 @@ public class FXHelloCVController implements Initializable {
 //                                                String filebrown = "/home/boss/NetBeansProjects/src/main/resources/facecode/brownquestion.jpeg"; 
 //                                                Mat matrix_brown = imageCodecs.imread(filebrown);
 //                                                Image imageToShow_tick = Utils.mat2Image(matrix_brown);
-                                Image imageToShow_tick = new Image("/facecode/brownquestion.jpeg");
+                                InputStream inputStream10 = FXHelloCVController.class.getResourceAsStream("/facecode/brownquestion.jpeg");
+                                Image imageToShow_tick = new Image(inputStream10);
                                 //Image imageToShow_tick = new Image("/facecode/tickgreen.jpg");
                                 updateImageView(iconFrame, imageToShow_tick);
                             }

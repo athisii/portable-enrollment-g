@@ -505,12 +505,14 @@ public class BiometricCaptureCompleteController implements Initializable {
                     //if(a.getDesc().contains("refused") || a.getDesc().contains("notreachable")) {
                     if (saveEnrollmentResponse.getDesc().contains("refused") || saveEnrollmentResponse.getDesc().contains("notreachable")
                             || saveEnrollmentResponse.getDesc().contains("Exception")) {
-                        Image image = new Image("/haar_facedetection/redcross.png");
+                        InputStream inputStream = BiometricCaptureCompleteController.class.getResourceAsStream("/haar_facedetection/redcross.png");
+                        Image image = new Image(inputStream);
                         statusImg.setImage(image);
                         submit.setDisable(false);
                         progressind.setVisible(false);
                     } else {
-                        Image image = new Image("/haar_facedetection/tickgreen.jpg");
+                        InputStream inputStream = BiometricCaptureCompleteController.class.getResourceAsStream("/haar_facedetection/tickgreen.jpg");
+                        Image image = new Image(inputStream);
                         statusImg.setImage(image);
                         progressind.setVisible(false);
                         backhome.setDisable(false);

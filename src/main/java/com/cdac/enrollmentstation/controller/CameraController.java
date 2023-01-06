@@ -103,7 +103,7 @@ public class CameraController {
     private ScheduledExecutorService timer;
     @FXML
     private Label confirmpanelabel;
-
+     //New File For Camera Capture
     // automatically called by JavaFx runtime.
     public void initialize() {
         try {

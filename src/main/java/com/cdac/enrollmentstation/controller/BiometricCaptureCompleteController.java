@@ -29,7 +29,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.text.Text;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
@@ -295,9 +294,9 @@ public class BiometricCaptureCompleteController implements Initializable {
                     //Added for Biometric Options
 
                     if (holder.getArcDetails().getBiometricOptions().contains("Photo")) {
-                        saveEnrollment.setIRISScannerSerialNo("Not Available");
-                        saveEnrollment.setLeftFPScannerSerialNo("Not Available");
-                        saveEnrollment.setRightFPScannerSerialNo("Not Available");
+                        saveEnrollment.setIRISScannerSerailNo("Not Available");
+                        saveEnrollment.setLeftFPScannerSerailNo("Not Available");
+                        saveEnrollment.setRightFPScannerSerailNo("Not Available");
                         Set<FP> fingerPrintSet = new HashSet<>();
                         FP fplt = new FP();
                         fplt.setPosition("Not Available");

@@ -307,8 +307,8 @@ public class SlapScannerController implements Initializable {
                 ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
                 ARCDetails a = holder.getArcDetails();
                 SaveEnrollmentDetails saveEnrollment = holder.getSaveEnrollmentDetails();
-                saveEnrollment.setLeftFPScannerSerialNo(deviceInfoT.deviceID);
-                saveEnrollment.setRightFPScannerSerialNo(deviceInfoT.deviceID);
+                saveEnrollment.setLeftFPScannerSerailNo(deviceInfoT.deviceID);
+                saveEnrollment.setRightFPScannerSerailNo(deviceInfoT.deviceID);
 
                 //saveEnrollment.setRightFPScannerSerailNo("Not Available");
                 System.out.println("details : " + saveEnrollment.getArcNo());

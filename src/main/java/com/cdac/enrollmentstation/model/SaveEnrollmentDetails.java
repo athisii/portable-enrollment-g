@@ -51,14 +51,14 @@ public class SaveEnrollmentDetails {
     @JsonProperty("IRIS")
     Set<IRIS> iris = new HashSet<>();
 
-    @JsonProperty("IRISScannerSerialNo")
-    String iRISScannerSerialNo;
+    @JsonProperty("IRISScannerSerailNo")
+    String iRISScannerSerailNo;
 
-    @JsonProperty("LeftFPScannerSerialNo")
-    String leftFPScannerSerialNo;
+    @JsonProperty("LeftFPScannerSerailNo")
+    String leftFPScannerSerailNo;
 
-    @JsonProperty("RightFPScannerSerialNo")
-    String rightFPScannerSerialNo;
+    @JsonProperty("RightFPScannerSerailNo")
+    String rightFPScannerSerailNo;
 
     @JsonProperty("UniqueID")
     String uniqueID;

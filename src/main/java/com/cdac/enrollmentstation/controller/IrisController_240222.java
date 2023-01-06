@@ -314,7 +314,7 @@ public class IrisController_240222 implements MIDIrisEnrollCallback, Initializab
                     ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
                     SaveEnrollmentDetails saveEnrollment = holder.getSaveEnrollmentDetails();
                     System.out.println("details : " + saveEnrollment.getArcNo());
-                    saveEnrollment.setIRISScannerSerialNo(info.SerialNo);
+                    saveEnrollment.setIRISScannerSerailNo(info.SerialNo);
                     saveEnrollment.setEnrollmentStatus("IRIS Capture Completed");
                     holder.setSaveEnrollmentDetails(saveEnrollment);
                     System.out.println("DEVICE INITIALIZED");

@@ -6,7 +6,6 @@
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
-import com.cdac.enrollmentstation.event.ChangeListener;
 import com.cdac.enrollmentstation.service.DirectoryLookup;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -83,7 +82,6 @@ public class VerifyAdminPasswdController implements Initializable {
                 App.setRoot("admin_config");
             } else {
                 statusMsg.setText(status);
-                return;
             }
 
         } catch (Exception e) {
@@ -96,10 +94,12 @@ public class VerifyAdminPasswdController implements Initializable {
     @Override
     public void initialize(URL arg0, ResourceBundle arg1) {
         // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        int maxLength = 15;
+//        int maxLength = 15;
         /* add ChangeListner to TextField to restrict the TextField Length*/
-        user.textProperty().addListener(new ChangeListener(user, maxLength));
-        adminPwd.textProperty().addListener(new ChangeListener(adminPwd, maxLength));
+//        user.textProperty().addListener(new ChangeListener(user, maxLength));
+//        user.textProperty().addListener((observable, oldValue, newValue) -> {
+//        });
+//        adminPwd.textProperty().addListener(new ChangeListener(adminPwd, maxLength));
     }
 
 }

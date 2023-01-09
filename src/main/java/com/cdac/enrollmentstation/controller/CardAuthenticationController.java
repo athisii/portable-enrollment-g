@@ -153,7 +153,9 @@ public class CardAuthenticationController implements Initializable, MIDFingerAut
         /* max length of text field user name */
         int maxLength = 10;
         /* add ChangeListner to TextField to restrict the TextField Length*/
+        LOGGER.log(Level.INFO, () -> "Before adding listener");
         usertxt.textProperty().addListener(new ChangeListener(usertxt, maxLength));
+        LOGGER.log(Level.INFO, () -> "After adding listener");
     }
 
     @FXML

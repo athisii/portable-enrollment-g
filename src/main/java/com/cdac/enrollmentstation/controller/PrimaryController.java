@@ -93,9 +93,9 @@ public class PrimaryController implements Initializable {
 
     @FXML
     public void OnSettings() throws IOException {
-        System.out.println("In onsettings");
+//        System.out.println("In onsettings");
         App.setRoot("enterpassword");
-        System.out.println("In onsettings1");
+//        System.out.println("In onsettings1");
     }
 
     @FXML

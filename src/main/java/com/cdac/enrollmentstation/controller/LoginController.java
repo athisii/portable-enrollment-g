@@ -34,7 +34,6 @@ public class LoginController implements Initializable {
     @FXML
     private void offlineLogin() throws IOException {
         //App.setRoot("list_contract");
-
         App.setRoot("cardauthentication");
 
     }

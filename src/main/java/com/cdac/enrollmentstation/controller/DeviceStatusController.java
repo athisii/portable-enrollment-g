@@ -7,7 +7,6 @@ import com.cdac.enrollmentstation.api.APIServerCheck;
 import com.cdac.enrollmentstation.util.TestIris;
 import com.cdac.enrollmentstation.util.TestProp;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -15,12 +14,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DeviceStatusController implements Initializable {
+public class DeviceStatusController {
     public APIServerCheck apiServerCheck = new APIServerCheck();
     @FXML
     public ImageView irisstatus, sdkirisstatus, sdkslapstatus;
@@ -257,8 +254,7 @@ public class DeviceStatusController implements Initializable {
 
     }
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
+    public void initialize() {
         // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 
 

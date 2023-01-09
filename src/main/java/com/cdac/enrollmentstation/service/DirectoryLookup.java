@@ -6,86 +6,61 @@
 package com.cdac.enrollmentstation.service;
 
 /**
- *
  * @author root
  */
-import com.cdac.enrollmentstation.util.TestProp;
 
-import java.io.IOException;
+import com.cdac.enrollmentstation.constant.PropertyName;
+import com.cdac.enrollmentstation.logging.ApplicationLogNew;
+import com.cdac.enrollmentstation.util.PropertyFile;
+
+import javax.naming.AuthenticationException;
+import javax.naming.CommunicationException;
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.naming.directory.InitialDirContext;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.naming.AuthenticationException;
-import javax.naming.CommunicationException;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
 
 public class DirectoryLookup {
-    
-TestProp prop = new TestProp();
 
-public DirectoryLookup() {
+    private static final Logger LOGGER = ApplicationLogNew.getLogger(DirectoryLookup.class);
 
-}
-
-public String doLookup(String username, String password) {
-    String domain=null;        
-    String ldapurl=null; 
-    try {
-        domain=prop.getProp().getProperty("domain");
-        ldapurl=prop.getProp().getProperty("ldapurl");
-    } catch (IOException ex) {
-        Logger.getLogger(DirectoryLookup.class.getName()).log(Level.SEVERE, null, ex);
-    }
-    boolean result = false;
-    //String domain = "CDACAD";
-    String securityprincipal = domain+"\\"+username;
-    Properties properties = new Properties();
-    properties.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
-    //properties.put(Context.PROVIDER_URL, "ldap://10.184.49.113");
-    //properties.put(Context.PROVIDER_URL, "ldap://10.184.36.14");
-    properties.put(Context.PROVIDER_URL, ldapurl);
-    properties.put(Context.SECURITY_AUTHENTICATION, "simple");    
-    //properties.put(Context.SECURITY_PRINCIPAL, "uid="+username+",cn=users,cn=accounts,dc=dssc,dc=mil");
-    //properties.put(Context.SECURITY_PRINCIPAL, "uid="+username+",cn=users,cn=accounts,dc=cdacad,dc=in");
-    properties.put(Context.SECURITY_PRINCIPAL, securityprincipal);
-    //properties.put(Context.SECURITY_PRINCIPAL, "cn="+username+",dc=cdacad,dc=in");
-    //properties.put(Context.SECURITY_PRINCIPAL, "uid=sysadmin1,cn=users,cn=accounts,dc=dssc,dc=mil");
-    properties.put(Context.SECURITY_CREDENTIALS, password);
-    //properties.put(Context.SECURITY_CREDENTIALS, "CDACchennai!12");
-    try {
-    DirContext context = new InitialDirContext(properties);
-    result = context != null;
-    if(context != null) {
-
-        context.close();
-    }
-    System.out.println("Result::::::"+result);
-    //Attributes attrs = context.getAttributes("uid=sysadmin1,cn=users,cn=accounts,dc=dssc,dc=mil");
-    //System.out.println("Surname: " + attrs.get("sn").get());
-    //System.out.println("Common name : " + attrs.get("cn").get());
-    //System.out.println("telephone number : " + attrs.get("telephoneNumber").get());
-    }catch(CommunicationException e){
-            return "Failed to connect with ldap server";
-    }catch(AuthenticationException e){
-            return "Failed to authenticate user";
-    }catch (NamingException e) {
-    //e.printStackTrace();
-    System.out.println("Invalid credentials");
-    return "Invalid credentials";
+    public static String doLookup(String username, String password) {
+        String result;
+        String domain = PropertyFile.getProperty(PropertyName.DOMAIN);
+        String ldapUrl = PropertyFile.getProperty(PropertyName.LDAP_URL);
+        // domain = "CDACAD"
+        // ldapUrl = "ldap://10.184.36.14"
+        String securityPrincipal = domain + "\\" + username;
+        Properties properties = new Properties();
+        properties.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        properties.put(Context.PROVIDER_URL, ldapUrl);
+        properties.put(Context.SECURITY_AUTHENTICATION, "simple");
+        properties.put(Context.SECURITY_PRINCIPAL, securityPrincipal);
+        properties.put(Context.SECURITY_CREDENTIALS, password);
+        try {
+            new InitialDirContext(properties);
+            result = "true";
+        } catch (CommunicationException e) {
+            LOGGER.log(Level.SEVERE, () -> "Failed to connect with ldap server");
+            result = "Failed to connect with ldap server";
+        } catch (AuthenticationException e) {
+            LOGGER.log(Level.SEVERE, () -> "Failed to authenticate user");
+            result = "Failed to authenticate user";
+        } catch (NamingException e) {
+            LOGGER.log(Level.SEVERE, () -> "Naming exception occurred");
+            result = "Invalid credentials";
+        }
+        return result;
     }
 
-    return "true";
-}
-
-public static void main(String[] args) {
-    DirectoryLookup sample = new DirectoryLookup();
-    //String result = sample.doLookup("r101", "boss");
-    //String result = sample.doLookup("CDACAD\\sudhakar", "Root1234#$");
-    String result = sample.doLookup("sudhakar", "Root1234#$");
-    System.out.println("Ldap Result::"+result);
-}
+    public static void main(String[] args) {
+        DirectoryLookup sample = new DirectoryLookup();
+        //String result = sample.doLookup("r101", "boss");
+        //String result = sample.doLookup("CDACAD\\sudhakar", "Root1234#$");
+        String result = sample.doLookup("sudhakar", "Root1234#$");
+        System.out.println("Ldap Result::" + result);
+    }
 
 }

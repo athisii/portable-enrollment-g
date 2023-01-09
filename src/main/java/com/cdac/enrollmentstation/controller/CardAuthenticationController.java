@@ -24,7 +24,6 @@ import com.mantra.midfingerauth.enums.DeviceModel;
 import com.mantra.midfingerauth.enums.TemplateFormat;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -37,11 +36,9 @@ import javax.xml.bind.DatatypeConverter;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,7 +50,7 @@ import java.util.stream.Collectors;
  *
  * @author padmanabhanj
  */
-public class CardAuthenticationController implements Initializable, MIDFingerAuth_Callback {
+public class CardAuthenticationController implements MIDFingerAuth_Callback {
 
     /**
      * Initializes the controller class.
@@ -146,16 +143,13 @@ public class CardAuthenticationController implements Initializable, MIDFingerAut
         }
     }
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
+    public void initialize() {
         // usertxt.requestFocus();
         // TODO
         /* max length of text field user name */
         int maxLength = 10;
         /* add ChangeListner to TextField to restrict the TextField Length*/
-        LOGGER.log(Level.INFO, () -> "Before adding listener");
         usertxt.textProperty().addListener(new ChangeListener(usertxt, maxLength));
-        LOGGER.log(Level.INFO, () -> "After adding listener");
     }
 
     @FXML

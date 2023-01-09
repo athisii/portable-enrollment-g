@@ -4,15 +4,12 @@ import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.api.APIServerCheck;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 
-public class PrimaryController implements Initializable {
+public class PrimaryController {
     @FXML
     private TextField irisInit;
     @FXML
@@ -20,36 +17,21 @@ public class PrimaryController implements Initializable {
     @FXML
     private TextField slapInit;
     @FXML
-    private Label statusmsg;
+    private Label statusMsg;
     @FXML
     private Label version;
 
-    private String versionno = "1.0";
+    private static final String versionNo = "1.0";
 
     private APIServerCheck apiServerCheck = new APIServerCheck();
 
     public void responseStatus(String message) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                statusmsg.setText(message);
-            }
-        });
+        Platform.runLater(() -> statusMsg.setText(message));
     }
 
     @FXML
     private void showEnrollmentHome() throws IOException {
-
-        // App.setRoot("second_screen");
         App.setRoot("enrollment_arc");
-
-    }
-
-    @FXML
-    private void showContract() throws IOException {
-        //App.setRoot("list_contract");
-
-        App.setRoot("n_showtoken_1");
 
     }
 
@@ -74,38 +56,23 @@ public class PrimaryController implements Initializable {
             response = "Network Connection Issue. Check Connection and Try Again";
             //messageStatus(response);
             responseStatus(response);
-            return;
         } else {
             App.setRoot("import_export");
         }
     }
 
     @FXML
-    public void deviceStatus() throws IOException {
-        //Initialize IRIS
-
-//        mIDIrisEnroll = new MIDIrisEnroll(this);
-//        String version = mIDIrisEnroll.GetSDKVersion();
-//        System.out.println("sdk version :"+ version); 
-//     
-
+    public void onSettings() throws IOException {
+        App.setRoot("admin-auth");
     }
 
     @FXML
-    public void OnSettings() throws IOException {
-//        System.out.println("In onsettings");
-        App.setRoot("enterpassword");
-//        System.out.println("In onsettings1");
-    }
-
-    @FXML
-    public void OnLogout() throws IOException {
+    public void onLogout() throws IOException {
         App.setRoot("main");
     }
 
-    @Override
-    public void initialize(URL arg0, ResourceBundle arg1) {
-        version.setText(versionno);
+    public void initialize() {
+        version.setText(versionNo);
     }
 
 

@@ -21,7 +21,7 @@
                     </font>
                 </Button>
                 <Button fx:id="showServerConfig" layoutX="544.0" layoutY="487.0" maxHeight="35.0" maxWidth="150.0"
-                        minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#serverConfig"
+                        minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#showPrimaryScreen"
                         prefHeight="35.0" prefWidth="150.0"
                         style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="LOGIN"
                         textFill="WHITE">
@@ -56,9 +56,9 @@
                 <AnchorPane layoutX="301.0" layoutY="251.0" prefHeight="168.0" prefWidth="487.0"
                             style="-fx-border-color: #04127b;">
 
-                    <PasswordField fx:id="adminpwd" layoutX="164.0" layoutY="85.0" prefHeight="26.0" prefWidth="194.0"
+                    <PasswordField fx:id="passwordField" layoutX="164.0" layoutY="85.0" prefHeight="26.0" prefWidth="194.0"
                                    promptText="Password"/>
-                    <TextField fx:id="user" layoutX="164.0" layoutY="32.0" prefHeight="26.0" prefWidth="190.0"
+                    <TextField fx:id="textField" layoutX="164.0" layoutY="32.0" prefHeight="26.0" prefWidth="190.0"
                                promptText="Username"/>
                     <ImageView fitHeight="43.0" fitWidth="41.0" layoutX="83.0" layoutY="25.0" pickOnBounds="true"
                                preserveRatio="true">

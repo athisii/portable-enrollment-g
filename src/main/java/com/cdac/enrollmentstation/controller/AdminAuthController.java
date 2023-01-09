@@ -20,7 +20,7 @@ import java.io.IOException;
  *
  * @author root
  */
-public class OnlineLoginController {
+public class AdminAuthController {
     @FXML
     private Label statusMsg;
 
@@ -32,19 +32,21 @@ public class OnlineLoginController {
 
     @FXML
     public void showHome() throws IOException {
-        App.setRoot("main");
+        App.setRoot("first_screen");
     }
 
 
     @FXML
-    public void showPrimaryScreen() {
-        AuthUtil.authenticate(textField, passwordField, statusMsg, "first_screen");
+    public void serverConfig() {
+        AuthUtil.authenticate(textField, passwordField, statusMsg, "admin_config");
     }
 
     public void initialize() {
-        //restrict the TextField Length
+        // restrict the TextField Length
         textField.textProperty().addListener((observable, oldValue, newValue) -> AuthUtil.limitCharacters(textField, oldValue, newValue));
         passwordField.textProperty().addListener((observable, oldValue, newValue) -> AuthUtil.limitCharacters(passwordField, oldValue, newValue));
+
+        // ease of use for operator
         textField.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
                 passwordField.requestFocus();
@@ -53,7 +55,7 @@ public class OnlineLoginController {
         });
         passwordField.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
-                showPrimaryScreen();
+                serverConfig();
             }
         });
     }

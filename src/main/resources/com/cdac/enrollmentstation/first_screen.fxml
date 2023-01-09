@@ -91,7 +91,7 @@
                         <Font size="16.0"/>
                     </font>
                 </Label>
-                <Label fx:id="logout" layoutX="1276.0" layoutY="131.0" onMouseClicked="#OnLogout" prefHeight="27.0"
+                <Label fx:id="logout" layoutX="1276.0" layoutY="131.0" onMouseClicked="#onLogout" prefHeight="27.0"
                        prefWidth="77.0" style="-fx-cursor: hand;" text="LOGOUT" underline="true">
                     <font>
                         <Font size="16.0"/>
@@ -103,13 +103,13 @@
                     <Image url="@img/logout.png"/>
 
                 </ImageView>
-                <Label fx:id="statusmsg" alignment="CENTER" layoutX="367.0" layoutY="623.0" prefHeight="27.0"
+                <Label fx:id="statusMsg" alignment="CENTER" layoutX="367.0" layoutY="623.0" prefHeight="27.0"
                        prefWidth="582.0">
                     <font>
                         <Font name="System Bold" size="17.0"/>
                     </font>
                 </Label>
-                <Label fx:id="settings" layoutX="1110.0" layoutY="130.0" onMouseClicked="#OnSettings" prefHeight="27.0"
+                <Label fx:id="settings" layoutX="1110.0" layoutY="130.0" onMouseClicked="#onSettings" prefHeight="27.0"
                        prefWidth="88.0" style="-fx-cursor: hand;" text="SETTINGS" underline="true">
                     <font>
                         <Font size="16.0"/>

@@ -45,7 +45,7 @@ public class PropertyName {
     public static final String BARCODE_FILE_PATH = "barcodeFilePath";
     public static final String SLAP_LICENSE = "slaplicense";
     public static final String DOMAIN = "domain";
-    public static final String LDA_PURL = "ldapurl";
+    public static final String LDAP_URL = "ldapurl";
     public static final String SERIAL_PORT_FILE = "serialportfile";
     public static final String IMPORT_JSON_FOLDER = "importjsonfolder";
     public static final String CUR_PES_ID = "curpesid";

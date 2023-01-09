@@ -1,6 +1,7 @@
 package com.cdac.enrollmentstation.util;
 
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
+import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLogNew;
 
@@ -34,5 +35,9 @@ public class PropertyFile {
 
     public static String getProperty(String propertyName) {
         return properties.getProperty(propertyName);
+    }
+
+    public static synchronized void changeCameraProperty(int value) {
+        properties.setProperty(PropertyName.CAMERA_ID, "" + value);
     }
 }

@@ -63,6 +63,8 @@ public class App extends Application implements EventHandler<WindowEvent> {
         scene = new Scene(loadFXML("main"), 1366, 768);
         scene.getStylesheets().add("/css/enrollmentcss.css");
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            LOGGER.log(Level.INFO, () -> " Throwable class: " + throwable.getCause());
+            LOGGER.log(Level.INFO, () -> " Thread class: " + thread.getName());
             LOGGER.log(Level.INFO, "detected from default UEH.\nWill exit now:", throwable.getClass());
         });
         stage.initStyle(StageStyle.UNDECORATED);// - Enable this

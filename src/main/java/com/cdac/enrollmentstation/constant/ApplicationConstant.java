@@ -10,5 +10,7 @@ public class ApplicationConstant {
     }
 
     public static final String DEFAULT_PROPERTY_FILE = "/etc/file.properties";
+    public static final String INTERNAL = "Internal";
+    public static final String EXTERNAL = "External";
 
 }

@@ -3,7 +3,7 @@ package com.cdac.enrollmentstation.util;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
-import com.cdac.enrollmentstation.logging.ApplicationLogNew;
+import com.cdac.enrollmentstation.logging.ApplicationLog;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -28,7 +28,7 @@ public class PropertyFile {
         try (FileReader reader = new FileReader(ApplicationConstant.DEFAULT_PROPERTY_FILE)) {
             properties.load(reader);
         } catch (IOException ex) {
-            ApplicationLogNew.getLogger(PropertyFile.class).log(Level.SEVERE, "File not found");
+            ApplicationLog.getLogger(PropertyFile.class).log(Level.SEVERE, "File not found");
             throw new GenericException("File not found!");
         }
     }

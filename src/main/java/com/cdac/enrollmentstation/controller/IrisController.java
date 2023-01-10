@@ -44,7 +44,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.*;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -107,9 +106,7 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
     EnrollmentDetailsHolder enrollmentDetailsHolder = null;
 
     Set<IRIS> irisSet = new HashSet<>();
-    ApplicationLog appLog = new ApplicationLog();
-    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
-    Handler handler;
+    private static final Logger LOGGER = ApplicationLog.getLogger(IrisController.class);
 
     public IrisController() {
 
@@ -739,7 +736,7 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        InputStream inputStream = IrisController.class.getResourceAsStream("/haar_facedetection/redcross.png");
+                        InputStream inputStream = IrisController.class.getResourceAsStream("/img/redcross.png");
                         Image image = new Image(inputStream);
                         camera.setDisable(true);
                         captureIris.setDisable(false);
@@ -914,7 +911,7 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            InputStream inputStream = IrisController.class.getResourceAsStream("/haar_facedetection/redcross.png");
+                            InputStream inputStream = IrisController.class.getResourceAsStream("/img/redcross.png");
                             Image image = new Image(inputStream);
                             camera.setDisable(true);
                             showFinger.setDisable(false);
@@ -927,7 +924,7 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            InputStream inputStream = IrisController.class.getResourceAsStream("/haar_facedetection/redcross.png");
+                            InputStream inputStream = IrisController.class.getResourceAsStream("/img/redcross.png");
                             Image image = new Image(inputStream);
                             camera.setDisable(true);
                             captureIris.setDisable(false);
@@ -940,9 +937,9 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            InputStream inputStream = IrisController.class.getResourceAsStream("/haar_facedetection/tickgreen.jpg");
+                            InputStream inputStream = IrisController.class.getResourceAsStream("/img/tickgreen.jpg");
                             Image image = new Image(inputStream);
-//                            Image image = new Image("@img/haar_facedetection/tickgreen.jpg");
+//                            Image image = new Image("@img/img/tickgreen.jpg");
                             camera.setDisable(false);
                             showFinger.setDisable(true);
                             captureIris.setDisable(true);
@@ -956,7 +953,7 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            InputStream inputStream = IrisController.class.getResourceAsStream("/haar_facedetection/redcross.png");
+                            InputStream inputStream = IrisController.class.getResourceAsStream("/img/redcross.png");
                             Image image = new Image(inputStream);
                             captureIris.setDisable(false);
                             showFinger.setDisable(false);
@@ -969,7 +966,7 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            InputStream inputStream = IrisController.class.getResourceAsStream("/haar_facedetection/tickgreen.jpg");
+                            InputStream inputStream = IrisController.class.getResourceAsStream("/img/tickgreen.jpg");
                             Image image = new Image(inputStream);
                             camera.setDisable(false);
                             showFinger.setDisable(true);
@@ -983,7 +980,7 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            InputStream inputStream = IrisController.class.getResourceAsStream("/haar_facedetection/redcross.png");
+                            InputStream inputStream = IrisController.class.getResourceAsStream("/img/redcross.png");
                             Image image = new Image(inputStream);
                             camera.setDisable(true);
                             captureIris.setDisable(false);
@@ -997,7 +994,7 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            InputStream inputStream = IrisController.class.getResourceAsStream("/haar_facedetection/tickgreen.jpg");
+                            InputStream inputStream = IrisController.class.getResourceAsStream("/img/tickgreen.jpg");
                             Image image = new Image(inputStream);
                             camera.setDisable(false);
                             showFinger.setDisable(true);
@@ -1248,7 +1245,7 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
         if (holder.getArcDetails().getBiometricOptions().contains("Biometric")) {
             try {
                 mIDIrisEnroll.Uninit();
-                App.setRoot("capturecomplete");
+                App.setRoot("biometric_capture_complete");
             } catch (IOException ex) {
                 //Logger.getLogger(ARCNoController.class.getName()).log(Level.SEVERE, null, ex);
                 LOGGER.log(Level.INFO, "IOException At Get Biometric Options:" + ex);

@@ -71,9 +71,7 @@ public class ARCNoController implements Initializable {
 
     private String exportjson = "";
 
-    //For Application Log
-    ApplicationLog appLog = new ApplicationLog();
-    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
+    private static final Logger LOGGER = ApplicationLog.getLogger(ARCNoController.class);
     Handler handler;
 
     TestProp prop = new TestProp();
@@ -179,7 +177,7 @@ public class ARCNoController implements Initializable {
                                 LOGGER.log(Level.INFO, "Going to Submit Page");
                             {
                                 try {
-                                    App.setRoot("capturecomplete");
+                                    App.setRoot("biometric_capture_complete");
                                 } catch (IOException ex) {
                                     //Logger.getLogger(ARCNoController.class.getName()).log(Level.SEVERE, null, ex);
                                     LOGGER.log(Level.INFO, "IOException:" + ex);
@@ -193,7 +191,7 @@ public class ARCNoController implements Initializable {
                                 LOGGER.log(Level.INFO, "Going for Finger print scan");
                             {
                                 try {
-                                    App.setRoot("capturecomplete");
+                                    App.setRoot("biometric_capture_complete");
                                 } catch (IOException ex) {
                                     //Logger.getLogger(ARCNoController.class.getName()).log(Level.SEVERE, null, ex);
                                     LOGGER.log(Level.INFO, "IOException:" + ex);
@@ -261,7 +259,7 @@ public class ARCNoController implements Initializable {
     @FXML
     private void showDlink() {
         try {
-            App.setRoot("detaillink");
+            App.setRoot("detail_link");
         } catch (IOException ex) {
             //Logger.getLogger(ARCNoController.class.getName()).log(Level.SEVERE, null, ex);
             LOGGER.log(Level.INFO, "IOException:" + ex);

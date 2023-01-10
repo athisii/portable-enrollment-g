@@ -118,8 +118,7 @@ public class FXHelloCVController implements Initializable {
     // private TextField panetxt;
 
     //For Application Log
-    ApplicationLog appLog = new ApplicationLog();
-    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
+    private static final Logger LOGGER = ApplicationLog.getLogger(FXHelloCVController.class);
     Handler handler;
 
     /**
@@ -561,7 +560,7 @@ public class FXHelloCVController implements Initializable {
     @FXML
     public void showCaptureStatus() {
         try {
-            App.setRoot("capturecomplete");
+            App.setRoot("biometric_capture_complete");
         } catch (IOException ex) {
             Logger.getLogger(FXHelloCVController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -685,7 +684,7 @@ public class FXHelloCVController implements Initializable {
                       output.write(encryptedJSON.getBytes());
                       output.close();*/
       /*      
-            App.setRoot("capturecomplete");
+            App.setRoot("biometric_capture_complete");
         } 
         else {        
         try{
@@ -701,7 +700,7 @@ public class FXHelloCVController implements Initializable {
              a.setDesc(saveEnrollmentResponse.getDesc());
              holder.setARC(a);
              System.out.println("ARC details :" +a.toString());
-             App.setRoot("capturecomplete");
+             App.setRoot("biometric_capture_complete");
 
             }
             catch(Exception e)
@@ -714,7 +713,7 @@ public class FXHelloCVController implements Initializable {
                    System.out.println("JSON Exception block"+ex);      
                 }
 
-          //  App.setRoot("capturecomplete");
+          //  App.setRoot("biometric_capture_complete");
         } */
 
     @Override

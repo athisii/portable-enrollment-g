@@ -24,7 +24,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -64,9 +63,7 @@ public class ServerConfigController implements Initializable {
     TestProp prop = new TestProp();
 
     //For Application Log
-    ApplicationLog appLog = new ApplicationLog();
-    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
-    Handler handler;
+    private static final Logger LOGGER = ApplicationLog.getLogger(ServerConfigController.class);
 
     public ServerConfigController() {
         //this.handler = appLog.getLogger();

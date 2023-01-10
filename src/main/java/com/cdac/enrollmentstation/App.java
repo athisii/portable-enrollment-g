@@ -1,10 +1,7 @@
 package com.cdac.enrollmentstation;
 
 
-import com.cdac.enrollmentstation.api.APIServerCheck;
-import com.cdac.enrollmentstation.dto.SaveEnrollmentResponse;
-import com.cdac.enrollmentstation.logging.ApplicationLogNew;
-import com.cdac.enrollmentstation.util.IrisInitialize;
+import com.cdac.enrollmentstation.logging.ApplicationLog;
 import javafx.application.Application;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
@@ -17,18 +14,14 @@ import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.opencv.core.Core;
 
-import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class App extends Application implements EventHandler<WindowEvent> {
-    private static final Logger LOGGER = ApplicationLogNew.getLogger(App.class);
+    private static final Logger LOGGER = ApplicationLog.getLogger(App.class);
     private static Scene scene;
-    public static IrisInitialize irisInit;
-    public static SecretKey skey;
-    public APIServerCheck apiServerCheck = new APIServerCheck();
-    public SaveEnrollmentResponse saveEnrollmentResponse;
 
     @Override
     public void start(Stage primaryStage) throws IOException {
@@ -56,8 +49,7 @@ public class App extends Application implements EventHandler<WindowEvent> {
     }
 
     private static Parent loadFXML(String fxml) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
-        return fxmlLoader.load();
+        return FXMLLoader.load(Objects.requireNonNull(App.class.getResource("/fxml/" + fxml + ".fxml")));
     }
 
     public static void main(String[] args) {
@@ -69,5 +61,6 @@ public class App extends Application implements EventHandler<WindowEvent> {
     public void handle(WindowEvent arg0) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
 
 }

@@ -5,7 +5,6 @@
  */
 package com.cdac.enrollmentstation.util;
 
-import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.mantra.midirisenroll.MIDIrisEnroll;
 import com.mantra.midirisenroll.MIDIrisEnrollCallback;
@@ -15,7 +14,6 @@ import com.mantra.midirisenroll.enums.IrisSide;
 import com.mantra.midirisenroll.model.ImagePara;
 import com.mantra.midirisenroll.model.ImageQuality;
 
-import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 /**
@@ -25,9 +23,7 @@ public class TestIris implements MIDIrisEnrollCallback {
     private MIDIrisEnroll mIDIrisEnroll = null;
     private String message = "";
     //For Application Log
-    ApplicationLog appLog = new ApplicationLog();
-    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
-    Handler handler;
+    private static final Logger LOGGER = ApplicationLog.getLogger(TestIris.class);
 
 
     public String sdkIrisStatus() {

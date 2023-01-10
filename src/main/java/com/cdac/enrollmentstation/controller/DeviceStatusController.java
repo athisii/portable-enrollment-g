@@ -39,8 +39,8 @@ public class DeviceStatusController {
     public void showDeviceStatus() {
 
         System.out.println("inside show device status");
-        Image redcross = new Image("/haar_facedetection/redcross.png");
-        Image greentick = new Image("/haar_facedetection/tickgreen.jpg");
+        Image redcross = new Image(getClass().getResourceAsStream("/img/redcross.png"));
+        Image greentick = new Image(getClass().getResourceAsStream("/img/tickgreen.jpg"));
 
 
         //To Test Iris SDK
@@ -258,8 +258,8 @@ public class DeviceStatusController {
         // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 
 
-        Image redcross = new Image("/haar_facedetection/redcross.png");
-        Image greentick = new Image("/haar_facedetection/tickgreen.jpg");
+        Image redcross = new Image(getClass().getResourceAsStream("/img/redcross.png"));
+        Image greentick = new Image(getClass().getResourceAsStream("/img/tickgreen.jpg"));
 
         //To Test Iris SDK
         try {

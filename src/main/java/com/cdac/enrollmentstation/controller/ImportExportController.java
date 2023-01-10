@@ -45,7 +45,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -118,9 +117,7 @@ public class ImportExportController implements Initializable {
     //AutoCompleteComboBoxListener autocompleteBox ;
 
     //For Application Log
-    ApplicationLog appLog = new ApplicationLog();
-    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
-    Handler handler;
+    private static final Logger LOGGER = ApplicationLog.getLogger(ImportExportController.class);
 
 
     public void messageStatus(String message) {

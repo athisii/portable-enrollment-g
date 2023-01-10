@@ -9,13 +9,13 @@ public class LoginController {
 
     @FXML
     private void onlineLogin() throws IOException {
-        App.setRoot("onlinelogin");
+        App.setRoot("online_login");
 
     }
 
     @FXML
     private void offlineLogin() throws IOException {
-        App.setRoot("cardauthentication");
+        App.setRoot("card_authentication");
     }
 
 

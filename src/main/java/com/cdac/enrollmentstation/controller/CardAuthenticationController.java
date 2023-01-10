@@ -9,9 +9,9 @@ import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.api.APIServerCheck;
 import com.cdac.enrollmentstation.api.CardReaderAPI;
 import com.cdac.enrollmentstation.api.CardReaderAPIURLs;
-import com.cdac.enrollmentstation.event.ChangeListener;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.*;
+import com.cdac.enrollmentstation.security.AuthUtil;
 import com.cdac.enrollmentstation.security.HextoASNFormat;
 import com.cdac.enrollmentstation.util.TestProp;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -39,7 +39,6 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -76,9 +75,7 @@ public class CardAuthenticationController implements MIDFingerAuth_Callback {
     CardReaderAPIURLs CardReaderAPIURLs = new CardReaderAPIURLs();
     CardReaderAPI cardReaderAPI = new CardReaderAPI();
     //For Application Log
-    ApplicationLog appLog = new ApplicationLog();
-    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
-    Handler handler;
+    private static final Logger LOGGER = ApplicationLog.getLogger(CardAuthenticationController.class);
     TestProp prop = new TestProp();
     private MIDFingerAuth midFingerAuth = null; // For MID finger jar 
     private DeviceInfo deviceInfo = null;
@@ -144,12 +141,17 @@ public class CardAuthenticationController implements MIDFingerAuth_Callback {
     }
 
     public void initialize() {
-        // usertxt.requestFocus();
-        // TODO
-        /* max length of text field user name */
-        int maxLength = 10;
         /* add ChangeListner to TextField to restrict the TextField Length*/
-        usertxt.textProperty().addListener(new ChangeListener(usertxt, maxLength));
+        usertxt.textProperty().addListener((observable, oldValue, newValue) -> AuthUtil.limitCharacters(usertxt, oldValue, newValue));
+        // TODO - need to implement
+        /*
+        usertxt.setOnKeyPressed(event -> {
+            if (event.getCode().equals(KeyCode.ENTER)) {
+                // TODO - should call 'login button' action here too
+                event.consume();
+            }
+        });
+         */
     }
 
     @FXML

@@ -3,7 +3,7 @@ package com.cdac.enrollmentstation.controller;
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
-import com.cdac.enrollmentstation.logging.ApplicationLogNew;
+import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ARCDetailsHolder;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Utils;
@@ -44,7 +44,7 @@ import java.util.logging.Logger;
  * Created on 26/12/22
  */
 public class CameraController {
-    private static final Logger LOGGER = ApplicationLogNew.getLogger(CameraController.class);
+    private static final Logger LOGGER = ApplicationLog.getLogger(CameraController.class);
     private static final int COUNTDOWN = 5;
     private static final int THREAD_EXEC_PERIOD = 50; // in milliseconds
     private static final int THRESHOLD_FOR_RED_BOX = 10;
@@ -194,7 +194,7 @@ public class CameraController {
     private void savePhoto(ActionEvent actionEvent) {
         LOGGER.log(Level.INFO, () -> "***********savePhoto*************");
         try {
-            App.setRoot("capturecomplete");
+            App.setRoot("biometric_capture_complete");
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, ex::getMessage);
         }
@@ -418,9 +418,9 @@ public class CameraController {
     }
 
     private static Image loadFileFromImgDirectory(String filename) {
-        InputStream inputStream = CameraController.class.getResourceAsStream("/com/cdac/enrollmentstation/img/" + filename);
+        InputStream inputStream = CameraController.class.getResourceAsStream("/img/" + filename);
         if (inputStream == null) {
-            throw new GenericException(filename + " not found in '/com/cdac/enrollmentstation/img/' directory");
+            throw new GenericException(filename + " not found in '/img/' directory");
         }
         return new Image(inputStream);
     }

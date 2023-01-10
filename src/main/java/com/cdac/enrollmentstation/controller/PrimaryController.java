@@ -63,7 +63,7 @@ public class PrimaryController {
 
     @FXML
     public void onSettings() throws IOException {
-        App.setRoot("admin-auth");
+        App.setRoot("admin_auth");
     }
 
     @FXML

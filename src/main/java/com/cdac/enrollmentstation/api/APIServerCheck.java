@@ -5,12 +5,10 @@
  */
 package com.cdac.enrollmentstation.api;
 
-import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.security.CryptoAES256;
 import com.cdac.enrollmentstation.security.HmacUtils;
 import com.cdac.enrollmentstation.security.PKIUtil;
-import com.cdac.enrollmentstation.util.TestProp;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -32,16 +30,10 @@ import java.util.stream.Collectors;
  */
 public class APIServerCheck {
     String sessionkey;
-    TestProp prop = new TestProp();
-    //For Application Log
-    ApplicationLog appLog = new ApplicationLog();
-    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
+    private static final Logger LOGGER = ApplicationLog.getLogger(APIServerCheck.class);
     Handler handler;
 
-    public APIServerCheck() {
-        //this.handler = appLog.getLogger();
-        //LOGGER.addHandler(handler); 
-    }
+
 
     public String checkGetARCNoAPI(String url, String arcNo) {
 

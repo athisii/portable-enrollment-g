@@ -5,7 +5,7 @@
  */
 package com.cdac.enrollmentstation.util;
 
-import com.cdac.enrollmentstation.controller.IrisController_240222;
+import com.cdac.enrollmentstation.controller.IrisController;
 import com.mantra.midirisenroll.DeviceInfo;
 import com.mantra.midirisenroll.MIDIrisEnroll;
 
@@ -19,8 +19,8 @@ public class IrisInitialize {
     public String deviceName = null;
     private int minQuality = 30;
     private int timeout = 10000;
-    private IrisController_240222.MyIcon mLeftIrisImage;
-    private IrisController_240222.MyIcon mRightIrisImage;
+    private IrisController.MyIcon mLeftIrisImage;
+    private IrisController.MyIcon mRightIrisImage;
     public int retInit;
 
 //    @Override
@@ -86,7 +86,7 @@ public class IrisInitialize {
 //                irisController.irisCapturedRight = false;
 //                Platform.runLater(new Runnable() {
 //                        @Override public void run() {
-//                            Image image = new Image("/haar_facedetection/redcross.png");
+//                            Image image = new Image("/img/redcross.png");
 //                            irisController.camera.setDisable(false);
 //                            irisController.statusImage.setImage(image);
 //                    }

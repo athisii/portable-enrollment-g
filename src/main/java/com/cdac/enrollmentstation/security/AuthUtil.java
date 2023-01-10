@@ -2,7 +2,7 @@ package com.cdac.enrollmentstation.security;
 
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.exception.GenericException;
-import com.cdac.enrollmentstation.logging.ApplicationLogNew;
+import com.cdac.enrollmentstation.logging.ApplicationLog;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  * Created on 09/01/23
  */
 public class AuthUtil {
-    private static final Logger LOGGER = ApplicationLogNew.getLogger(AuthUtil.class);
+    private static final Logger LOGGER = ApplicationLog.getLogger(AuthUtil.class);
     private static final int MAX_LENGTH = 15;
 
     //Suppresses default constructor for noninstantiability

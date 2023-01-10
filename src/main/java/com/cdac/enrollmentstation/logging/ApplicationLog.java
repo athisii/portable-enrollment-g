@@ -1,63 +1,54 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.cdac.enrollmentstation.logging;
 
-import com.cdac.enrollmentstation.util.TestProp;
+import com.cdac.enrollmentstation.constant.PropertyName;
+import com.cdac.enrollmentstation.exception.GenericException;
+import com.cdac.enrollmentstation.util.PropertyFile;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
+import java.util.logging.*;
 
 /**
- *
- * @author root
+ * @author athisii, CDAC
+ * Created on 17/12/22
  */
 public class ApplicationLog {
-    
-    
-    private static final Logger LOGGER = Logger.getLogger(ApplicationLog.class.getName());
-
-    public static Handler handler;
-    
-    TestProp prop = new TestProp();
-    
-    //private static final Logger LOGGER; 
-    
-    
-     public static Handler getLogger() {
-        try {
-            //String applogfile="/var/log/enrollment/enrollmentstationapp.log";
-            String applogfile="";
-            ApplicationLog applog = new ApplicationLog();
-            applogfile = applog.getLogFileLoc()+LocalDateTime.now().withNano(0);
-            handler = new FileHandler(applogfile, 1024000, 2); //1024000 is 1Mb - It will rollover after a file becomes 1Mb
-            handler.setFormatter(new SimpleFormatter()); 
-            handler.setLevel(Level.ALL);
-            
-            LOGGER.setLevel(Level.INFO);
-            
-        } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, "Exception in Application Log. Failed to add new handler");
-            
-        } catch (SecurityException ex) {
-            LOGGER.log(Level.SEVERE, "Exception in Application Log. Security Exception");
-        }
-        return handler;
+    //Suppress default constructor for noninstantiability
+    private ApplicationLog() {
+        throw new AssertionError("The ApplicationLogNew methods should be accessed statically");
     }
-    
-    public String getLogFileLoc(){
-            String applogfile="";
+
+    private static Handler handler;
+    private static final Logger LOG = Logger.getLogger(ApplicationLog.class.getName());
+
+    static {
         try {
-            applogfile = prop.getProp().getProperty("logfile");
+            // /var/log/enrollment/enrollmentstationapp.log
+            String logfileName = PropertyFile.getProperty(PropertyName.LOG_FILE).split("\\.")[0] + LocalDateTime.now().withNano(0) + "log";
+            handler = new FileHandler(logfileName, 1024000, 2); //1024000 is 1Mb - It will roll over after a file becomes 1Mb
+            handler.setFormatter(new SimpleFormatter());
+            handler.setLevel(Level.ALL);
+            LOG.addHandler(handler);
+            LOG.setLevel(Level.INFO);
+        } catch (GenericException ex) {
+            // throws by ProperFile class if /etc/file.properties is not found.
+            LOG.log(Level.SEVERE, "Property File not found. Shutting down.......");
+            System.exit(-1);
         } catch (IOException ex) {
-            Logger.getLogger(ApplicationLog.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, "Exception in Application Log. Failed to add new handler. Shutting down.......");
+            System.exit(-1);
+        } catch (SecurityException ex) {
+            LOG.log(Level.SEVERE, "Exception in Application Log. Security Exception. Shutting down.......");
+            System.exit(-1);
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, "Errored occurred in creating Application Log. Shutting down.......");
+            System.exit(-1);
         }
-            return applogfile;
+    }
+
+    public static Logger getLogger(Class<?> klass) {
+        var logger = Logger.getLogger(klass.getName());
+        logger.addHandler(handler);
+        return logger;
     }
 }

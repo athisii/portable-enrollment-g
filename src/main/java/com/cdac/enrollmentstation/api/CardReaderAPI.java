@@ -5,7 +5,6 @@
  */
 package com.cdac.enrollmentstation.api;
 
-import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import org.json.JSONObject;
 
@@ -15,7 +14,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Base64;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -26,16 +24,7 @@ import java.util.stream.Collectors;
 public class CardReaderAPI {
 
     private CardReaderAPIURLs cardReaderAPIURLs = new CardReaderAPIURLs();
-
-    //For Application Log
-    ApplicationLog appLog = new ApplicationLog();
-    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
-    Handler handler;
-
-    public CardReaderAPI() {
-        //this.handler = appLog.getLogger();
-        //LOGGER.addHandler(handler); 
-    }
+    private static final Logger LOGGER = ApplicationLog.getLogger(CardReaderAPI.class);
 
     public String initialize() {
 
@@ -77,7 +66,7 @@ public class CardReaderAPI {
         String[] processed = null;
 
         try {
-            URL siteURL = new URL(cardReaderAPIURLs.getListofReaders());
+            URL siteURL = new URL(cardReaderAPIURLs.getListOfReaders());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -358,7 +347,7 @@ public class CardReaderAPI {
         int noOfRetries = 3;
         String status = "";
         try {
-            URL siteURL = new URL(cardReaderAPIURLs.PKIAuth());
+            URL siteURL = new URL(cardReaderAPIURLs.pkiAuth());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -386,7 +375,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
 
         }
-        System.out.println(cardReaderAPIURLs.PKIAuth() + "Response :" + response.toString());
+        System.out.println(cardReaderAPIURLs.pkiAuth() + "Response :" + response.toString());
         return response;
     }
 
@@ -762,7 +751,7 @@ public class CardReaderAPI {
         String status = "";
         try {
 
-            URL siteURL = new URL(cardReaderAPIURLs.PKIAuth());
+            URL siteURL = new URL(cardReaderAPIURLs.pkiAuth());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -796,7 +785,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
 
         }
-        System.out.println(cardReaderAPIURLs.PKIAuth() + "\t\tStatus:" + result);
+        System.out.println(cardReaderAPIURLs.pkiAuth() + "\t\tStatus:" + result);
         return result;
     }
 

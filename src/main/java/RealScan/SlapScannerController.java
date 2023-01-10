@@ -37,7 +37,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.*;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -256,9 +255,7 @@ public class SlapScannerController implements Initializable {
 
     AnsiIso ansiISO = new AnsiIso();
 
-    ApplicationLog appLog = new ApplicationLog();
-    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
-    Handler handler;
+    private static final Logger LOGGER = ApplicationLog.getLogger(SlapScannerController.class);
 
 
     public void statusMsg(String message) {

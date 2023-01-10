@@ -10,7 +10,7 @@ package com.cdac.enrollmentstation.service;
  */
 
 import com.cdac.enrollmentstation.constant.PropertyName;
-import com.cdac.enrollmentstation.logging.ApplicationLogNew;
+import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.util.PropertyFile;
 
 import javax.naming.AuthenticationException;
@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 
 public class DirectoryLookup {
 
-    private static final Logger LOGGER = ApplicationLogNew.getLogger(DirectoryLookup.class);
+    private static final Logger LOGGER = ApplicationLog.getLogger(DirectoryLookup.class);
 
     public static String doLookup(String username, String password) {
         String result;

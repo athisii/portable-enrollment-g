@@ -37,7 +37,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -81,9 +80,7 @@ public class BiometricCaptureCompleteController implements Initializable {
     TestProp prop = new TestProp();
 
     //For Application Log
-    ApplicationLog appLog = new ApplicationLog();
-    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
-    Handler handler;
+    private static final Logger LOGGER = ApplicationLog.getLogger(BiometricCaptureCompleteController.class);
 
     //Thread
     Thread pi = null;
@@ -504,13 +501,13 @@ public class BiometricCaptureCompleteController implements Initializable {
                     //if(a.getDesc().contains("refused") || a.getDesc().contains("notreachable")) {
                     if (saveEnrollmentResponse.getDesc().contains("refused") || saveEnrollmentResponse.getDesc().contains("notreachable")
                             || saveEnrollmentResponse.getDesc().contains("Exception")) {
-                        InputStream inputStream = BiometricCaptureCompleteController.class.getResourceAsStream("/haar_facedetection/redcross.png");
+                        InputStream inputStream = BiometricCaptureCompleteController.class.getResourceAsStream("/img/redcross.png");
                         Image image = new Image(inputStream);
                         statusImg.setImage(image);
                         submit.setDisable(false);
                         progressind.setVisible(false);
                     } else {
-                        InputStream inputStream = BiometricCaptureCompleteController.class.getResourceAsStream("/haar_facedetection/tickgreen.jpg");
+                        InputStream inputStream = BiometricCaptureCompleteController.class.getResourceAsStream("/img/tickgreen.jpg");
                         Image image = new Image(inputStream);
                         statusImg.setImage(image);
                         progressind.setVisible(false);

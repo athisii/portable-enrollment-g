@@ -220,7 +220,7 @@ public class CameraController {
 
         } else {
             // active status to be used by worker thread
-            this.cameraActive = true;
+            cameraActive = true;
             videoCapture = new VideoCapture(cameraId);
             requireCameraOpened();
             this.timer = Executors.newSingleThreadScheduledExecutor();
@@ -333,47 +333,50 @@ public class CameraController {
             while ((eline = error.readLine()) != null) {
                 LOGGER.log(Level.SEVERE, eline);
             }
-            // TODO - make sure unnecessary print is removed in python scripts
-            String line = input.readLine();
             error.close();
+            String line;
+            while ((line = input.readLine()) != null) {
+                if (line.contains("Valid")) {
+                    validImage = true;
+                    stopLive = true;
+                    cameraActive = false;
+                } else if (line.contains("Message=")) {
+                    String subString = line.substring("Message= ".length());
+                    Platform.runLater(() -> message.setText(subString));
+                    hintMessage(subString);
+                } else {
+                    String finalLine = line; // to be used in lambda
+                    LOGGER.log(Level.INFO, () -> "Valued read from python process: " + finalLine);
+                }
+            }
             input.close();
-            if (line == null) {
-                LOGGER.log(Level.SEVERE, () -> "Read null value from outputStream of Process");
-                return;
-            }
-            if (line.contains("Message=")) {
-                String subString = line.substring("Message= ".length());
-                Platform.runLater(() -> message.setText(subString));
-                hintMessage(subString);
-            }
-            if (line.contains("Valid")) {
-                validImage = true;
-                stopLive = true;
-                cameraActive = false;
-            }
             int exitVal = pr.waitFor();
             LOGGER.log(Level.INFO, () -> "Process Exit Value: " + exitVal);
-            if (exitVal == 0 && validImage) {
-                Image image = new Image(Files.newInputStream(Paths.get(SUB_FILE)));
-                resultImageView.setImage(image);
-                updateImageView(iconFrame, TICK_GREEN_IMAGE);
-                updateImageView(msgIcon, null);
-                updateImageView(sunGlassIcon, null);
-                Platform.runLater(() -> {
-                    // camSlider.setVisible(true)
-                    // brightness.setVisible(true)
-                    message.setText("Valid image. Restart Camera if photo is not good.");
-                    startStopCameraBtn.setText("Restart Camera");
-                    enableControls(startStopCameraBtn, backBtn, savePhotoBtn);
-                });
-                stopAcquisition();
-            }
+            updateUIOnValidImageAndNormalExit(exitVal);
         } catch (Exception ex) {
             Platform.runLater(() -> message.setText("Something went wrong while capturing photo."));
             LOGGER.log(Level.SEVERE, ex::getMessage);
             Thread.currentThread().interrupt();
         }
 
+    }
+
+    private void updateUIOnValidImageAndNormalExit(int exitVal) throws IOException {
+        if (exitVal == 0 && validImage) {
+            Image image = new Image(Files.newInputStream(Paths.get(SUB_FILE)));
+            resultImageView.setImage(image);
+            updateImageView(iconFrame, TICK_GREEN_IMAGE);
+            updateImageView(msgIcon, null);
+            updateImageView(sunGlassIcon, null);
+            Platform.runLater(() -> {
+                // camSlider.setVisible(true)
+                // brightness.setVisible(true)
+                message.setText("Valid image. Restart Camera if photo is not good.");
+                startStopCameraBtn.setText("Restart Camera");
+                enableControls(startStopCameraBtn, backBtn, savePhotoBtn);
+            });
+            stopAcquisition();
+        }
     }
 
     private void hintMessage(String message) {
@@ -439,7 +442,7 @@ public class CameraController {
         if (this.videoCapture.isOpened()) {
             this.videoCapture.release();
         }
-        this.cameraActive = false;
+        cameraActive = false;
     }
 
     @FXML

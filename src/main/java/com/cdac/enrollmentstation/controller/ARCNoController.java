@@ -103,7 +103,7 @@ public class ARCNoController implements Initializable {
             }
         } else if (holder.getArcDetails().getBiometricOptions().contains("Biometric") || holder.getArcDetails().getBiometricOptions().contains("biometric") || holder.getArcDetails().getBiometricOptions().contains("Both") || holder.getArcDetails().getBiometricOptions().contains("both")) {
 
-            //App.setRoot("slapscanner_1");
+            //App.setRoot("slapscanner");
             //App.setRoot("slapscanner");
             //Code added by K. Karthikeyan - Start [for app crash and resume from previous data]
             String saveenrollment = null;
@@ -205,7 +205,7 @@ public class ARCNoController implements Initializable {
                                 LOGGER.log(Level.INFO, "Going for Finger print scan");
                             {
                                 try {
-                                    App.setRoot("slapscanner_1");
+                                    App.setRoot("slapscanner");
                                 } catch (IOException ex) {
                                     //Logger.getLogger(ARCNoController.class.getName()).log(Level.SEVERE, null, ex);
                                     LOGGER.log(Level.INFO, "IOException:" + ex);
@@ -222,7 +222,7 @@ public class ARCNoController implements Initializable {
                         try {
                             //ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
                             //System.out.println("Biometric Options- Arc Number Available in Save:"+holder.getARC().getBiometricoptions());
-                            App.setRoot("slapscanner_1");
+                            App.setRoot("slapscanner");
                         } catch (IOException ex) {
                             //Logger.getLogger(ARCNoController.class.getName()).log(Level.SEVERE, null, ex);
                             LOGGER.log(Level.INFO, "IOException:" + ex);
@@ -235,7 +235,7 @@ public class ARCNoController implements Initializable {
                     try {
                         //ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
                         //System.out.println("Biometric Options- Arc Number Not Available in Save:"+holder.getARC().getBiometricoptions());
-                        App.setRoot("slapscanner_1");
+                        App.setRoot("slapscanner");
                     } catch (IOException ex) {
                         //Logger.getLogger(ARCNoController.class.getName()).log(Level.SEVERE, null, ex);
                         LOGGER.log(Level.INFO, "IOException:" + ex);

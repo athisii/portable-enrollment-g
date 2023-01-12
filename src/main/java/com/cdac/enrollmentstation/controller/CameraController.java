@@ -161,7 +161,7 @@ public class CameraController {
             ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
             if (holder.getArcDetails().getIris().size() > 1) {
                 // should go back to fingerprint scanner page
-                App.setRoot("slapscanner_1");
+                App.setRoot("slapscanner");
             } else {
                 App.setRoot("iris");
 

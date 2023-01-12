@@ -1159,7 +1159,7 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
     private void switchToSlap() throws IOException {
         //App.setRoot("secondary");
         // mIDIrisEnroll.Uninit();
-        //App.setRoot("slapscanner_1");
+        //App.setRoot("slapscanner");
         showFinger.setDisable(true);
         captureIris.setDisable(true);
         camera.setDisable(true);
@@ -1281,7 +1281,7 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
             LOGGER.log(Level.SEVERE, "Error: " + ex.getMessage());
         }
         try {
-            App.setRoot("slapscanner_1");
+            App.setRoot("slapscanner");
         } catch (IOException ex) {
             //Logger.getLogger(IrisController.class.getName()).log(Level.SEVERE, null, ex);
             LOGGER.log(Level.SEVERE, "Error: " + ex.getMessage());

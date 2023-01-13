@@ -4,6 +4,7 @@ package com.cdac.enrollmentstation.controller;
 import RealScan.TestSlapScanner;
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.api.APIServerCheck;
+import com.cdac.enrollmentstation.util.DeviceUtil;
 import com.cdac.enrollmentstation.util.TestIris;
 import com.cdac.enrollmentstation.util.TestProp;
 import javafx.fxml.FXML;
@@ -34,6 +35,7 @@ public class DeviceStatusController {
     TestIris testIris = new TestIris();
     TestSlapScanner testSlap = new TestSlapScanner();
 
+    FileInputStream fis = null;
 
     @FXML
     public void showDeviceStatus() {
@@ -71,50 +73,23 @@ public class DeviceStatusController {
             System.out.println("Exception:" + e);
         }
 
-
-        FileInputStream readIrisFile = null;
-        try {
-            //String irisFile = "/etc/fingerprint_iris.txt";
-            String irisFile = "";
-            irisFile = prop.getProp().getProperty("irisFile");
-            File iris_file = new File(irisFile);
-            readIrisFile = new FileInputStream(iris_file);
-            byte[] data = new byte[(int) iris_file.length()];
-            readIrisFile.read(data);
-            String fileContent = new String(data, "UTF-8");
-            System.out.println(readIrisFile);
-
-            if (fileContent.contains("yes")) {
-                System.out.println("Iris Connected");
+        //IRIS
+        try{
+            boolean irisStatus =  DeviceUtil.isIrisConnected();
+            if (irisStatus) {
                 irisstatus.setImage(greentick);
-
             } else {
-                System.out.println("Iris Not Connected");
                 irisstatus.setImage(redcross);
             }
-            readIrisFile.close();
-
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occurred reading IrisDevice File.");
-            e.printStackTrace();
-        } catch (IOException ex) {
-            Logger.getLogger(DeviceStatusController.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                readIrisFile.close();
-            } catch (IOException ex) {
-                Logger.getLogger(DeviceStatusController.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        }catch (Exception ex) {
+            Logger.getLogger(DeviceStatusController.class.getName()).log(Level.INFO, null, ex);
         }
 
-        FileInputStream fis = null;
-
+        //SLAPSCANNER
         try {
             //String slapscanFile = "/etc/fingerprint_realscan.txt";
             String slapscanFile = "";
-            slapscanFile = prop.getProp().getProperty("slapscanFile"); /*File slapscan_file = new File(slapscanFile);
-            /*File slapscan_file = new File(slapscanFile);
-            Scanner readSlapFile = new Scanner(slapscan_file);*/
+            slapscanFile = prop.getProp().getProperty("slapscanFile");
 
             File file = new File(slapscanFile);
             fis = new FileInputStream(file);
@@ -147,41 +122,19 @@ public class DeviceStatusController {
             }
         }
 
+
         //Camera
-        try {
-            //String cameraFilePath = "/etc/fingerprint_camera.txt";
-            String cameraFilePath = "";
-            cameraFilePath = prop.getProp().getProperty("cameraFilePath");
-            File cameraFile = new File(cameraFilePath);
-            fis = new FileInputStream(cameraFile);
-            byte[] data = new byte[(int) cameraFile.length()];
-            fis.read(data);
+         try{
+            boolean cameraStatus =  DeviceUtil.isCameraConnected();
+             if (cameraStatus) {
+                 camerastatus.setImage(greentick);
+             } else {
+                 camerastatus.setImage(redcross);
+             }
+         }catch (Exception ex) {
+             Logger.getLogger(DeviceStatusController.class.getName()).log(Level.INFO, null, ex);
+         }
 
-            String fileContent = new String(data, "UTF-8");
-            System.out.println(fileContent);
-
-            if (fileContent.contains("yes")) {
-                System.out.println("Camera Connected");
-                camerastatus.setImage(greentick);
-            } else {
-                System.out.println("Camera Not Connected");
-                camerastatus.setImage(redcross);
-            }
-
-
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occurred reading Camera File.");
-            e.printStackTrace();
-        } catch (IOException e) {
-            System.out.println("An error occur reading SlapScanner File.");
-            e.printStackTrace();
-        } finally {
-            try {
-                fis.close();
-            } catch (IOException ex) {
-                Logger.getLogger(DeviceStatusController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
 
         //Barcode Scanner
         try {
@@ -289,50 +242,25 @@ public class DeviceStatusController {
             System.out.println("Exception:" + e);
         }
 
-
-        FileInputStream readIrisFile = null;
-        try {
-            //String irisFile = "/etc/fingerprint_iris.txt";
-            String irisFile = "";
-            irisFile = prop.getProp().getProperty("irisFile");
-            File iris_file = new File(irisFile);
-            readIrisFile = new FileInputStream(iris_file);
-            byte[] data = new byte[(int) iris_file.length()];
-            readIrisFile.read(data);
-            String fileContent = new String(data, "UTF-8");
-            System.out.println(readIrisFile);
-
-            if (fileContent.contains("yes")) {
-                System.out.println("Iris Connected");
+        //IRIS
+        try{
+            boolean irisStatus =  DeviceUtil.isIrisConnected();
+            if (irisStatus) {
                 irisstatus.setImage(greentick);
-
             } else {
-                System.out.println("Iris Not Connected");
                 irisstatus.setImage(redcross);
             }
-
-
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occurred reading IrisDevice File.");
-            e.printStackTrace();
-        } catch (IOException ex) {
-            Logger.getLogger(DeviceStatusController.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                readIrisFile.close();
-            } catch (IOException ex) {
-                Logger.getLogger(DeviceStatusController.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        }catch (Exception ex) {
+            Logger.getLogger(DeviceStatusController.class.getName()).log(Level.INFO, null, ex);
         }
 
 
-        FileInputStream fis = null;
+
+        //FileInputStream fis = null;
         try {
             //String slapscanFile = "/etc/fingerprint_realscan.txt";
             String slapscanFile = "";
-            slapscanFile = prop.getProp().getProperty("slapscanFile"); /*File slapscan_file = new File(slapscanFile);
-            /*File slapscan_file = new File(slapscanFile);
-            Scanner readSlapFile = new Scanner(slapscan_file);*/
+            slapscanFile = prop.getProp().getProperty("slapscanFile");
 
             File file = new File(slapscanFile);
             fis = new FileInputStream(file);
@@ -365,7 +293,22 @@ public class DeviceStatusController {
             }
         }
 
+
         //Camera
+        try{
+            boolean cameraStatus =  DeviceUtil.isCameraConnected();
+            if (cameraStatus) {
+                camerastatus.setImage(greentick);
+            } else {
+                camerastatus.setImage(redcross);
+            }
+        }catch (Exception ex) {
+            Logger.getLogger(DeviceStatusController.class.getName()).log(Level.INFO, null, ex);
+        }
+
+
+        //Camera
+        /*
         try {
             //String cameraFilePath = "/etc/fingerprint_camera.txt";
             String cameraFilePath = "";
@@ -400,9 +343,11 @@ public class DeviceStatusController {
                 Logger.getLogger(DeviceStatusController.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-
+        */
         //Barcode Scanner
+
         try {
+
             //String barcodeFilePath = "/etc/fingerprint_barcode.txt";
             String barcodeFilePath = "";
             barcodeFilePath = prop.getProp().getProperty("barcodeFilePath");

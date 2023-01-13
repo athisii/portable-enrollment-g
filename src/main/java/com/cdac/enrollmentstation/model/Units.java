@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
  */
 @Getter
 @Setter
-@ToString
+//@ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Units {
     @JsonProperty("Caption")
@@ -25,4 +25,9 @@ public class Units {
 
     @JsonProperty("Value")
     String value;
+
+    @Override
+    public String toString() {
+        return caption;
+    }
 }

@@ -32,10 +32,10 @@ public class App extends Application implements EventHandler<WindowEvent> {
         });
         scene = new Scene(loadFXML("main"), 1366, 768);
 //        scene.getStylesheets().add("/css/enrollmentcss.css")
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            LOGGER.log(Level.INFO, () -> "Caught by default Uncaught Exception Handler. Will exit now");
-            throwable.printStackTrace();
-        });
+//        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+//            LOGGER.log(Level.INFO, () -> "Caught by default Uncaught Exception Handler. Will exit now");
+//            throwable.printStackTrace();
+//        });
         primaryStage.initStyle(StageStyle.UNDECORATED);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Enrollment Application");

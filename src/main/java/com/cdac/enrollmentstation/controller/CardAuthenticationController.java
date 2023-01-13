@@ -501,21 +501,21 @@ public class CardAuthenticationController implements MIDFingerAuth_Callback {
                        System.out.println("Contractor ID:::::"+contractorId); */
 
                         //Set the Contractor Id and Card Serial Number (CSN)
-                        ContactDetail contactdetail = new ContactDetail();
-                        contactdetail.setContractorId(contractorId.trim());
-                        contactdetail.setContractorName(contractorName);
+                        ContractorDetail contractorDetail = new ContractorDetail();
+                        contractorDetail.setContractorId(contractorId.trim());
+                        contractorDetail.setContractorName(contractorName);
                         //contactdetail.setSerial_no(decodedCsnValue.toLowerCase());
-                        contactdetail.setSerialNo(decodedCsnValue);
-                        contactdetail.setCardReaderHandle(handleValue);
+                        contractorDetail.setSerialNo(decodedCsnValue);
+                        contractorDetail.setCardReaderHandle(handleValue);
 
                         //Details details = Details.getdetails();
                         //details.setContractdetail(contactdetail);
-                        System.out.println("Details from Show Token:::" + contactdetail.getContractorId());
-                        System.out.println("Details from Show Token:::" + contactdetail.getSerialNo());
+                        System.out.println("Details from Show Token:::" + contractorDetail.getContractorId());
+                        System.out.println("Details from Show Token:::" + contractorDetail.getSerialNo());
 
 
-                        String contractorID = contactdetail.getContractorId();
-                        String serialNo = contactdetail.getSerialNo();
+                        String contractorID = contractorDetail.getContractorId();
+                        String serialNo = contractorDetail.getSerialNo();
                         if (contractorID != null && !contractorID.isEmpty()) {
                             //App.setRoot("list_contract");
                             System.out.println("Inside Card read Details");

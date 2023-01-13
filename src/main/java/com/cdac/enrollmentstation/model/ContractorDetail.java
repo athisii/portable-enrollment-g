@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ContactDetail {
+public class ContractorDetail {
     String contractorId;
     String serialNo;
     String contactId;

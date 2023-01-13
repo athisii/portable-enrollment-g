@@ -159,12 +159,10 @@ public class CameraController {
         enableControls(startStopCameraBtn, backBtn);
         try {
             ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
-            if (holder.getArcDetails().getIris().size() > 1) {
-                // should go back to fingerprint scanner page
-                App.setRoot("slapscanner");
-            } else {
+            if(holder.getArcDetails().getBiometricOptions().contains("Photo")){
+                App.setRoot("enrollment_arc");
+            }else{
                 App.setRoot("iris");
-
             }
         } catch (IOException ex) {
             LOGGER.log(Level.INFO, ex::getMessage);
@@ -182,11 +180,14 @@ public class CameraController {
     private void back(ActionEvent actionEvent) {
         confirmPane.setVisible(true);
         ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
-        confirmPaneLbl.setText("Click 'Yes' to Scan Iris or Click 'No' to Capture photo");
-        // exceptions in both eyes
-        if (holder.getArcDetails().getIris().size() > 1) {
-            confirmPaneLbl.setText("Click 'Yes' to Scan Fingers or Click 'No' to Capture photo");
+        // Added For Biometric Options
+        if(holder.getArcDetails().getBiometricOptions().contains("Photo")){
+            confirmPaneLbl.setText("Click 'Yes' to FetchArc or Click 'No' to Capture photo");
         }
+        else{
+            confirmPaneLbl.setText("Click 'Yes' to Scan Iris or Click 'No' to Capture photo");
+        }
+
         disableControls(startStopCameraBtn, backBtn, savePhotoBtn);
     }
 

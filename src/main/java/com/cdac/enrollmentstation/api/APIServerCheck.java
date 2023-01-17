@@ -5,22 +5,23 @@
  */
 package com.cdac.enrollmentstation.api;
 
+import com.cdac.enrollmentstation.constant.PropertyName;
+import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.security.CryptoAES256;
 import com.cdac.enrollmentstation.security.HmacUtils;
 import com.cdac.enrollmentstation.security.PKIUtil;
+import com.cdac.enrollmentstation.util.PropertyFile;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.Key;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -31,8 +32,6 @@ import java.util.stream.Collectors;
 public class APIServerCheck {
     String sessionkey;
     private static final Logger LOGGER = ApplicationLog.getLogger(APIServerCheck.class);
-    Handler handler;
-
 
 
     public String checkGetARCNoAPI(String url, String arcNo) {
@@ -702,71 +701,69 @@ public class APIServerCheck {
     }
 
 
-    public String getARCURL() {
-        System.out.println("Mafis server API :" + getMAFISAPIServer());
-        String arcURL = getMAFISAPIServer() + "/api/EnrollmentStation/GetDetailsByARCNo";
-        return arcURL;
+    public String getArcUrl() {
+        return getMafisApiServer() + "/api/EnrollmentStation/GetDetailsByARCNo";
     }
 
     public String getContractListURL() {
-        System.out.println("Mafis server API :" + getMAFISAPIServer());
-        String contractURL = getMAFISAPIServer() + "/api/EnrollmentStation/GetContractList";
-        return contractURL;
+        String mafisApiServer = getMafisApiServer();
+        LOGGER.log(Level.INFO, () -> "Mafis server API :" + mafisApiServer);
+        return getMafisApiServer() + "/api/EnrollmentStation/GetContractList";
     }
 
     public String getLabourListURL() {
-        System.out.println("Mafis server API :" + getMAFISAPIServer());
-        String labourListURL = getMAFISAPIServer() + "/api/EnrollmentStation/GetLabourList";
+        System.out.println("Mafis server API :" + getMafisApiServer());
+        String labourListURL = getMafisApiServer() + "/api/EnrollmentStation/GetLabourList";
         return labourListURL;
     }
 
     public String getUnitListURL() {
-        String unitListURL = getMAFISAPIServer() + "/api/EnrollmentStation/GetAllUnits";
+        String unitListURL = getMafisApiServer() + "/api/EnrollmentStation/GetAllUnits";
         return unitListURL;
     }
 
     public String getTokenUpdateURL() {
-        String updateToken = getMAFISAPIServer() + "/api/EnrollmentStation/UpdateTokenStatus";
+        String updateToken = getMafisApiServer() + "/api/EnrollmentStation/UpdateTokenStatus";
         return updateToken;
     }
 
     public String getEnrollmentSaveURL() {
 
-        String enrollmentSaveURL = getMAFISAPIServer() + "/api/EnrollmentStation/SaveEnrollment";
+        String enrollmentSaveURL = getMafisApiServer() + "/api/EnrollmentStation/SaveEnrollment";
         return enrollmentSaveURL;
     }
 
     public String getDemographicURL() {
 
-        String demographicURL = getMAFISAPIServer() + "/api/EnrollmentStation/GetDemographicDetails";
+        String demographicURL = getMafisApiServer() + "/api/EnrollmentStation/GetDemographicDetails";
         return demographicURL;
     }
 
 
-    public String getMAFISAPIServer() {
-
-        String mafisServerAPI = "";
-        try (BufferedReader file = new BufferedReader(new FileReader("/etc/data.txt"))) {
-            String line = " ";
-            String input = " ";
-            while ((line = file.readLine()) != null) {
-                String[] tokens = line.split(",");
-                mafisServerAPI = tokens[1];
-
+    public String getMafisApiServer() {
+        String mafisServerApi = "";
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(PropertyFile.getProperty(PropertyName.URL_DATA)));
+            if (lines.isEmpty() || lines.get(0).isBlank()) {
+                throw new GenericException(PropertyFile.getProperty(PropertyName.URL_DATA) + " is empty");
             }
-            file.close();
-        } catch (Exception e) {
+            String line = lines.get(0);
+            // /etc/data.txt -> U1,http://X.X.X.X:X,XX
+            String[] tokens = line.split(",");
+            if (tokens.length < 3) {
+                throw new GenericException("Malformed values. Values should be separated by ','. Example- U1,http://X.X.X.X:X,XX");
+            }
+            mafisServerApi = tokens[1];
+        } catch (IOException e) {
+            LOGGER.log(Level.INFO, "Problem reading file: " + PropertyFile.getProperty(PropertyName.URL_DATA));
             e.printStackTrace();
-            //System.out.println("Problem reading file.");
-            LOGGER.log(Level.INFO, "Problem reading file /etc/data");
-
-
+            throw new GenericException("Errored occurred reading " + PropertyFile.getProperty(PropertyName.URL_DATA));
         }
-        if (mafisServerAPI.endsWith("/")) {
-            return mafisServerAPI.substring(0, mafisServerAPI.lastIndexOf("/"));
-        } else {
-            return mafisServerAPI;
+        if (mafisServerApi.endsWith("/")) {
+            return mafisServerApi.substring(0, mafisServerApi.lastIndexOf("/"));
         }
+        return mafisServerApi;
+
 
     }
 

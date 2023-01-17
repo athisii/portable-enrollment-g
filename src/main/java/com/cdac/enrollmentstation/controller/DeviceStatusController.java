@@ -1,408 +1,141 @@
 package com.cdac.enrollmentstation.controller;
 
 
-import RealScan.TestSlapScanner;
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.api.APIServerCheck;
+import com.cdac.enrollmentstation.constant.PropertyName;
+import com.cdac.enrollmentstation.exception.GenericException;
+import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.util.DeviceUtil;
-import com.cdac.enrollmentstation.util.TestIris;
-import com.cdac.enrollmentstation.util.TestProp;
+import com.cdac.enrollmentstation.util.PropertyFile;
 import javafx.fxml.FXML;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DeviceStatusController {
-    public APIServerCheck apiServerCheck = new APIServerCheck();
+
+    private static final Logger LOGGER = ApplicationLog.getLogger(DeviceStatusController.class);
+    private static final Image RED_CROSS_IMAGE;
+    private static final Image GREEN_TICK_IMAGE;
+
+    static {
+        RED_CROSS_IMAGE = new Image(Objects.requireNonNull(DeviceStatusController.class.getResourceAsStream("/img/redcross.png")));
+        GREEN_TICK_IMAGE = new Image(Objects.requireNonNull(DeviceStatusController.class.getResourceAsStream("/img/tickgreen.jpg")));
+    }
+
+    private final APIServerCheck apiServerCheck = new APIServerCheck();
     @FXML
-    public ImageView irisstatus, sdkirisstatus, sdkslapstatus;
+    private ImageView irisUsbImage;
     @FXML
-    public ImageView slapstatus;
+    private ImageView irisSdkImage;
     @FXML
-    public ImageView camerastatus;
+    private ImageView slapSdkImage;
     @FXML
-    public ImageView barcodestatus;
+    private ImageView slapUsbImage;
     @FXML
-    public ImageView mafisurl;
-
-    TestProp prop = new TestProp();
-    TestIris testIris = new TestIris();
-    TestSlapScanner testSlap = new TestSlapScanner();
-
-    FileInputStream fis = null;
-
+    private ImageView cameraImage;
     @FXML
-    public void showDeviceStatus() {
+    private ImageView barcodeImage;
+    @FXML
+    private ImageView mafisUrlImage;
 
-        System.out.println("inside show device status");
-        Image redcross = new Image(getClass().getResourceAsStream("/img/redcross.png"));
-        Image greentick = new Image(getClass().getResourceAsStream("/img/tickgreen.jpg"));
-
-
-        //To Test Iris SDK
-        try {
-            String message = testIris.sdkIrisStatus();
-            System.out.println("message:::" + message);
-            if (message.equals("true")) {
-                sdkirisstatus.setImage(greentick);
-            } else {
-                sdkirisstatus.setImage(redcross);
-            }
-
-        } catch (Exception e) {
-            System.out.println("Exception:" + e);
-        }
-
-        //To Test Slap SDK
-        try {
-            String message = testSlap.sdkSlapScannerStatus();
-            System.out.println("message:::" + message);
-            if (message.equals("true")) {
-                sdkslapstatus.setImage(greentick);
-            } else {
-                sdkslapstatus.setImage(redcross);
-            }
-
-        } catch (Exception e) {
-            System.out.println("Exception:" + e);
-        }
-
-        //IRIS
-        try{
-            boolean irisStatus =  DeviceUtil.isIrisConnected();
-            if (irisStatus) {
-                irisstatus.setImage(greentick);
-            } else {
-                irisstatus.setImage(redcross);
-            }
-        }catch (Exception ex) {
-            Logger.getLogger(DeviceStatusController.class.getName()).log(Level.INFO, null, ex);
-        }
-
-        //SLAPSCANNER
-        try {
-            //String slapscanFile = "/etc/fingerprint_realscan.txt";
-            String slapscanFile = "";
-            slapscanFile = prop.getProp().getProperty("slapscanFile");
-
-            File file = new File(slapscanFile);
-            fis = new FileInputStream(file);
-            byte[] data = new byte[(int) file.length()];
-            fis.read(data);
-
-            String fileContent = new String(data, "UTF-8");
-
-            System.out.println(fileContent);
-            if (fileContent.contains("yes")) {
-                System.out.println("Slap Scanner Connected");
-                slapstatus.setImage(greentick);
-            } else {
-                System.out.println("Slap Scanner Not Connected");
-                slapstatus.setImage(redcross);
-            }
-
-
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occur reading SlapScanner File.");
-            e.printStackTrace();
-        } catch (IOException e) {
-            System.out.println("An error occur reading SlapScanner File.");
-            e.printStackTrace();
-        } finally {
-            try {
-                fis.close();
-            } catch (IOException ex) {
-                Logger.getLogger(DeviceStatusController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-
-        //Camera
-         try{
-            boolean cameraStatus =  DeviceUtil.isCameraConnected();
-             if (cameraStatus) {
-                 camerastatus.setImage(greentick);
-             } else {
-                 camerastatus.setImage(redcross);
-             }
-         }catch (Exception ex) {
-             Logger.getLogger(DeviceStatusController.class.getName()).log(Level.INFO, null, ex);
-         }
-
-
-        //Barcode Scanner
-        try {
-            //String barcodeFilePath = "/etc/fingerprint_barcode.txt";
-            String barcodeFilePath = "";
-            barcodeFilePath = prop.getProp().getProperty("barcodeFilePath");
-            File barcodeFile = new File(barcodeFilePath);
-            fis = new FileInputStream(barcodeFile);
-            byte[] data = new byte[(int) barcodeFile.length()];
-            fis.read(data);
-
-            String fileContent = new String(data, "UTF-8");
-            System.out.println(fileContent);
-
-            if (fileContent.contains("yes")) {
-                System.out.println("Barcode Connected");
-                barcodestatus.setImage(greentick);
-
-            } else {
-                System.out.println("Barcode Not Connected");
-                barcodestatus.setImage(redcross);
-
-            }
-            fis.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occurred reading Barcode File.");
-            e.printStackTrace();
-        } catch (IOException e) {
-            System.out.println("An error occur reading SlapScanner File.");
-            e.printStackTrace();
-        } finally {
-            try {
-                fis.close();
-            } catch (IOException ex) {
-                Logger.getLogger(DeviceStatusController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-        //URL Connectivity
-
-        try {
-
-            String arcNo = "123abc";
-            String connurl = apiServerCheck.getARCURL();
-            String connectionStatus = apiServerCheck.checkGetARCNoAPI(connurl, arcNo);
-
-            if (!connectionStatus.contentEquals("connected")) {
-                System.out.println("mafisurl not Connected");
-                mafisurl.setImage(redcross);
-            } else {
-                System.out.println("mafisurl Connected");
-                mafisurl.setImage(greentick);
-            }
-        } catch (Exception e) {
-            System.out.println("Exception:: " + e);
-        }
-
-
+    private void checkDevicesStatus() {
+        ForkJoinPool.commonPool().execute(this::checkMafisApi);
+        ForkJoinPool.commonPool().execute(this::checkSlapScanner);
+        checkCamera();
+        checkIris();
     }
 
     @FXML
-    public void showDeviceStatusPrevious() throws IOException {
+    private void refresh() {
+        checkDevicesStatus();
+    }
+
+    @FXML
+    private void home() throws IOException {
         App.setRoot("first_screen");
-
     }
 
     @FXML
-    public void showDeviceStatusBack() throws IOException {
+    private void back() throws IOException {
         App.setRoot("admin_config");
-
     }
 
+    // automatically called by JavaFX runtime.
     public void initialize() {
-        // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-
-
-        Image redcross = new Image(getClass().getResourceAsStream("/img/redcross.png"));
-        Image greentick = new Image(getClass().getResourceAsStream("/img/tickgreen.jpg"));
-
-        //To Test Iris SDK
-        try {
-            String message = testIris.sdkIrisStatus();
-            System.out.println("message" + message);
-            if (message.equals("true")) {
-                sdkirisstatus.setImage(greentick);
-            } else {
-                sdkirisstatus.setImage(redcross);
-            }
-
-        } catch (Exception e) {
-            System.out.println("Exception:" + e);
-        }
-
-        //To Test Slap SDK
-        try {
-            String message = testSlap.sdkSlapScannerStatus();
-            System.out.println("message:::" + message);
-            if (message.equals("true")) {
-                sdkslapstatus.setImage(greentick);
-            } else {
-                sdkslapstatus.setImage(redcross);
-            }
-
-        } catch (Exception e) {
-            System.out.println("Exception:" + e);
-        }
-
-        //IRIS
-        try{
-            boolean irisStatus =  DeviceUtil.isIrisConnected();
-            if (irisStatus) {
-                irisstatus.setImage(greentick);
-            } else {
-                irisstatus.setImage(redcross);
-            }
-        }catch (Exception ex) {
-            Logger.getLogger(DeviceStatusController.class.getName()).log(Level.INFO, null, ex);
-        }
-
-
-
-        //FileInputStream fis = null;
-        try {
-            //String slapscanFile = "/etc/fingerprint_realscan.txt";
-            String slapscanFile = "";
-            slapscanFile = prop.getProp().getProperty("slapscanFile");
-
-            File file = new File(slapscanFile);
-            fis = new FileInputStream(file);
-            byte[] data = new byte[(int) file.length()];
-            fis.read(data);
-
-            String fileContent = new String(data, "UTF-8");
-
-            System.out.println(fileContent);
-            if (fileContent.contains("yes")) {
-                System.out.println("Slap Scanner Connected");
-                slapstatus.setImage(greentick);
-            } else {
-                System.out.println("Slap Scanner Not Connected");
-                slapstatus.setImage(redcross);
-            }
-
-
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occur reading SlapScanner File.");
-            e.printStackTrace();
-        } catch (IOException e) {
-            System.out.println("An error occur reading SlapScanner File.");
-            e.printStackTrace();
-        } finally {
-            try {
-                fis.close();
-            } catch (IOException ex) {
-                Logger.getLogger(DeviceStatusController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-
-        //Camera
-        try{
-            boolean cameraStatus =  DeviceUtil.isCameraConnected();
-            if (cameraStatus) {
-                camerastatus.setImage(greentick);
-            } else {
-                camerastatus.setImage(redcross);
-            }
-        }catch (Exception ex) {
-            Logger.getLogger(DeviceStatusController.class.getName()).log(Level.INFO, null, ex);
-        }
-
-
-        //Camera
-        /*
-        try {
-            //String cameraFilePath = "/etc/fingerprint_camera.txt";
-            String cameraFilePath = "";
-            cameraFilePath = prop.getProp().getProperty("cameraFilePath");
-            File cameraFile = new File(cameraFilePath);
-            fis = new FileInputStream(cameraFile);
-            byte[] data = new byte[(int) cameraFile.length()];
-            fis.read(data);
-
-            String fileContent = new String(data, "UTF-8");
-            System.out.println(fileContent);
-
-            if (fileContent.contains("yes")) {
-                System.out.println("Camera Connected");
-                camerastatus.setImage(greentick);
-            } else {
-                System.out.println("Camera Not Connected");
-                camerastatus.setImage(redcross);
-            }
-
-
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occurred reading Camera File.");
-            e.printStackTrace();
-        } catch (IOException e) {
-            System.out.println("An error occur reading SlapScanner File.");
-            e.printStackTrace();
-        } finally {
-            try {
-                fis.close();
-            } catch (IOException ex) {
-                Logger.getLogger(DeviceStatusController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        */
-        //Barcode Scanner
-
-        try {
-
-            //String barcodeFilePath = "/etc/fingerprint_barcode.txt";
-            String barcodeFilePath = "";
-            barcodeFilePath = prop.getProp().getProperty("barcodeFilePath");
-            File barcodeFile = new File(barcodeFilePath);
-            fis = new FileInputStream(barcodeFile);
-            byte[] data = new byte[(int) barcodeFile.length()];
-            fis.read(data);
-
-            String fileContent = new String(data, "UTF-8");
-            System.out.println(fileContent);
-
-            if (fileContent.contains("yes")) {
-                System.out.println("Barcode Connected");
-                barcodestatus.setImage(greentick);
-
-            } else {
-                System.out.println("Barcode Not Connected");
-                barcodestatus.setImage(redcross);
-
-            }
-
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occurred reading Barcode File.");
-            e.printStackTrace();
-        } catch (IOException e) {
-            System.out.println("An error occur reading SlapScanner File.");
-            e.printStackTrace();
-        } finally {
-            try {
-                fis.close();
-            } catch (IOException ex) {
-                Logger.getLogger(DeviceStatusController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-        //URL Connectivity
-
-        try {
-
-            String arcNo = "123abc";
-            String connurl = apiServerCheck.getARCURL();
-            String connectionStatus = apiServerCheck.checkGetARCNoAPI(connurl, arcNo);
-
-            if (!connectionStatus.contentEquals("connected")) {
-                System.out.println("mafisurl not Connected");
-                mafisurl.setImage(redcross);
-            } else {
-                System.out.println("mafisurl Connected");
-                mafisurl.setImage(greentick);
-            }
-        } catch (Exception e) {
-            System.out.println("Exception:: " + e);
-        }
-
+        checkDevicesStatus();
     }
 
 
+    private void checkCamera() {
+        // checks using JNI
+        if (DeviceUtil.isCameraConnected()) {
+            cameraImage.setImage(GREEN_TICK_IMAGE);
+        } else {
+            cameraImage.setImage(RED_CROSS_IMAGE);
+        }
+    }
+
+    private void checkIris() {
+        // checks using JNI
+        if (DeviceUtil.isIrisConnected()) {
+            irisSdkImage.setImage(GREEN_TICK_IMAGE);
+            irisUsbImage.setImage(GREEN_TICK_IMAGE);
+        } else {
+            irisSdkImage.setImage(RED_CROSS_IMAGE);
+            irisUsbImage.setImage(RED_CROSS_IMAGE);
+        }
+    }
+
+    private void checkSlapScanner() {
+        // checks using JNI
+        if (DeviceUtil.isFpScannerConnected(1)) {
+            slapUsbImage.setImage(GREEN_TICK_IMAGE);
+            slapSdkImage.setImage(GREEN_TICK_IMAGE);
+        } else {
+            slapUsbImage.setImage(RED_CROSS_IMAGE);
+            slapSdkImage.setImage(RED_CROSS_IMAGE);
+        }
+    }
+
+    private void checkBarcode() {
+        try {
+            List<String> lines = Files.readAllLines(Path.of(PropertyFile.getProperty(PropertyName.BARCODE_FILE_PATH)));
+            if (lines.isEmpty() || lines.get(0) == null || !lines.get(0).contains("yes")) {
+                barcodeImage.setImage(RED_CROSS_IMAGE);
+            } else {
+                barcodeImage.setImage(GREEN_TICK_IMAGE);
+            }
+        } catch (InvalidPathException e) {
+            LOGGER.log(Level.SEVERE, () -> PropertyFile.getProperty(PropertyName.BARCODE_FILE_PATH) + "not found.");
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, () -> "An error occur reading barcode file.");
+            e.printStackTrace();
+            throw new GenericException("An error occur reading barcode file.");
+        }
+    }
+
+    private void checkMafisApi() {
+        try {
+            String connectionStatus = apiServerCheck.checkGetARCNoAPI(apiServerCheck.getArcUrl(), "123abc");
+            if (!connectionStatus.contentEquals("connected")) {
+                mafisUrlImage.setImage(RED_CROSS_IMAGE);
+            } else {
+                mafisUrlImage.setImage(GREEN_TICK_IMAGE);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, () -> "An error occurred while connecting to MAFIS server.");
+        }
+
+    }
 }

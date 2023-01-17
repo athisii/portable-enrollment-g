@@ -340,7 +340,7 @@ public class BiometricCaptureCompleteController implements Initializable {
                     //statusMessage.setText("In process...");
 
                     String postJson;
-                    String connurl_arc = apiServerCheck.getARCURL();
+                    String connurl_arc = apiServerCheck.getArcUrl();
                     String arcno = "123abc";
                     String connectionStatus = apiServerCheck.checkGetARCNoAPI(connurl_arc, arcno);
                     System.out.println("connection status :" + connectionStatus);
@@ -348,7 +348,7 @@ public class BiometricCaptureCompleteController implements Initializable {
                         try {
 
                             postJson = mapper.writeValueAsString(saveEnrollment);
-                            String connurl = apiServerCheck.getARCURL();
+                            String connurl = apiServerCheck.getArcUrl();
                             //String arcno = "123abc";
                             //String connectionStatus = apiServerCheck.checkGetARCNoAPI(connurl,arcno);
                             //System.out.println("connection status :"+connectionStatus);

@@ -3,9 +3,9 @@ package com.cdac.enrollmentstation.util;
 import RealScan.RealScan_JNI;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.mantra.midirisenroll.MIDIrisEnroll;
+import com.mantra.midirisenroll.enums.DeviceModel;
+import com.mantra.midirisenroll.enums.IrisSide;
 import org.opencv.videoio.VideoCapture;
-
-import java.util.ArrayList;
 
 /**
  * @author athisii, CDAC
@@ -19,17 +19,12 @@ public class DeviceUtil {
 
     // returns true if number of connected device >= expectedNoOfDev else false
     public static boolean isFpScannerConnected(int expectedNoOfDev) {
-        return RealScan_JNI.RS_InitSDK(null, 0) >= expectedNoOfDev;
+        return RealScan_JNI.RS_InitSDK("", 0) >= expectedNoOfDev;
     }
 
     public static boolean isIrisConnected() {
         var midIrisEnroll = new MIDIrisEnroll(null);
-        var devices = new ArrayList<String>();
-        int result = midIrisEnroll.GetConnectedDevices(devices);
-        if (result != 0) {
-            return false;
-        }
-        return !devices.isEmpty();
+        return midIrisEnroll.IsDeviceConnected(DeviceModel.MATISX, new IrisSide[1]);
     }
 
     public static boolean isCameraConnected() {

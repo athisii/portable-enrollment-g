@@ -643,7 +643,7 @@ public class ImportExportController implements Initializable {
             responseStatus(response);
             SaveEnrollmentDetails saveEnrollment = new SaveEnrollmentDetails();
             String postJson = "";
-            String connurl = apiServerCheck.getARCURL();
+            String connurl = apiServerCheck.getArcUrl();
             String arcno = "123abc";
             String connectionStatus = apiServerCheck.checkGetARCNoAPI(connurl, arcno);
             System.out.println("connection status :" + connectionStatus);

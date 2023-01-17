@@ -19,6 +19,8 @@ import static java.net.http.HttpRequest.BodyPublishers;
 import static java.net.http.HttpResponse.BodyHandlers;
 
 public class ServerAPI {
+    private static final int NO_OF_RETRIES = 1;
+
     private static final Logger LOGGER = ApplicationLog.getLogger(ServerAPI.class);
     private static final HttpClient httpClient;
 
@@ -41,7 +43,7 @@ public class ServerAPI {
      */
 
     public static ARCDetails fetchARCDetails(String url, String arcNo) throws IOException {
-        int noOfRetries = 3;
+        int noOfRetries = NO_OF_RETRIES;
         var requestDto = new ARCNoReqDto(arcNo);
         var jsonRequest = Singleton.getObjectMapper().writeValueAsString(requestDto); // converts to JSON string.
         var postRequest = HttpRequest.newBuilder().uri(URI.create(url)).POST(BodyPublishers.ofString(jsonRequest)).header(HttpHeader.CONTENT_TYPE, "application/json; utf-8").header(HttpHeader.ACCEPT, "application/json").timeout(Duration.ofSeconds(20)).build();

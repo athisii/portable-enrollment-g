@@ -50,8 +50,14 @@ public class DeviceStatusController {
     private ImageView mafisUrlImage;
 
     private void checkDevicesStatus() {
-        ForkJoinPool.commonPool().execute(this::checkMafisApi);
-        ForkJoinPool.commonPool().execute(this::checkSlapScanner);
+        ForkJoinPool.commonPool().execute(() -> {
+            LOGGER.log(Level.INFO, () -> "MafisApi:Thread: " + Thread.currentThread().getName());
+            checkMafisApi();
+        });
+        ForkJoinPool.commonPool().execute(() -> {
+            LOGGER.log(Level.INFO, () -> "SlapScanner:Thread: " + Thread.currentThread().getName());
+            checkSlapScanner();
+        });
         checkCamera();
         checkIris();
     }

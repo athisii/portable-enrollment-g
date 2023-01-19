@@ -64,7 +64,7 @@ module com.cdac.enrollmentstation {
     opens com.cdac.enrollmentstation.util to javafx.fxml;
 
 
-    requires org.json;
+    requires json;
 //    requires gson;
 
     requires static lombok;

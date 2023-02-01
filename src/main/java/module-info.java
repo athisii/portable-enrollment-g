@@ -68,6 +68,7 @@ module com.cdac.enrollmentstation {
 //    requires gson;
 
     requires static lombok;
+    requires MFS;
 
 
 }

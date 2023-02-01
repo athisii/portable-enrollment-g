@@ -88,9 +88,7 @@ public class ARCNoController implements Initializable {
 
     @FXML
     private void showFingerPrint() throws IOException {
-
         //Added For Only Photo
-
 
         ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
         if (holder.getArcDetails().getBiometricOptions().contains("Photo") || holder.getArcDetails().getBiometricOptions().contains("photo")) {

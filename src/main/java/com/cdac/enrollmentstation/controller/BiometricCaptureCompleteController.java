@@ -90,7 +90,7 @@ public class BiometricCaptureCompleteController implements Initializable {
     private void homescreen() {
 
         try {
-            App.setRoot("first_screen");
+            App.setRoot("main_screen");
         } catch (IOException ex) {
             Logger.getLogger(BiometricCaptureCompleteController.class.getName()).log(Level.SEVERE, null, ex);
             LOGGER.log(Level.INFO, ex + "IOException");

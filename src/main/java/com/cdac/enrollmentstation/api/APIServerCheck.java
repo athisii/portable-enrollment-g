@@ -34,7 +34,7 @@ public class APIServerCheck {
     private static final Logger LOGGER = ApplicationLog.getLogger(APIServerCheck.class);
 
 
-    public String checkGetARCNoAPI(String url, String arcNo) {
+    public static String checkGetARCNoAPI(String url, String arcNo) {
 
         String result = "";
         int code = 200;
@@ -359,9 +359,6 @@ public class APIServerCheck {
             con.setConnectTimeout(10000);
             con.setReadTimeout(20000);
             con.setDoOutput(true);
-            //String arcNo = "123abc";
-
-
             while (noOfRetries > 0) {
                 con.connect();
 
@@ -701,46 +698,36 @@ public class APIServerCheck {
     }
 
 
-    public String getArcUrl() {
-        return getMafisApiServer() + "/api/EnrollmentStation/GetDetailsByARCNo";
+    public static String getArcUrl() {
+        return getMafisApiServer() + "/GetDetailsByARCNo";
     }
 
-    public String getContractListURL() {
-        String mafisApiServer = getMafisApiServer();
-        LOGGER.log(Level.INFO, () -> "Mafis server API :" + mafisApiServer);
-        return getMafisApiServer() + "/api/EnrollmentStation/GetContractList";
+    public static String getContractListURL() {
+        return getMafisApiServer() + "/GetContractList";
     }
 
-    public String getLabourListURL() {
-        System.out.println("Mafis server API :" + getMafisApiServer());
-        String labourListURL = getMafisApiServer() + "/api/EnrollmentStation/GetLabourList";
-        return labourListURL;
+    public static String getLabourListURL() {
+        return getMafisApiServer() + "/GetLabourList";
     }
 
-    public String getUnitListURL() {
-        String unitListURL = getMafisApiServer() + "/api/EnrollmentStation/GetAllUnits";
-        return unitListURL;
+    public static String getUnitListURL() {
+        return getMafisApiServer() + "/GetAllUnits";
     }
 
-    public String getTokenUpdateURL() {
-        String updateToken = getMafisApiServer() + "/api/EnrollmentStation/UpdateTokenStatus";
-        return updateToken;
+    public static String getTokenUpdateURL() {
+        return getMafisApiServer() + "/UpdateTokenStatus";
     }
 
-    public String getEnrollmentSaveURL() {
-
-        String enrollmentSaveURL = getMafisApiServer() + "/api/EnrollmentStation/SaveEnrollment";
-        return enrollmentSaveURL;
+    public static String getEnrollmentSaveURL() {
+        return getMafisApiServer() + "/SaveEnrollment";
     }
 
-    public String getDemographicURL() {
-
-        String demographicURL = getMafisApiServer() + "/api/EnrollmentStation/GetDemographicDetails";
-        return demographicURL;
+    public static String getDemographicURL() {
+        return getMafisApiServer() + "/GetDemographicDetails";
     }
 
 
-    public String getMafisApiServer() {
+    public static String getMafisApiServer() {
         String mafisServerApi = "";
         try {
             List<String> lines = Files.readAllLines(Paths.get(PropertyFile.getProperty(PropertyName.URL_DATA)));
@@ -755,19 +742,19 @@ public class APIServerCheck {
             }
             mafisServerApi = tokens[1];
         } catch (IOException e) {
-            LOGGER.log(Level.INFO, "Problem reading file: " + PropertyFile.getProperty(PropertyName.URL_DATA));
+            LOGGER.log(Level.INFO, () -> "Problem reading file: " + PropertyFile.getProperty(PropertyName.URL_DATA));
             e.printStackTrace();
             throw new GenericException("Errored occurred reading " + PropertyFile.getProperty(PropertyName.URL_DATA));
         }
         if (mafisServerApi.endsWith("/")) {
-            return mafisServerApi.substring(0, mafisServerApi.lastIndexOf("/"));
+            mafisServerApi = mafisServerApi.substring(0, mafisServerApi.lastIndexOf("/"));
         }
-        return mafisServerApi;
+        return mafisServerApi + "/api/EnrollmentStation";
 
 
     }
 
-    public String getUnitID() {
+    public static String getUnitID() {
         String unitID = "";
         try (BufferedReader file = new BufferedReader(new FileReader("/etc/data.txt"))) {
             String line = " ";

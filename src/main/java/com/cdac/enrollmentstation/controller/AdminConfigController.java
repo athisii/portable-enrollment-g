@@ -121,7 +121,7 @@ public class AdminConfigController {
     @FXML
     public void logOut() {
         try {
-            App.setRoot("main");
+            App.setRoot("login");
         } catch (IOException ex) {
             Logger.getLogger(AdminConfigController.class.getName()).log(Level.SEVERE, null, ex);
             LOGGER.log(Level.INFO, ex + "IOException:");

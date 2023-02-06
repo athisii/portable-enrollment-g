@@ -15,7 +15,7 @@ public class LoginController {
 
     @FXML
     private void offlineLogin() throws IOException {
-        App.setRoot("card_authentication");
+        App.setRoot("card_login");
     }
 
 

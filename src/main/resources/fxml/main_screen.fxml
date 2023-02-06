@@ -56,7 +56,7 @@
                         <Image url="@../img/importexport.jpeg"/>
 
                     </ImageView>
-                    <Button fx:id="importexport" layoutX="32.0" layoutY="309.0" mnemonicParsing="false"
+                    <Button layoutX="32.0" layoutY="309.0" mnemonicParsing="false"
                             onAction="#showImportExport" prefHeight="50.0" prefWidth="310.0"
                             style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
                             text="IMPORT/EXPORT" textFill="WHITE">
@@ -66,20 +66,7 @@
                     </Button>
 
                 </AnchorPane>
-                <AnchorPane layoutX="819.0" layoutY="234.0" prefHeight="300.0" prefWidth="300.0" visible="false">
 
-                    <ImageView fitHeight="162.0" fitWidth="161.0" layoutX="66.0" layoutY="58.0" pickOnBounds="true"
-                               preserveRatio="true">
-
-                        <Image url="@../img/settingfirst.png"/>
-
-                    </ImageView>
-                    <Button layoutX="47.0" layoutY="249.0" mnemonicParsing="false" onAction="#showPasswdScreen"
-                            prefHeight="37.0" prefWidth="216.0"
-                            style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
-                            text="APPLICATION SETTINGS" textFill="WHITE"/>
-
-                </AnchorPane>
                 <ImageView fitHeight="47.0" fitWidth="48.0" layoutX="21.0" layoutY="112.0" pickOnBounds="true"
                            preserveRatio="true">
 
@@ -91,7 +78,7 @@
                         <Font size="16.0"/>
                     </font>
                 </Label>
-                <Label fx:id="logout" layoutX="1276.0" layoutY="131.0" onMouseClicked="#onLogout" prefHeight="27.0"
+                <Label layoutX="1276.0" layoutY="131.0" onMouseClicked="#onLogout" prefHeight="27.0"
                        prefWidth="77.0" style="-fx-cursor: hand;" text="LOGOUT" underline="true">
                     <font>
                         <Font size="16.0"/>
@@ -103,13 +90,13 @@
                     <Image url="@../img/logout.png"/>
 
                 </ImageView>
-                <Label fx:id="statusMsg" alignment="CENTER" layoutX="367.0" layoutY="623.0" prefHeight="27.0"
+                <Label alignment="CENTER" layoutX="367.0" layoutY="623.0" prefHeight="27.0"
                        prefWidth="582.0">
                     <font>
                         <Font name="System Bold" size="17.0"/>
                     </font>
                 </Label>
-                <Label fx:id="settings" layoutX="1110.0" layoutY="130.0" onMouseClicked="#onSettings" prefHeight="27.0"
+                <Label layoutX="1110.0" layoutY="130.0" onMouseClicked="#onSettings" prefHeight="27.0"
                        prefWidth="88.0" style="-fx-cursor: hand;" text="SETTINGS" underline="true">
                     <font>
                         <Font size="16.0"/>

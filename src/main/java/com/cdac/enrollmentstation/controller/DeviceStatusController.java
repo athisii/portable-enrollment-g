@@ -33,7 +33,6 @@ public class DeviceStatusController {
         GREEN_TICK_IMAGE = new Image(Objects.requireNonNull(DeviceStatusController.class.getResourceAsStream("/img/tickgreen.jpg")));
     }
 
-    private final APIServerCheck apiServerCheck = new APIServerCheck();
     @FXML
     private ImageView irisUsbImage;
     @FXML
@@ -69,7 +68,7 @@ public class DeviceStatusController {
 
     @FXML
     private void home() throws IOException {
-        App.setRoot("first_screen");
+        App.setRoot("main_screen");
     }
 
     @FXML
@@ -133,7 +132,7 @@ public class DeviceStatusController {
 
     private void checkMafisApi() {
         try {
-            String connectionStatus = apiServerCheck.checkGetARCNoAPI(apiServerCheck.getArcUrl(), "123abc");
+            String connectionStatus = APIServerCheck.checkGetARCNoAPI(APIServerCheck.getArcUrl(), "123abc");
             if (!connectionStatus.contentEquals("connected")) {
                 mafisUrlImage.setImage(RED_CROSS_IMAGE);
             } else {

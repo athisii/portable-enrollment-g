@@ -30,6 +30,6 @@ public class UnitListDetails {
     String desc;
 
     @JsonProperty("Units")
-    List<Units> units = new ArrayList<>();
+    List<Units> units;
 
 }

@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
  *
  * @author padmanabhanj
  */
-public class CardAuthenticationController implements MIDFingerAuth_Callback {
+public class CardLoginController implements MIDFingerAuth_Callback {
 
     /**
      * Initializes the controller class.
@@ -75,7 +75,7 @@ public class CardAuthenticationController implements MIDFingerAuth_Callback {
     CardReaderAPIURLs CardReaderAPIURLs = new CardReaderAPIURLs();
     CardReaderAPI cardReaderAPI = new CardReaderAPI();
     //For Application Log
-    private static final Logger LOGGER = ApplicationLog.getLogger(CardAuthenticationController.class);
+    private static final Logger LOGGER = ApplicationLog.getLogger(CardLoginController.class);
     TestProp prop = new TestProp();
     private MIDFingerAuth midFingerAuth = null; // For MID finger jar 
     private DeviceInfo deviceInfo = null;
@@ -89,7 +89,7 @@ public class CardAuthenticationController implements MIDFingerAuth_Callback {
 
     public APIServerCheck apiServerCheck = new APIServerCheck();
 
-    public CardAuthenticationController() {
+    public CardLoginController() {
         //this.handler = appLog.getLogger();
         //LOGGER.addHandler(handler); 
 
@@ -156,8 +156,8 @@ public class CardAuthenticationController implements MIDFingerAuth_Callback {
 
     @FXML
     private void showHome() throws IOException {
-        //App.setRoot("first_screen");
-        App.setRoot("main");
+        //App.setRoot("main_screen");
+        App.setRoot("login");
 
     }
 
@@ -190,7 +190,7 @@ public class CardAuthenticationController implements MIDFingerAuth_Callback {
         if (response.equals("success")) {
             //lblcarderror.setText("Kindly Check the CardReader Api Service");
             // App.setRoot("list_contract");
-            //App.setRoot("first_screen");
+            //App.setRoot("main_screen");
             return;
         } else {
             //messageStatus(response);
@@ -215,7 +215,7 @@ public class CardAuthenticationController implements MIDFingerAuth_Callback {
         if (response.equals("success")) {
             //lblcarderror.setText("Kindly Check the CardReader Api Service");
             // App.setRoot("list_contract");
-            //App.setRoot("first_screen");
+            //App.setRoot("main_screen");
             return;
         } else {
             messageStatus(response);
@@ -271,7 +271,7 @@ public class CardAuthenticationController implements MIDFingerAuth_Callback {
                 //CardReaderReadData readDataFromNaval = objReadDataFromNaval.readValue(responseReadDataArray, CardReaderReadData.class);
                 readDataFromNaval = objReadDataFromNaval.readValue(responseReadDataArray, CardReaderReadData.class);
             } catch (JsonProcessingException ex) {
-                Logger.getLogger(CardAuthenticationController.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(CardLoginController.class.getName()).log(Level.SEVERE, null, ex);
                 response = "JSON Prossessing Error CardReaderReadData";
 
                 return responsebuffer;
@@ -341,7 +341,7 @@ public class CardAuthenticationController implements MIDFingerAuth_Callback {
         try {
             cardReaderInitialize = objMapper.readValue(responseinit, CardReaderInitialize.class);
         } catch (JsonProcessingException ex) {
-            Logger.getLogger(CardAuthenticationController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(CardLoginController.class.getName()).log(Level.SEVERE, null, ex);
             response = "JSON Prossessing Error cardReaderInitialize";
             return response;
 
@@ -369,7 +369,7 @@ public class CardAuthenticationController implements MIDFingerAuth_Callback {
                 try {
                     waitForConnect = objMapperWaitConn.readValue(responseWaitConnect, CardReaderWaitForConnect.class);
                 } catch (JsonProcessingException ex) {
-                    Logger.getLogger(CardAuthenticationController.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(CardLoginController.class.getName()).log(Level.SEVERE, null, ex);
                     response = "JSON Prossessing Error CardReaderWaitforConnect";
                     return response;
                 }
@@ -399,7 +399,7 @@ public class CardAuthenticationController implements MIDFingerAuth_Callback {
                     try {
                         selectApp = objMapperSelectApp.readValue(responseSelectApp, CardReaderSelectApp.class);
                     } catch (JsonProcessingException ex) {
-                        Logger.getLogger(CardAuthenticationController.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(CardLoginController.class.getName()).log(Level.SEVERE, null, ex);
                         response = "JSON Prossessing Error CardReaderSelectApp";
                         return response;
                     }
@@ -529,12 +529,12 @@ public class CardAuthenticationController implements MIDFingerAuth_Callback {
                                 try {
                                     System.out.println("Equals ContractID");
                                     response = "success";
-                                    App.setRoot("first_screen");
+                                    App.setRoot("main_screen");
                                     return response;
                                    /* To Check UnitId against the Card
                                     if(contractorName.equals(apiServerCheck.getUnitID().trim())){
                                         response="success";
-                                        App.setRoot("first_screen");
+                                        App.setRoot("main_screen");
                                         return response;
                                     }else{
                                         response="Invalid Unit, Try with Valid Card";                                 
@@ -542,7 +542,7 @@ public class CardAuthenticationController implements MIDFingerAuth_Callback {
                                     }*/
 
                                 } catch (IOException ex) {
-                                    Logger.getLogger(CardAuthenticationController.class.getName()).log(Level.SEVERE, null, ex);
+                                    Logger.getLogger(CardLoginController.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                                 return response;
                             } else {
@@ -585,7 +585,7 @@ public class CardAuthenticationController implements MIDFingerAuth_Callback {
             try {
                 cardReaderDeInitialize = objMapperDeInitialize.readValue(responseDeInitialize, CardReaderDeInitialize.class);
             } catch (JsonProcessingException ex) {
-                Logger.getLogger(CardAuthenticationController.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(CardLoginController.class.getName()).log(Level.SEVERE, null, ex);
             }
 
 

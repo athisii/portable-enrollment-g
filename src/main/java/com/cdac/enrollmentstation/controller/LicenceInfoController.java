@@ -50,7 +50,7 @@ public class LicenceInfoController implements Initializable {
 
     @FXML
     public void showHome() throws IOException {
-        App.setRoot("first_screen");
+        App.setRoot("main_screen");
     }
 
     @FXML

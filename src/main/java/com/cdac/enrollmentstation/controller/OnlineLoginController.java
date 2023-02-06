@@ -32,13 +32,13 @@ public class OnlineLoginController {
 
     @FXML
     public void showHome() throws IOException {
-        App.setRoot("main");
+        App.setRoot("login");
     }
 
 
     @FXML
     public void showPrimaryScreen() {
-        AuthUtil.authenticate(textField, passwordField, statusMsg, "first_screen");
+        AuthUtil.authenticate(textField, passwordField, statusMsg, "main_screen");
     }
 
     public void initialize() {

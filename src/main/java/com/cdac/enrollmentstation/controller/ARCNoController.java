@@ -280,7 +280,7 @@ public class ARCNoController implements Initializable {
     @FXML
     private void showHome() {
         try {
-            App.setRoot("first_screen");
+            App.setRoot("main_screen");
         } catch (IOException ex) {
             //Logger.getLogger(ARCNoController.class.getName()).log(Level.SEVERE, null, ex);
             LOGGER.log(Level.INFO, "IOException:" + ex);

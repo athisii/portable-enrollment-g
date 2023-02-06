@@ -143,6 +143,6 @@ public class SelectPesUnitIdController implements Initializable {
 
     @FXML
     private void showHome() throws IOException {
-        App.setRoot("first_screen");
+        App.setRoot("main_screen");
     }
 }

@@ -1,13 +1,18 @@
 package com.cdac.enrollmentstation.api;
 
 
+import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.HttpHeader;
+import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.ARCNoReqDto;
+import com.cdac.enrollmentstation.dto.UnitCodeReqDto;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ARCDetails;
+import com.cdac.enrollmentstation.model.ARCDetailsList;
 import com.cdac.enrollmentstation.model.UnitListDetails;
 import com.cdac.enrollmentstation.model.Units;
+import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -17,6 +22,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
 import java.util.logging.Level;
@@ -27,9 +34,8 @@ import static java.net.http.HttpResponse.BodyHandlers;
 
 public class ServerAPI {
     private static final int NO_OF_RETRIES = 1;
-    private static final int CONNECTION_TIMEOUT = 5;
+    private static final int CONNECTION_TIMEOUT = 10;
     private static final int WRITE_TIMEOUT = 30;
-    private static final String ERROR_MESSAGE = "Something went wrong. Please try again.";
 
 
     private static final Logger LOGGER = ApplicationLog.getLogger(ServerAPI.class);
@@ -44,8 +50,8 @@ public class ServerAPI {
     }
 
     /**
-     * Fetches single ARCDetails based on ARC unique number.
-     * Caller must handle exceptions
+     * Fetches single ARCDetails based on ARC number.
+     * Caller must handle the exception.
      *
      * @param url   url of the API.
      * @param arcNo unique id whose details are to be fetched
@@ -54,20 +60,20 @@ public class ServerAPI {
      */
 
     public static ARCDetails fetchARCDetails(String url, String arcNo) {
-        String jsonRequest;
+        String jsonRequestData;
         try {
-            jsonRequest = Singleton.getObjectMapper().writeValueAsString(new ARCNoReqDto(arcNo));
+            jsonRequestData = Singleton.getObjectMapper().writeValueAsString(new ARCNoReqDto(arcNo));
         } catch (JsonProcessingException e) {
-            LOGGER.log(Level.SEVERE, "Unable to write as JSON string.");
-            throw new GenericException(ERROR_MESSAGE);
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ERROR_MESSAGE);
+            throw new GenericException(ApplicationConstant.GENERIC_ERROR_MESSAGE);
         }
-        String jsonResponse = sendHttpRequest(createPostHttpRequest(url, jsonRequest));
+        String jsonResponse = sendHttpRequest(createPostHttpRequest(url, jsonRequestData));
         ARCDetails arcDetail;
         try {
             arcDetail = Singleton.getObjectMapper().readValue(jsonResponse, ARCDetails.class);
         } catch (JsonProcessingException ignored) {
-            LOGGER.log(Level.SEVERE, "Error occurred while parsing json data.");
-            throw new GenericException(ERROR_MESSAGE);
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERROR_MESSAGE);
+            throw new GenericException(ApplicationConstant.GENERIC_ERROR_MESSAGE);
         }
         if (!"0".equals(arcDetail.getErrorCode())) {
             throw new GenericException(arcDetail.getDesc());
@@ -76,9 +82,10 @@ public class ServerAPI {
     }
 
     /**
-     * Sends request. Caller must handle exceptions
+     * Sends Http request.
+     * Caller must handle the exception.
      *
-     * @param httpRequest reqeust payload
+     * @param httpRequest request payload
      * @throws GenericException exception on connection timeout, error, json parsing exception etc.
      */
 
@@ -106,26 +113,56 @@ public class ServerAPI {
 
     /**
      * Fetches all units.
-     * Caller must handle exceptions.
+     * Caller must handle the exception.
      *
      * @return List<Units>
      * @throws GenericException exception on connection timeout, error, json parsing exception etc.
      */
     public static List<Units> fetchAllUnits() {
-        var getRequest = createGetHttpRequest(APIServerCheck.getUnitListURL());
-        String response = sendHttpRequest(getRequest);
+        String jsonResponse = sendHttpRequest(createGetHttpRequest(getUnitListURL()));
         // if this line is reached, response received with status code 200
         UnitListDetails unitListDetails;
         try {
-            unitListDetails = Singleton.getObjectMapper().readValue(response, UnitListDetails.class);
+            unitListDetails = Singleton.getObjectMapper().readValue(jsonResponse, UnitListDetails.class);
         } catch (JsonProcessingException ignored) {
-            LOGGER.log(Level.SEVERE, "Error occurred while parsing json data.");
-            throw new GenericException(ERROR_MESSAGE);
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERROR_MESSAGE);
+            throw new GenericException(ApplicationConstant.GENERIC_ERROR_MESSAGE);
         }
-        if (!"0".equals(unitListDetails.getErrorCode())) {
+        if (unitListDetails.getErrorCode() != 0) {
             throw new GenericException(unitListDetails.getDesc());
         }
         return unitListDetails.getUnits();
+    }
+
+
+    /**
+     * Fetches list of ARC based on unitCode.
+     * Caller must handle the exception.
+     *
+     * @return List<ARCDetails>
+     * @throws GenericException exception on connection timeout, error, json parsing exception etc.
+     */
+
+    public static List<ARCDetails> fetchArcListByUnitCode(String unitCode) {
+        String jsonRequestData;
+        try {
+            jsonRequestData = Singleton.getObjectMapper().writeValueAsString(new UnitCodeReqDto(unitCode));
+        } catch (JsonProcessingException e) {
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ERROR_MESSAGE);
+            throw new GenericException(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+        }
+        String jsonResponse = sendHttpRequest(createPostHttpRequest(getDemographicURL(), jsonRequestData));
+        ARCDetailsList arcDetailsList;
+        try {
+            arcDetailsList = Singleton.getObjectMapper().readValue(jsonResponse, ARCDetailsList.class);
+        } catch (JsonProcessingException e) {
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERROR_MESSAGE);
+            throw new GenericException(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+        }
+        if (arcDetailsList.getErrorCode() != 0) {
+            throw new GenericException(arcDetailsList.getDesc());
+        }
+        return arcDetailsList.getArcDetails();
     }
 
     private static HttpRequest createGetHttpRequest(String url) {
@@ -148,14 +185,43 @@ public class ServerAPI {
     }
 
 
-    //Test Code
-    public static void main(String[] args) {
-        ARCDetails arcDetail;
+    public static String getUnitListURL() {
+        return getMafisApiUrl() + "/GetAllUnits";
+    }
+
+    public static String getDemographicURL() {
+        return getMafisApiUrl() + "/GetDemographicDetails";
+    }
+
+    /**
+     * Returns MAFIS API home url from /etc/file.properties
+     * Caller must handle the exception.
+     *
+     * @return String - MAFIS API home url
+     * @throws GenericException exception on connection timeout, error, json parsing exception etc.
+     */
+    public static String getMafisApiUrl() {
+        String mafisServerApi;
         try {
-            arcDetail = fetchARCDetails("http://localhost:8080/arc-details", "1111-AAAA");
-            LOGGER.log(Level.INFO, arcDetail::toString);
-        } catch (GenericException ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage());
+            List<String> lines = Files.readAllLines(Paths.get(PropertyFile.getProperty(PropertyName.URL_DATA)));
+            if (lines.isEmpty() || lines.get(0).isBlank()) {
+                throw new GenericException(PropertyFile.getProperty(PropertyName.URL_DATA) + " is empty");
+            }
+            String line = lines.get(0);
+            // /etc/data.txt -> U1,http://X.X.X.X:X,XX
+            String[] tokens = line.split(",");
+            if (tokens.length < 3) {
+                throw new GenericException("Malformed values. Values should be separated by ','. Example- U1,http://X.X.X.X:X,XX");
+            }
+            mafisServerApi = tokens[1];
+        } catch (IOException e) {
+            LOGGER.log(Level.INFO, () -> "Problem reading file: " + PropertyFile.getProperty(PropertyName.URL_DATA));
+            e.printStackTrace();
+            throw new GenericException("Errored occurred reading " + PropertyFile.getProperty(PropertyName.URL_DATA));
         }
+        if (mafisServerApi.endsWith("/")) {
+            mafisServerApi = mafisServerApi.substring(0, mafisServerApi.lastIndexOf("/"));
+        }
+        return mafisServerApi + "/api/EnrollmentStation";
     }
 }

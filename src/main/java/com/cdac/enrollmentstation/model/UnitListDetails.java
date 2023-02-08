@@ -12,7 +12,6 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,7 +23,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UnitListDetails {
     @JsonProperty("ErrorCode")
-    String errorCode;
+    int errorCode;
 
     @JsonProperty("Desc")
     String desc;

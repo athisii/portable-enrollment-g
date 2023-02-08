@@ -29,7 +29,7 @@ import java.util.Map;
 @JsonPropertyOrder({"ErrorCode", "Desc", "arcDetails"})
 public class ARCDetailsList {
     @JsonProperty("ErrorCode")
-    Integer errorCode;
+    int errorCode;
 
     @JsonProperty("Desc")
     String desc;

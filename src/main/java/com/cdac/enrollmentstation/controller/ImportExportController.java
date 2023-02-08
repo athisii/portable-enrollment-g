@@ -9,26 +9,32 @@ package com.cdac.enrollmentstation.controller;
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.api.APIServerCheck;
 import com.cdac.enrollmentstation.api.ServerAPI;
+import com.cdac.enrollmentstation.constant.ApplicationConstant;
+import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.SaveEnrollmentResponse;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.*;
+import com.cdac.enrollmentstation.model.ARCDetails;
+import com.cdac.enrollmentstation.model.SaveEnrollmentDetails;
+import com.cdac.enrollmentstation.model.Units;
 import com.cdac.enrollmentstation.security.AESFileEncryptionDecryption;
+import com.cdac.enrollmentstation.util.PropertyFile;
+import com.cdac.enrollmentstation.util.Singleton;
 import com.cdac.enrollmentstation.util.TestProp;
 import com.fasterxml.jackson.core.Base64Variants;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
-import org.apache.commons.io.FileUtils;
+import javafx.scene.text.Text;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -37,19 +43,20 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * FXML Controller class
@@ -57,35 +64,50 @@ import java.util.stream.Collectors;
  * @author root
  */
 public class ImportExportController {
+    private static final Logger LOGGER = ApplicationLog.getLogger(ImportExportController.class);
+    private static final String IMPORTED_TEXT = "IMPORTED: ";
+    private static final String CAPTURED_BIOMETRIC_TEXT = "CAPTURED BIOMETRIC: ";
     @FXML
-    public Button importDataBtn;
+    public Text importedUnitText;
+    @FXML
+    public Text capturedBiometricText;
     @FXML
     public Button exportDataBtn;
-    private List<Units> allUnits = new ArrayList<>();
+    @FXML
+    private Button importUnitBtn;
+    @FXML
+    private ListView<String> importedUnitListView;
+    @FXML
+    private Button clearImportBtn;
+    @FXML
+    private Button clearAllImportBtn;
+    @FXML
+    private ListView<String> capturedArcListView;
+    private final List<Units> allUnits = new ArrayList<>();
+    private final List<String> selectedUnits = new ArrayList<>();
+
     private APIServerCheck apiServerCheck = new APIServerCheck();
 
-    public SaveEnrollmentResponse saveEnrollmentResponse;
+    private SaveEnrollmentResponse saveEnrollmentResponse;
     @FXML
     private Label messageLabel;
-    TestProp prop = new TestProp();
+    private TestProp prop = new TestProp();
     //private String importjson="/usr/share/enrollment/json/import/arclistimported.json"
     private String importjson = null;
     //private String export="/usr/share/enrollment/json/export"
-    public SaveEnrollmentResponse enrollmentResponse;
+    private SaveEnrollmentResponse enrollmentResponse;
     private String export = null;
     @FXML
     private ImageView refreshIcon;
-    Thread exportthread = null;
-    Thread importthread = null;
+    private Thread exportthread = null;
+
     @FXML
     private ListView<String> unitListView;
     @FXML
     private TextField searchText;
-    List<String> selectedUnits = new ArrayList<>();
-    private static final Logger LOGGER = ApplicationLog.getLogger(ImportExportController.class);
 
 
-    public void updateUI(String message) {
+    private void updateUI(String message) {
         Platform.runLater(() -> messageLabel.setText(message));
     }
 
@@ -97,194 +119,6 @@ public class ImportExportController {
         String extPattern = "(?<!^)[.]" + (removeAllExtensions ? ".*" : "[^.]*$");
         return filename.replaceAll(extPattern, "");
     }
-
-    @FXML
-    public void importData() {
-        try {
-            importthread = new Thread(importjsonFile);
-            importthread.start();
-        } catch (Exception e) {
-            System.out.println("Error in loop::" + e);
-        }
-    }
-
-    Runnable importjsonFile = () -> {
-        String response = "";
-        response = "Importing Please Wait...";
-        updateUI(response);
-        String jsonurllist = "";
-        String connurlUnitList = apiServerCheck.getUnitListURL();
-        List<String> unitIds = new ArrayList<>();
-        try {
-            HashSet<String> unitListHash = new HashSet<>(selectedUnits);
-            for (String uList : unitListHash) {
-                System.out.println("Unit List from Hash::" + uList);
-            }
-            jsonurllist = apiServerCheck.getUnitListAPI(connurlUnitList);
-            System.out.println("Output str : " + jsonurllist);
-            ObjectMapper objectmapper = new ObjectMapper();
-            UnitListDetails details = objectmapper.readValue(jsonurllist, UnitListDetails.class);
-            if (details.getErrorCode().equals("0")) {
-                response = "Unit Details Fetched Successfully";
-                System.out.println("At Import Fetch Unit If :" + response);
-            } else {
-                response = details.getDesc();
-                System.out.println("At Import Fetch Unit Else :" + response);
-                updateUI(response);
-                return;
-            }
-
-            List<Units> unit = details.getUnits();
-            for (Units result1 : unit) {
-                for (String uList : unitListHash) {
-                    System.out.println("Unit List3::" + uList);
-                    System.out.println("Unit List3GetCaption::" + result1.getCaption());
-                    if (result1.getCaption().equals(uList)) {
-                        unitIds.add(result1.getValue().trim());
-                        System.out.println("caption:" + result1.getCaption());
-                    }
-                }
-            }
-
-            if (unitIds.size() == 0) {
-                response = "Kindly select the Values from Unit";
-                updateUI(response);
-                return;
-            }
-
-
-        } catch (Exception e) {
-            System.out.println("Exception::" + e);
-            response = "Kindly select the Values from Unit";
-            updateUI(response);
-            return;
-        }
-
-        try {
-            importjson = prop.getProp().getProperty("importjsonfolder");
-        } catch (IOException ex) {
-            Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
-            response = "Import Json Folder Not Exist in File.properties";
-            updateUI(response);
-            return;
-        }
-        try {
-            export = prop.getProp().getProperty("exportfolder");
-        } catch (IOException ex) {
-            Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
-            response = "Export Json Folder Not Exist in File.properties";
-            updateUI(response);
-            return;
-        }
-        System.out.println("import data");
-
-        try {
-            String ckeckUnitid = "";
-            for (String uNitLists : unitIds) {
-                System.out.println("Unit ListValue4::" + uNitLists);
-                ckeckUnitid = uNitLists;
-            }
-            String connurl = apiServerCheck.getDemographicURL();
-            String connectionStatus = apiServerCheck.getDemoGraphicDetailsAPI(connurl, ckeckUnitid);
-            System.out.println("Output :::::::" + connectionStatus);
-            if (connectionStatus.contains("Exception")) {
-                response = connectionStatus;
-                updateUI(response);
-                return;
-            }
-            String importjsonFile = prop.getProp().getProperty("importjsonfile");
-            File jsonFile = new File(importjsonFile);
-            String connurl1 = apiServerCheck.getDemographicURL();
-            ARCDetailsList arcDetailsList = new ARCDetailsList();
-            ARCDetailsList checkArcDetailsList = new ARCDetailsList();
-            ObjectMapper mapper = new ObjectMapper();
-
-            JsonFactory jfactory = new JsonFactory();
-            List<ArcDetailsMapping> mappingResult;
-            try {
-
-                for (String uNitLists : unitIds) {
-                    System.out.println("Unit ListValue5::" + uNitLists);
-                    String json = apiServerCheck.getDemoGraphicDetailsAPI(connurl1, uNitLists);
-                    try {
-                        checkArcDetailsList = mapper.readValue(json, ARCDetailsList.class);
-                    } catch (Exception e) {
-                        System.out.println("Exception While Read Json From Server:" + e);
-                        response = "ARC data From Server had issue";
-                        updateUI(response);
-                    }
-                    if (checkArcDetailsList.getErrorCode() == 0) {
-                        System.out.println("Arc details List Error Code:" + checkArcDetailsList.getErrorCode());
-                        if (jsonFile.exists() && !(jsonFile.length() == 0)) {
-                            FileReader reader = new FileReader(importjsonFile);
-                            arcDetailsList = mapper.readValue(reader, ARCDetailsList.class);
-                            String postJson = mapper.writeValueAsString(arcDetailsList);
-
-                            JsonParser jParser1 = jfactory.createJsonParser(json);
-                            JsonParser jParser2 = jfactory.createJsonParser(postJson);
-                            ARCDetailsList arcDetailsList1 = mapper.readValue(jParser1, ARCDetailsList.class);// JsonObj is Pojo for your jsonObject
-                            ARCDetailsList arcDetailsList2 = mapper.readValue(jParser2, ARCDetailsList.class);
-                            arcDetailsList1.getArcDetails().addAll(arcDetailsList2.getArcDetails());
-                            String finaljson = mapper.writeValueAsString(arcDetailsList1);
-                            FileUtils.writeStringToFile(new File(importjsonFile), finaljson);
-                            System.out.println("importjsonfile  Exist");
-                        } else {
-                            System.out.println("importjsonfile Not Exist");
-                            arcDetailsList = mapper.readValue(json, ARCDetailsList.class);
-                            FileUtils.writeStringToFile(new File(importjsonFile), json);
-                        }
-                    } else {
-                        System.out.println("Else Arc details List Error Code:" + checkArcDetailsList.getErrorCode());
-                        response = checkArcDetailsList.getDesc();
-                        updateUI(response + " " + "Try again with Other than " + uNitLists + " " + "Unit");
-                        return;
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println("Exception While Import Json:" + e);
-                response = "No ARC available for Selected Unit";
-                updateUI(response);
-                return;
-            }
-
-            ObjectMapper objMapper = new ObjectMapper();
-            try {
-                FileReader reader = new FileReader(importjsonFile);
-                arcDetailsList = mapper.readValue(reader, ARCDetailsList.class);
-                System.out.println("response compatible with ARCDetailsList POJO");
-            } catch (JsonParseException | JsonMappingException e) {
-                System.out.println("response NOT compatible with ARCDetailsList POJO");
-                response = "The Response From Server is not Compatible";
-                updateUI(response);
-                return;
-            }
-
-            System.out.println("Import Error Code :::" + arcDetailsList.getErrorCode());
-
-            if (arcDetailsList.getErrorCode() == 0) {
-                try {
-                    System.out.println("Successfully Copied JSON Object to File..." + arcDetailsList.getDesc());
-                    response = "Successfully Imported";
-                    updateUI(response);
-                    return;
-                } catch (Exception e) {
-                    System.out.println("Exception" + e);
-                }
-
-            } else {
-                response = arcDetailsList.getDesc();
-                updateUI(response);
-                return;
-            }
-
-        } catch (Exception e) {
-            System.out.println("Exception========" + e);
-            response = "No ARC Available for Selected Unit";
-            updateUI(response);
-            return;
-        }
-        updateUI(response);
-    };
 
     @FXML
     private void exportData() {
@@ -487,26 +321,29 @@ public class ImportExportController {
         ForkJoinPool.commonPool().execute(this::fetchAllUnits);
     }
 
+    // runs in WorkerThread
     private void fetchAllUnits() {
         try {
             List<String> unitCaptions = new ArrayList<>();
             allUnits.clear();
-            ServerAPI.fetchAllUnits().stream()
-                    .sorted(Comparator.comparing(Units::getCaption))
-                    .forEach(unit -> {
-                        unitCaptions.add(unit.getCaption());
-                        allUnits.add(unit);
-                    });
+            // throws exception
+            ServerAPI.fetchAllUnits().stream().sorted(Comparator.comparing(Units::getCaption)).forEach(unit -> {
+                unitCaptions.add(unit.getCaption());
+                allUnits.add(unit);
+            });
+
             Platform.runLater(() -> {
                 unitListView.setItems(FXCollections.observableArrayList(unitCaptions));
                 messageLabel.setText("");
-                enableControls(importDataBtn, exportDataBtn);
+                enableControls(importUnitBtn);
             });
         } catch (GenericException ex) {
-            allUnits = new ArrayList<>();
+            LOGGER.log(Level.SEVERE, ex::getMessage);
+            allUnits.clear();
             Platform.runLater(() -> {
+                unitListView.getItems().clear();
                 messageLabel.setText(ex.getMessage());
-                disableControls(importDataBtn, exportDataBtn);
+                disableControls(importUnitBtn);
             });
         }
     }
@@ -514,16 +351,25 @@ public class ImportExportController {
 
     public void initialize() {
         refreshIcon.setOnMouseClicked(mouseEvent -> refresh());
+        importUnitBtn.setOnAction(event -> importSelectedUnits());
+        clearImportBtn.setOnAction(event -> clearSingleImportedUnit());
+        clearAllImportBtn.setOnAction(event -> clearAllImportedUnits());
         searchText.textProperty().addListener((observable, oldVal, newVal) -> searchFilter(newVal));
-        unitListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        // should not allow multiple selections of units
+        // some units might not have Arc number
+        // error message will get override if multiple units are selected
+//        unitListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE)
         unitListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             selectedUnits.clear();
             selectedUnits.addAll(new ArrayList<>(unitListView.getSelectionModel().getSelectedItems()));
         });
         //Root1234#$
         messageLabel.setText("Fetching units.....");
-        disableControls(importDataBtn, exportDataBtn);
+        disableControls(importUnitBtn);
         ForkJoinPool.commonPool().execute(this::fetchAllUnits);
+        ForkJoinPool.commonPool().execute(this::updateImportedListView);
+        ForkJoinPool.commonPool().execute(this::updateCapturedBiometric);
+
     }
 
     private void disableControls(Node... nodes) {
@@ -545,5 +391,187 @@ public class ImportExportController {
         }
         String valueUpper = value.toUpperCase();
         unitListView.setItems(FXCollections.observableList(allUnits.stream().map(Units::getCaption).filter(caption -> caption.toUpperCase().contains(valueUpper)).collect(Collectors.toList())));
+    }
+
+    private void importSelectedUnits() {
+        if (selectedUnits.isEmpty()) {
+            updateUI("Please select a unit");
+            return;
+        }
+        Set<String> selectedUnitSet = new HashSet<>(selectedUnits);
+        List<String> selectedUnitCodes = allUnits.stream().filter(unit -> selectedUnitSet.contains(unit.getCaption())).map(Units::getValue).collect(Collectors.toList());
+        if (selectedUnitCodes.isEmpty()) {
+            updateUI("Kindly, select values from unit list");
+            return;
+        }
+        for (String unitCode : selectedUnitCodes) {
+            ForkJoinPool.commonPool().execute(() -> importUnit(unitCode));
+        }
+        disableControls(importUnitBtn);
+        messageLabel.setText("Importing unit. Please wait.......");
+
+    }
+
+    private void importUnit(String unitCode) {
+        String unitId;
+        String unitCaption;
+        List<ARCDetails> arcDetailsList;
+        try {
+            // throws exception
+            arcDetailsList = ServerAPI.fetchArcListByUnitCode(unitCode);
+            if (arcDetailsList.isEmpty()) {
+                updateUI("No ARC found for imported unit.");
+                return;
+            }
+            var firstArcDetails = arcDetailsList.get(0);
+            unitId = firstArcDetails.getArcNo().split("-")[0];
+            unitCaption = firstArcDetails.getUnit();
+
+        } catch (GenericException ex) {
+            String exceptionMessage = ex.getMessage();
+            LOGGER.log(Level.SEVERE, exceptionMessage);
+            // Special case, if network connection is interrupted while importing units
+            if (exceptionMessage != null && exceptionMessage.toUpperCase().contains("CONNECTION TIMEOUT")) {
+                Platform.runLater(() -> {
+                    unitListView.getItems().clear();
+                    disableControls(importUnitBtn);
+                });
+                updateUI(ex.getMessage());
+                return;
+            }
+            Platform.runLater(() -> {
+                enableControls(importUnitBtn);
+                messageLabel.setText(exceptionMessage);
+            });
+            return;
+        }
+
+        String jsonArcList;
+        try {
+            // throws exception
+            jsonArcList = Singleton.getObjectMapper().writeValueAsString(arcDetailsList);
+        } catch (JsonProcessingException e) {
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ERROR_MESSAGE);
+            updateUI(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            return;
+        }
+
+        String filePath = PropertyFile.getProperty(PropertyName.IMPORT_JSON_FOLDER) + "/" + unitId + "-" + unitCode + "-" + unitCaption;
+        try {
+            // throws exception
+            Files.writeString(Path.of(filePath), jsonArcList, StandardCharsets.UTF_8);
+            Platform.runLater(() -> {
+                enableControls(importUnitBtn);
+                messageLabel.setText("");
+            });
+            updateImportedListView();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ERROR_MESSAGE);
+            updateUI("Something went wrong. Please try again.");
+        }
+
+    }
+
+    private void updateImportedListView() {
+        // throws exception
+        try (Stream<Path> importFolder = Files.walk(Path.of(PropertyFile.getProperty(PropertyName.IMPORT_JSON_FOLDER)))) {
+            List<String> unitCaptions = importFolder
+                    .filter(Files::isRegularFile)
+                    .map(file -> {
+                        String[] splitFileName = file.getFileName().toString().split("-");
+                        if (splitFileName.length > 2) {
+                            //00001-INSI-INS INDIA
+                            return splitFileName[2];
+                        }
+                        LOGGER.log(Level.SEVERE, () -> "Malformed filename: " + file.getFileName());
+                        return "";
+                    }).filter(unitCaption -> !unitCaption.isBlank())
+                    .collect(Collectors.toList());
+
+            Platform.runLater(() -> {
+                importedUnitListView.setItems(FXCollections.observableList(unitCaptions));
+                messageLabel.setText("");
+                importedUnitText.setText(IMPORTED_TEXT + unitCaptions.size());
+            });
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error updating imported list view.");
+            updateUI(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+        }
+    }
+
+    private void clearSingleImportedUnit() {
+        String selectedImportedUnit = importedUnitListView.getSelectionModel().getSelectedItem();
+        if (selectedImportedUnit == null || selectedImportedUnit.isBlank()) {
+            return;
+        }
+        // throws exception
+        try (Stream<Path> importFolder = Files.walk(Path.of(PropertyFile.getProperty(PropertyName.IMPORT_JSON_FOLDER)))) {
+            Optional<Path> optionalPath = importFolder
+                    .filter(file -> {
+                        if (Files.isRegularFile(file)) {
+                            String[] splitFileName = file.getFileName().toString().split("-");
+                            if (splitFileName.length > 2) {
+                                //00001-INSI-INS INDIA
+                                return selectedImportedUnit.equals(splitFileName[2]);
+                            }
+                        }
+                        return false;
+                    }).findFirst();
+            if (optionalPath.isEmpty()) {
+                return;
+            }
+            Files.delete(optionalPath.get());
+            updateImportedListView();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error deleting selected unit.");
+            updateUI("Error deleting selected unit");
+        }
+
+    }
+
+    private void clearAllImportedUnits() {
+        try (Stream<Path> importFolder = Files.walk(Path.of(PropertyFile.getProperty(PropertyName.IMPORT_JSON_FOLDER)))) {
+            importFolder.filter(Files::isRegularFile).forEach(this::deletePath);
+            updateImportedListView();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error while deleting files");
+            updateUI(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+        }
+    }
+
+    private void deletePath(Path path) {
+        try {
+            Files.delete(path);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, () -> "Error deleting selected file: " + path.getFileName());
+            updateUI(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+        }
+    }
+
+
+    // needs to be run on WorkerThread; as the list can grow to large extent
+    private void updateCapturedBiometric() {
+        try (Stream<Path> encExportFolder = Files.walk(Path.of(PropertyFile.getProperty(PropertyName.ENC_EXPORT_FOLDER)))) {
+            List<String> capturedArcs = new ArrayList<>();
+            encExportFolder
+                    .forEach(path -> {
+                        if (Files.isRegularFile(path)) {
+                            String[] splitFilename = path.getFileName().toString().split("\\.");
+                            if (splitFilename.length > 1) {
+                                capturedArcs.add(splitFilename[0]);
+                            }
+                        }
+                    });
+
+            Platform.runLater(() -> capturedBiometricText.setText(CAPTURED_BIOMETRIC_TEXT + capturedArcs.size()));
+
+            if (!capturedArcs.isEmpty()) {
+                return;
+            }
+            Platform.runLater(() -> capturedArcListView.setItems(FXCollections.observableList(capturedArcs)));
+
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error occurred while getting the count of captured biometric data");
+        }
     }
 }

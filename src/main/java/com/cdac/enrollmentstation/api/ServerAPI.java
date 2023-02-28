@@ -201,7 +201,29 @@ public class ServerAPI {
      * @throws GenericException exception on connection timeout, error, json parsing exception etc.
      */
     public static String getMafisApiUrl() {
-        String mafisServerApi;
+        String mafisServerApi = extractValueFromDataFile(DataType.MAFIS_URL);
+        if (mafisServerApi.endsWith("/")) {
+            mafisServerApi = mafisServerApi.substring(0, mafisServerApi.lastIndexOf("/"));
+        }
+        return mafisServerApi + "/api/EnrollmentStation";
+    }
+
+    public static String getStationId() {
+        return extractValueFromDataFile(DataType.STATION_ID);
+    }
+
+    public static String getUnitId() {
+        return extractValueFromDataFile(DataType.UNIT_ID);
+    }
+
+
+    enum DataType {
+        UNIT_ID,
+        MAFIS_URL,
+        STATION_ID
+    }
+
+    private static String extractValueFromDataFile(DataType type) {
         try {
             List<String> lines = Files.readAllLines(Paths.get(PropertyFile.getProperty(PropertyName.URL_DATA)));
             if (lines.isEmpty() || lines.get(0).isBlank()) {
@@ -213,15 +235,21 @@ public class ServerAPI {
             if (tokens.length < 3) {
                 throw new GenericException("Malformed values. Values should be separated by ','. Example- U1,http://X.X.X.X:X,XX");
             }
-            mafisServerApi = tokens[1];
+            switch (type) {
+                case UNIT_ID:
+                    return tokens[0];
+                case MAFIS_URL:
+                    return tokens[1];
+                case STATION_ID:
+                    return tokens[2];
+                default:
+                    throw new GenericException("Unknown type");
+            }
         } catch (IOException e) {
             LOGGER.log(Level.INFO, () -> "Problem reading file: " + PropertyFile.getProperty(PropertyName.URL_DATA));
             e.printStackTrace();
             throw new GenericException("Errored occurred reading " + PropertyFile.getProperty(PropertyName.URL_DATA));
         }
-        if (mafisServerApi.endsWith("/")) {
-            mafisServerApi = mafisServerApi.substring(0, mafisServerApi.lastIndexOf("/"));
-        }
-        return mafisServerApi + "/api/EnrollmentStation";
+
     }
 }

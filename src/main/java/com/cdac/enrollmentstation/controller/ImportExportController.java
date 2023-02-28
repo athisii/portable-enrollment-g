@@ -327,10 +327,12 @@ public class ImportExportController {
             List<String> unitCaptions = new ArrayList<>();
             allUnits.clear();
             // throws exception
-            ServerAPI.fetchAllUnits().stream().sorted(Comparator.comparing(Units::getCaption)).forEach(unit -> {
-                unitCaptions.add(unit.getCaption());
-                allUnits.add(unit);
-            });
+            ServerAPI.fetchAllUnits().stream()
+                    .sorted(Comparator.comparing(Units::getCaption))
+                    .forEach(unit -> {
+                        unitCaptions.add(unit.getCaption());
+                        allUnits.add(unit);
+                    });
 
             Platform.runLater(() -> {
                 unitListView.setItems(FXCollections.observableArrayList(unitCaptions));
@@ -363,12 +365,12 @@ public class ImportExportController {
             selectedUnits.clear();
             selectedUnits.addAll(new ArrayList<>(unitListView.getSelectionModel().getSelectedItems()));
         });
-        //Root1234#$
-        messageLabel.setText("Fetching units.....");
         disableControls(importUnitBtn);
+        messageLabel.setText("Fetching units.....");
         ForkJoinPool.commonPool().execute(this::fetchAllUnits);
         ForkJoinPool.commonPool().execute(this::updateImportedListView);
         ForkJoinPool.commonPool().execute(this::updateCapturedBiometric);
+
 
     }
 
@@ -490,7 +492,6 @@ public class ImportExportController {
 
             Platform.runLater(() -> {
                 importedUnitListView.setItems(FXCollections.observableList(unitCaptions));
-                messageLabel.setText("");
                 importedUnitText.setText(IMPORTED_TEXT + unitCaptions.size());
             });
         } catch (IOException e) {
@@ -565,9 +566,10 @@ public class ImportExportController {
 
             Platform.runLater(() -> capturedBiometricText.setText(CAPTURED_BIOMETRIC_TEXT + capturedArcs.size()));
 
-            if (!capturedArcs.isEmpty()) {
+            if (capturedArcs.isEmpty()) {
                 return;
             }
+            Collections.sort(capturedArcs);
             Platform.runLater(() -> capturedArcListView.setItems(FXCollections.observableList(capturedArcs)));
 
         } catch (IOException e) {

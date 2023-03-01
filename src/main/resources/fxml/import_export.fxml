@@ -85,7 +85,7 @@
                               prefHeight="265.0" prefWidth="271.0"/>
 
                     <Button fx:id="exportDataBtn" layoutX="54.0" layoutY="318.0" maxHeight="35.0" maxWidth="275.0"
-                            minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#exportData"
+                            minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#exportDataOld"
                             prefHeight="33.0" prefWidth="270.0"
                             style="-fx-background-color: #04127b; -fx-background-radius: 10 10 10 10;" text="EXPORT"
                             textFill="WHITE">

@@ -121,7 +121,7 @@ public class ImportExportController {
     }
 
     @FXML
-    private void exportData() {
+    private void exportDataOld() {
 
         try {
             exportthread = new Thread(exportjsonFile);
@@ -292,6 +292,8 @@ public class ImportExportController {
                         updateUI(response);
                     }
                 }
+                updateImportedListView();
+                updateCapturedBiometric();
             } else {
 
                 System.out.println("The Directory is empty.. No encrypted files");
@@ -337,7 +339,7 @@ public class ImportExportController {
             Platform.runLater(() -> {
                 unitListView.setItems(FXCollections.observableArrayList(unitCaptions));
                 messageLabel.setText("");
-                enableControls(importUnitBtn);
+                enableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportDataBtn);
             });
         } catch (GenericException ex) {
             LOGGER.log(Level.SEVERE, ex::getMessage);
@@ -345,7 +347,7 @@ public class ImportExportController {
             Platform.runLater(() -> {
                 unitListView.getItems().clear();
                 messageLabel.setText(ex.getMessage());
-                disableControls(importUnitBtn);
+                disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportDataBtn);
             });
         }
     }
@@ -365,7 +367,7 @@ public class ImportExportController {
             selectedUnits.clear();
             selectedUnits.addAll(new ArrayList<>(unitListView.getSelectionModel().getSelectedItems()));
         });
-        disableControls(importUnitBtn);
+        disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportDataBtn);
         messageLabel.setText("Fetching units.....");
         ForkJoinPool.commonPool().execute(this::fetchAllUnits);
         ForkJoinPool.commonPool().execute(this::updateImportedListView);

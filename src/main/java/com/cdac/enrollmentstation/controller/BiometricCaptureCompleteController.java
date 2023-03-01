@@ -392,13 +392,13 @@ public class BiometricCaptureCompleteController implements Initializable {
                                 }
 
                             } catch (InvalidKeySpecException ex) {
-                                Logger.getLogger(FXHelloCVController.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(CameraController.class.getName()).log(Level.SEVERE, null, ex);
                                 statusMsg("Exception:" + ex);
                                 submit.setDisable(false);
                                 progressind.setVisible(false);
 
                             } catch (InvalidAlgorithmParameterException ex) {
-                                Logger.getLogger(FXHelloCVController.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(CameraController.class.getName()).log(Level.SEVERE, null, ex);
                                 statusMsg("Exception:" + ex);
                                 submit.setDisable(false);
                                 progressind.setVisible(false);

@@ -566,13 +566,11 @@ public class ImportExportController {
                         }
                     });
 
-            Platform.runLater(() -> capturedBiometricText.setText(CAPTURED_BIOMETRIC_TEXT + capturedArcs.size()));
-
-            if (capturedArcs.isEmpty()) {
-                return;
-            }
             Collections.sort(capturedArcs);
-            Platform.runLater(() -> capturedArcListView.setItems(FXCollections.observableList(capturedArcs)));
+            Platform.runLater(() -> {
+                capturedBiometricText.setText(CAPTURED_BIOMETRIC_TEXT + capturedArcs.size());
+                capturedArcListView.setItems(FXCollections.observableList(capturedArcs));
+            });
 
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error occurred while getting the count of captured biometric data");

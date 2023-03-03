@@ -15,5 +15,6 @@ public class ApplicationConstant {
     public static final String GENERIC_ERROR_MESSAGE = "Something went wrong. Please try again.";
     public static final String JSON_READ_ERROR_MESSAGE = "Error occurred while reading json data.";
     public static final String JSON_WRITE_ERROR_MESSAGE = "Error occurred while writing as JSON string.";
+    public static final String INVALID_CREDENTIALS = "Invalid credentials.";
 
 }

@@ -53,5 +53,6 @@ public class PropertyName {
     public static final String CAMERA_ID = "cameraid";
     public static final String PHOTO_CAPTURE_IMG = "photocaptureimg";
     public static final String SUB_FILE = "subfile";
+    public static final String ENV = "env";
 
 }

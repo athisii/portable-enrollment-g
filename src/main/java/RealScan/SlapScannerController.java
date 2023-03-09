@@ -2956,11 +2956,10 @@ public class SlapScannerController implements Initializable {
             ansiISO.setLicenseContent(Files.readAllBytes(file.toPath()), Files.readAllBytes(file.toPath()).length);
             ansiISO.init();
         } catch (RuntimeException e) {
-            System.out.println("Runtime exception" + e.toString());
-            System.out.println("Runtime exception" + e.toString());
             String[] tokens = e.toString().split(":");
             System.out.println("Runtime exception" + tokens[1] + " " + tokens[2]);
             statusField.setText("Error : " + tokens[2]);
+            scan.setDisable(true);
         }
     }
 

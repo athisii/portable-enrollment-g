@@ -455,8 +455,8 @@ public class ImportExportController {
             // throws exception
             jsonArcList = Singleton.getObjectMapper().writeValueAsString(arcDetailsList);
         } catch (JsonProcessingException e) {
-            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ERROR_MESSAGE);
-            updateUI(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
+            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
             return;
         }
 
@@ -470,7 +470,7 @@ public class ImportExportController {
             });
             updateImportedListView();
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ERROR_MESSAGE);
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             updateUI("Something went wrong. Please try again.");
         }
 
@@ -498,7 +498,7 @@ public class ImportExportController {
             });
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error updating imported list view.");
-            updateUI(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 
@@ -538,7 +538,7 @@ public class ImportExportController {
             updateImportedListView();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error while deleting files");
-            updateUI(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 
@@ -547,7 +547,7 @@ public class ImportExportController {
             Files.delete(path);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, () -> "Error deleting selected file: " + path.getFileName());
-            updateUI(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 

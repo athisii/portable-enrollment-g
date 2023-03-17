@@ -5,7 +5,6 @@
  */
 package com.cdac.enrollmentstation.model;
 
-import RealScan.FP;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.Getter;

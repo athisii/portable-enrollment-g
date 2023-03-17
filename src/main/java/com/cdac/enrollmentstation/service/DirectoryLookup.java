@@ -46,7 +46,7 @@ public class DirectoryLookup {
             throw new GenericException(ApplicationConstant.INVALID_CREDENTIALS);
         } catch (NamingException e) {
             LOGGER.log(Level.SEVERE, e::getMessage);
-            throw new GenericException(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 

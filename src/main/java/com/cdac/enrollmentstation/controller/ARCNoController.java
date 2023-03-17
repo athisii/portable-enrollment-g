@@ -105,7 +105,7 @@ public class ARCNoController {
         if (saveEnrollmentFileString == null || saveEnrollmentFileString.isBlank()) {
             LOGGER.log(Level.SEVERE, "'saveenrollment' entry not found or is empty in /etc/file.properties");
             updateUiLabel(null);
-            messageLabel.setText(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
             return;
         }
         Path saveEnrollmentFilePath = Path.of(saveEnrollmentFileString);
@@ -116,7 +116,7 @@ public class ARCNoController {
                 Files.writeString(saveEnrollmentFilePath, saveEnrollmentDetailsString, StandardCharsets.UTF_8);
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, e.getMessage());
-                messageLabel.setText(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+                messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
                 return;
             }
         }
@@ -125,7 +125,7 @@ public class ARCNoController {
             saveEnrollmentDetails = readDataFromFile(saveEnrollmentFilePath);
         } catch (GenericException exception) {
             LOGGER.log(Level.SEVERE, exception.getMessage());
-            messageLabel.setText(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
             return;
         }
 
@@ -228,7 +228,7 @@ public class ARCNoController {
         } catch (ExecutionException e) {
             LOGGER.log(Level.SEVERE, "Error occurred while getting value from worker thread.");
             updateUiLabel(null);
-            updateUI(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
             return;
         }
 
@@ -268,7 +268,7 @@ public class ARCNoController {
             saveEnrollmentDetails.setEnrollmentStationID(ServerAPI.getStationId());
         } catch (GenericException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            messageLabel.setText(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
             return;
         }
 
@@ -308,7 +308,7 @@ public class ARCNoController {
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error occurred while searching arc number in import folder");
-            updateUI(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
         }
         //Arc number not found
         return null;
@@ -328,7 +328,7 @@ public class ARCNoController {
             return optionalPath.isPresent();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error occurred while checking if already captured");
-            updateUI(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
             return false;
         }
     }

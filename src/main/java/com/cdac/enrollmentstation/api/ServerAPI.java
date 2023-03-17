@@ -64,16 +64,16 @@ public class ServerAPI {
         try {
             jsonRequestData = Singleton.getObjectMapper().writeValueAsString(new ARCNoReqDto(arcNo));
         } catch (JsonProcessingException e) {
-            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ERROR_MESSAGE);
-            throw new GenericException(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
         String jsonResponse = sendHttpRequest(createPostHttpRequest(url, jsonRequestData));
         ARCDetails arcDetail;
         try {
             arcDetail = Singleton.getObjectMapper().readValue(jsonResponse, ARCDetails.class);
         } catch (JsonProcessingException ignored) {
-            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERROR_MESSAGE);
-            throw new GenericException(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
         if (!"0".equals(arcDetail.getErrorCode())) {
             throw new GenericException(arcDetail.getDesc());
@@ -125,8 +125,8 @@ public class ServerAPI {
         try {
             unitListDetails = Singleton.getObjectMapper().readValue(jsonResponse, UnitListDetails.class);
         } catch (JsonProcessingException ignored) {
-            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERROR_MESSAGE);
-            throw new GenericException(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
         if (unitListDetails.getErrorCode() != 0) {
             throw new GenericException(unitListDetails.getDesc());
@@ -148,16 +148,16 @@ public class ServerAPI {
         try {
             jsonRequestData = Singleton.getObjectMapper().writeValueAsString(new UnitCodeReqDto(unitCode));
         } catch (JsonProcessingException e) {
-            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ERROR_MESSAGE);
-            throw new GenericException(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
         String jsonResponse = sendHttpRequest(createPostHttpRequest(getDemographicURL(), jsonRequestData));
         ARCDetailsList arcDetailsList;
         try {
             arcDetailsList = Singleton.getObjectMapper().readValue(jsonResponse, ARCDetailsList.class);
         } catch (JsonProcessingException e) {
-            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERROR_MESSAGE);
-            throw new GenericException(ApplicationConstant.GENERIC_ERROR_MESSAGE);
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
         if (arcDetailsList.getErrorCode() != 0) {
             throw new GenericException(arcDetailsList.getDesc());

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package RealScan;
+package com.cdac.enrollmentstation.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;

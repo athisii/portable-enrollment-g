@@ -5,7 +5,6 @@
  */
 package com.cdac.enrollmentstation.controller;
 
-import RealScan.SlapScannerController;
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.*;
@@ -1233,7 +1232,7 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
 
             //     System.out.println("post json iris :"+ postJson);
         } catch (JsonProcessingException ex) {
-            Logger.getLogger(SlapScannerController.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         }
        
             /*Commented For only Photo

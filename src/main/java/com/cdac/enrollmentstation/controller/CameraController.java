@@ -124,18 +124,18 @@ public class CameraController {
     private Label message;
     @FXML
     private Button startStopCameraBtn;
-    private volatile boolean cameraActive = false;
+    private volatile boolean isCameraActive = false;
     private volatile boolean stopLive = false;
     //    private static final int CAMERA_ID = Integer.parseInt(PropertyFile.getProperty(PropertyName.CAMERA_ID))
     private volatile int cameraId; // default 0
     private VideoCapture videoCapture;
 
-    private volatile int imageCaptureCount = 0;
+    private final AtomicInteger imageCaptureCount = new AtomicInteger(0);
     private volatile boolean validImage = false;
     @FXML
     private Slider camSlider;
 
-    private ScheduledExecutorService timer;
+    private ScheduledExecutorService scheduledExecutorService;
 
     // automatically called by JavaFx runtime.
     public void initialize() {
@@ -159,9 +159,9 @@ public class CameraController {
         enableControls(startStopCameraBtn, backBtn);
         try {
             ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
-            if(holder.getArcDetails().getBiometricOptions().contains("Photo")){
+            if (holder.getArcDetails().getBiometricOptions().contains("Photo")) {
                 App.setRoot("enrollment_arc");
-            }else{
+            } else {
                 App.setRoot("iris");
             }
         } catch (IOException ex) {
@@ -181,10 +181,9 @@ public class CameraController {
         confirmPane.setVisible(true);
         ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
         // Added For Biometric Options
-        if(holder.getArcDetails().getBiometricOptions().contains("Photo")){
+        if (holder.getArcDetails().getBiometricOptions().contains("Photo")) {
             confirmPaneLbl.setText("Click 'Yes' to FetchArc or Click 'No' to Capture photo");
-        }
-        else{
+        } else {
             confirmPaneLbl.setText("Click 'Yes' to Scan Iris or Click 'No' to Capture photo");
         }
 
@@ -203,11 +202,11 @@ public class CameraController {
 
     // action for start/stop button
     public void startCamera(ActionEvent actionEvent) {
-        imageCaptureCount = 0;
+        imageCaptureCount.getAndSet(0);
         validImage = false;
         // if active then stop it
-        if (cameraActive) {
-            cameraActive = false;
+        if (isCameraActive) {
+            isCameraActive = false;
             stopLive = true;
             startStopCameraBtn.setText("Start Camera");
             backBtn.setDisable(false);
@@ -221,12 +220,12 @@ public class CameraController {
 
         } else {
             // active status to be used by worker thread
-            cameraActive = true;
+            isCameraActive = true;
             videoCapture = new VideoCapture(cameraId);
             requireCameraOpened();
-            this.timer = Executors.newSingleThreadScheduledExecutor();
+            scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
             //disable controls during the countdown
-            this.startStopCameraBtn.setText("Stop Camera");
+            startStopCameraBtn.setText("Stop Camera");
             disableControls(startStopCameraBtn, backBtn, savePhotoBtn);
             // clears icons
             updateImageView(sunGlassIcon, null);
@@ -255,11 +254,11 @@ public class CameraController {
         }
         // enable controls after countdown
         Platform.runLater(() -> {
-            this.startStopCameraBtn.setText("Stop Camera");
-            this.startStopCameraBtn.setDisable(false);
-            this.message.setText("");
+            startStopCameraBtn.setText("Stop Camera");
+            startStopCameraBtn.setDisable(false);
+            message.setText("");
         });
-        timer.scheduleAtFixedRate(this::grabFrame, 0, THREAD_EXEC_PERIOD, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(this::grabFrame, 0, THREAD_EXEC_PERIOD, TimeUnit.MILLISECONDS);
     }
 
     private void liveImageThread() {
@@ -268,12 +267,12 @@ public class CameraController {
             boolean read = videoCapture.read(matrix);
             if (!read) {
                 // only log when camera is active
-                if (cameraActive) {
+                if (isCameraActive) {
                     LOGGER.log(Level.INFO, () -> "Failed to capture the photo.");
                 }
                 return;
             }
-            if (imageCaptureCount > THRESHOLD_FOR_RED_BOX) {
+            if (imageCaptureCount.get() > THRESHOLD_FOR_RED_BOX) {
                 Imgproc.rectangle(matrix,                   //Matrix obj of the image
                         new Point(150, 100),           //p1
                         new Point(450, 450),           //p2
@@ -297,14 +296,14 @@ public class CameraController {
 
 
     private void grabFrame() {
-        if (!cameraActive) {
+        if (!isCameraActive) {
             LOGGER.log(Level.INFO, () -> "***************Valid Image already captured. Just stop the current task******************");
             return;
         }
         requireCameraOpened();
         Mat matrix = new Mat();
         // read the current matrix
-        this.videoCapture.read(matrix);
+        videoCapture.read(matrix);
         // if the matrix is empty, return
         if (matrix.empty()) {
             LOGGER.log(Level.INFO, () -> "Read empty matrix");
@@ -312,9 +311,9 @@ public class CameraController {
         }
         // writes to /usr/share/enrollment/images/input.jpeg
         Imgcodecs.imwrite(INPUT_FILE, matrix);
-        this.imageCaptureCount++;
+        this.imageCaptureCount.getAndIncrement();
         // stop camera after IMAGE_CAPTURE_LIMIT shots
-        if (imageCaptureCount > IMAGE_CAPTURE_LIMIT) {
+        if (imageCaptureCount.get() > IMAGE_CAPTURE_LIMIT) {
             stopAcquisition();
             updateImageView(sunGlassIcon, NO_GLASSES_IMAGE);
             updateImageView(iconFrame, NO_MASK_IMAGE);
@@ -340,7 +339,7 @@ public class CameraController {
                 if (line.contains("Valid")) {
                     validImage = true;
                     stopLive = true;
-                    cameraActive = false;
+                    isCameraActive = false;
                 } else if (line.contains("Message=")) {
                     String subString = line.substring("Message= ".length());
                     Platform.runLater(() -> message.setText(subString));
@@ -430,20 +429,20 @@ public class CameraController {
     }
 
     private void stopAcquisition() {
-        if (this.timer != null && !this.timer.isShutdown()) {
+        if (scheduledExecutorService != null && !scheduledExecutorService.isShutdown()) {
             try {
                 // stop the timer
-                this.timer.shutdown();
-                this.timer.awaitTermination(THREAD_EXEC_PERIOD, TimeUnit.MILLISECONDS);
+                scheduledExecutorService.shutdown();
+                scheduledExecutorService.awaitTermination(THREAD_EXEC_PERIOD, TimeUnit.MILLISECONDS);
             } catch (InterruptedException ex) {
                 LOGGER.log(Level.INFO, ex::getMessage);
                 Thread.currentThread().interrupt();
             }
         }
-        if (this.videoCapture.isOpened()) {
-            this.videoCapture.release();
+        if (videoCapture.isOpened()) {
+            videoCapture.release();
         }
-        cameraActive = false;
+        isCameraActive = false;
     }
 
     @FXML

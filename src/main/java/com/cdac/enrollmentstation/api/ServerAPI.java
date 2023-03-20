@@ -5,6 +5,7 @@ import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.HttpHeader;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.ARCNoReqDto;
+import com.cdac.enrollmentstation.dto.SaveEnrollmentResponse;
 import com.cdac.enrollmentstation.dto.UnitCodeReqDto;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
@@ -78,6 +79,27 @@ public class ServerAPI {
             throw new GenericException(arcDetail.getDesc());
         }
         return arcDetail;
+    }
+
+    /**
+     * Sends http post request.
+     * Caller must handle the exception.
+     *
+     * @param data request payload
+     * @throws GenericException exception on connection timeout, error, json parsing exception etc.
+     */
+    public static SaveEnrollmentResponse postEnrollment(String data) {
+        //TODO:
+        // need to add unique-key, hash value in request header
+        String response = sendHttpRequest(createPostHttpRequest(getSaveEnrollmentUrl(), data));
+        SaveEnrollmentResponse saveEnrollmentResponse;
+        try {
+            saveEnrollmentResponse = Singleton.getObjectMapper().readValue(response, SaveEnrollmentResponse.class);
+        } catch (JsonProcessingException ignored) {
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+        }
+        return saveEnrollmentResponse;
     }
 
     /**
@@ -225,6 +247,10 @@ public class ServerAPI {
 
     public static String getArcUrl() {
         return getMafisApiUrl() + "/GetDetailsByARCNo";
+    }
+
+    public static String getSaveEnrollmentUrl() {
+        return getMafisApiUrl() + "/SaveEnrollment";
     }
 
 }

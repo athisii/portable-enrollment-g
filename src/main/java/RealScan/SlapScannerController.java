@@ -9,7 +9,7 @@ import com.cdac.enrollmentstation.model.ARCDetailsHolder;
 import com.cdac.enrollmentstation.model.FP;
 import com.cdac.enrollmentstation.model.SaveEnrollmentDetails;
 import com.cdac.enrollmentstation.util.PropertyFile;
-import com.cdac.enrollmentstation.util.Singleton;
+import com.cdac.enrollmentstation.util.SaveEnrollmentDetailsUtil;
 import com.innovatrics.commons.img.RawGrayscaleImage;
 import com.innovatrics.iengine.ansiiso.AnsiIso;
 import com.innovatrics.iengine.ansiiso.AnsiIsoImageFormatEnum;
@@ -28,7 +28,6 @@ import javafx.scene.layout.AnchorPane;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -1060,9 +1059,10 @@ public class SlapScannerController {
 
         // throws GenericException
         try {
-            writeSaveEnrollmentDetailsToFile(saveEnrollmentDetails);
+            SaveEnrollmentDetailsUtil.writeToFile(saveEnrollmentDetails);
         } catch (GenericException ex) {
-            updateUI(ex.getMessage());
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            updateUI(ApplicationConstant.GENERIC_TEMPLATE_CONVERSION_ERR_MSG);
             enableControls(scanBtn);
             return;
         }
@@ -1075,23 +1075,6 @@ public class SlapScannerController {
             captureIrisBtn.setDisable(false);
             isFpScanCompleted = true;
         });
-
-    }
-
-    private void writeSaveEnrollmentDetailsToFile(SaveEnrollmentDetails saveEnrollmentDetails) {
-        String saveEnrollmentFileString = PropertyFile.getProperty(PropertyName.SAVE_ENROLLMENT);
-        if (saveEnrollmentFileString == null || saveEnrollmentFileString.isBlank()) {
-            LOGGER.log(Level.SEVERE, "'saveenrollment' entry not found or is empty in /etc/file.properties");
-            throw new GenericException(ApplicationConstant.GENERIC_TEMPLATE_CONVERSION_ERR_MSG);
-        }
-        Path saveEnrollmentFilePath = Path.of(saveEnrollmentFileString);
-        try {
-            String saveEnrollmentDetailsString = Singleton.getObjectMapper().writeValueAsString(saveEnrollmentDetails);
-            Files.writeString(saveEnrollmentFilePath, saveEnrollmentDetailsString, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, e.getMessage());
-            throw new GenericException(ApplicationConstant.GENERIC_TEMPLATE_CONVERSION_ERR_MSG);
-        }
 
     }
 

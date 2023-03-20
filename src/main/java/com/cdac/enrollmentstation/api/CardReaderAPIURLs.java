@@ -5,6 +5,7 @@
  */
 package com.cdac.enrollmentstation.api;
 
+import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
@@ -71,8 +72,8 @@ public class CardReaderAPIURLs {
 
     public String requireNonBlank(String value) {
         if (value == null || value.isBlank()) {
-            LOGGER.log(Level.SEVERE, () -> "Property '" + value + "' is empty or not found in /etc/file.properties. Please add it");
-            throw new GenericException("Property '" + value + "' is empty or not found in /etc/file.properties. Please add it");
+            LOGGER.log(Level.SEVERE, () -> "Property '" + value + "' is empty or not found in " + ApplicationConstant.DEFAULT_PROPERTY_FILE + ". Please add it");
+            throw new GenericException("Property '" + value + "' is empty or not found in "+ ApplicationConstant.DEFAULT_PROPERTY_FILE + ". Please add it");
         }
         return value;
     }

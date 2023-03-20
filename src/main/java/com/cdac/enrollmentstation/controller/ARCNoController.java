@@ -15,6 +15,7 @@ import com.cdac.enrollmentstation.model.ARCDetails;
 import com.cdac.enrollmentstation.model.ARCDetailsHolder;
 import com.cdac.enrollmentstation.model.SaveEnrollmentDetails;
 import com.cdac.enrollmentstation.util.PropertyFile;
+import com.cdac.enrollmentstation.util.SaveEnrollmentDetailsUtil;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.application.Platform;
@@ -103,7 +104,7 @@ public class ARCNoController {
         // /usr/share/enrollment/save/saveEnrollment.txt
         String saveEnrollmentFileString = PropertyFile.getProperty(PropertyName.SAVE_ENROLLMENT);
         if (saveEnrollmentFileString == null || saveEnrollmentFileString.isBlank()) {
-            LOGGER.log(Level.SEVERE, "'saveenrollment' entry not found or is empty in /etc/file.properties");
+            LOGGER.log(Level.SEVERE, "'save.enrollment' entry not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
             updateUiLabel(null);
             messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
             return;
@@ -111,20 +112,18 @@ public class ARCNoController {
         Path saveEnrollmentFilePath = Path.of(saveEnrollmentFileString);
         if (!Files.exists(saveEnrollmentFilePath)) {
             try {
-                Files.createFile(saveEnrollmentFilePath);
-                String saveEnrollmentDetailsString = Singleton.getObjectMapper().writeValueAsString(new SaveEnrollmentDetails());
-                Files.writeString(saveEnrollmentFilePath, saveEnrollmentDetailsString, StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, e.getMessage());
+                SaveEnrollmentDetailsUtil.writeToFile(new SaveEnrollmentDetails());
+            } catch (GenericException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage());
                 messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
                 return;
             }
         }
         SaveEnrollmentDetails saveEnrollmentDetails;
         try {
-            saveEnrollmentDetails = readDataFromFile(saveEnrollmentFilePath);
-        } catch (GenericException exception) {
-            LOGGER.log(Level.SEVERE, exception.getMessage());
+            saveEnrollmentDetails = SaveEnrollmentDetailsUtil.readFromFile();
+        } catch (GenericException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
             messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
             return;
         }
@@ -178,21 +177,6 @@ public class ARCNoController {
                     LOGGER.log(Level.SEVERE, ex.getMessage());
                 }
                 break;
-        }
-    }
-
-    private SaveEnrollmentDetails readDataFromFile(Path path) {
-        if (!Files.exists(path)) {
-            throw new GenericException("File not found.");
-        }
-        try {
-            String content = Files.readString(path, StandardCharsets.UTF_8);
-            if (content.isBlank()) {
-                return new SaveEnrollmentDetails();
-            }
-            return Singleton.getObjectMapper().readValue(content, SaveEnrollmentDetails.class);
-        } catch (IOException e) {
-            throw new GenericException("Error occurred while reading file.");
         }
     }
 

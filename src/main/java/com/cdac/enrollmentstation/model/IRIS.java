@@ -6,10 +6,7 @@
 package com.cdac.enrollmentstation.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 /**
@@ -19,6 +16,8 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
 public class IRIS {
     @JsonProperty("Position")
     String position;

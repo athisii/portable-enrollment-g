@@ -5,7 +5,7 @@ package com.cdac.enrollmentstation.constant;
  * Created on 17/12/22
  */
 
-// A utility class for mapping properties names in /etc/file.properties file.
+// A utility class for mapping properties names in /etc/enrollment-app.properties file.
 public class PropertyName {
     //Suppress default constructor for noninstantiability
     private PropertyName() {

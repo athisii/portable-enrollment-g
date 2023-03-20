@@ -125,7 +125,6 @@ public class ServerConfigController {
             }
             List<String> captions = units.stream().map(Unit::getCaption).collect(Collectors.toList());
             enrollmentStationUnitIdsComboBox.setItems(FXCollections.observableArrayList(captions));
-            enrollmentStationUnitIdsComboBox.getSelectionModel().select(0);
             updateUI("Units fetched successfully.");
         } catch (GenericException ex) {
             updateUI("Connection timeout. Failed to connect to server.");
@@ -163,7 +162,6 @@ public class ServerConfigController {
                 if (!newValue.equals(oldValue)) {
                     Optional<Unit> unitOptional = units.stream().filter(u -> u.getCaption().equals(newValue)).findFirst();
                     unitOptional.ifPresent(u -> unit = u);
-                    updateUI(newValue + " unit selected.");
                 }
 
             }

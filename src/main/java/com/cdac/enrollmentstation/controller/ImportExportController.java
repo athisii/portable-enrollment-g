@@ -16,11 +16,10 @@ import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ARCDetails;
 import com.cdac.enrollmentstation.model.SaveEnrollmentDetails;
-import com.cdac.enrollmentstation.model.Units;
+import com.cdac.enrollmentstation.model.Unit;
 import com.cdac.enrollmentstation.security.AESFileEncryptionDecryption;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
-import com.cdac.enrollmentstation.util.TestProp;
 import com.fasterxml.jackson.core.Base64Variants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -83,7 +82,7 @@ public class ImportExportController {
     private Button clearAllImportBtn;
     @FXML
     private ListView<String> capturedArcListView;
-    private final List<Units> allUnits = new ArrayList<>();
+    private final List<Unit> allUnits = new ArrayList<>();
     private final List<String> selectedUnits = new ArrayList<>();
 
     private APIServerCheck apiServerCheck = new APIServerCheck();
@@ -91,7 +90,6 @@ public class ImportExportController {
     private SaveEnrollmentResponse saveEnrollmentResponse;
     @FXML
     private Label messageLabel;
-    private TestProp prop = new TestProp();
     //private String importjson="/usr/share/enrollment/json/import/arclistimported.json"
     private String importjson = null;
     //private String export="/usr/share/enrollment/json/export"
@@ -139,9 +137,9 @@ public class ImportExportController {
             updateUI(response);
             SaveEnrollmentDetails saveEnrollment = new SaveEnrollmentDetails();
             String postJson = "";
-            String connurl = apiServerCheck.getArcUrl();
+            String connurl = APIServerCheck.getArcUrl();
             String arcno = "123abc";
-            String connectionStatus = apiServerCheck.checkGetARCNoAPI(connurl, arcno);
+            String connectionStatus = APIServerCheck.checkGetARCNoAPI(connurl, arcno);
             System.out.println("connection status :" + connectionStatus);
 
             if (!connectionStatus.contentEquals("connected")) {
@@ -151,15 +149,15 @@ public class ImportExportController {
             }
 
             try {
-                export = prop.getProp().getProperty("exportfolder");
-            } catch (IOException ex) {
+                export = PropertyFile.getProperty(PropertyName.EXPORT_FOLDER);
+            } catch (GenericException ex) {
                 Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
                 response = "Export Folder Not Found on the System";
                 updateUI(response);
                 return;
             }
             try {
-                importjson = prop.getProp().getProperty("importjsonfolder");
+                importjson = PropertyFile.getProperty(PropertyName.IMPORT_JSON_FOLDER);
                 File dire = new File(importjson);
                 File[] dirlisting = dire.listFiles();
                 if (dirlisting.length != 0) {
@@ -168,7 +166,7 @@ public class ImportExportController {
                         children.delete();
                     }
                 }
-            } catch (IOException ex) {
+            } catch (GenericException ex) {
                 Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
             }
             File dir = new File(export + "/enc");
@@ -330,11 +328,15 @@ public class ImportExportController {
             allUnits.clear();
             // throws exception
             ServerAPI.fetchAllUnits().stream()
-                    .sorted(Comparator.comparing(Units::getCaption))
+                    .sorted(Comparator.comparing(Unit::getCaption))
                     .forEach(unit -> {
                         unitCaptions.add(unit.getCaption());
                         allUnits.add(unit);
                     });
+
+            if (allUnits.isEmpty()) {
+                updateUI("No units available.");
+            }
 
             Platform.runLater(() -> {
                 unitListView.setItems(FXCollections.observableArrayList(unitCaptions));
@@ -390,11 +392,11 @@ public class ImportExportController {
 
     private void searchFilter(String value) {
         if (value.isEmpty()) {
-            unitListView.setItems(FXCollections.observableList(allUnits.stream().map(Units::getCaption).collect(Collectors.toList())));
+            unitListView.setItems(FXCollections.observableList(allUnits.stream().map(Unit::getCaption).collect(Collectors.toList())));
             return;
         }
         String valueUpper = value.toUpperCase();
-        unitListView.setItems(FXCollections.observableList(allUnits.stream().map(Units::getCaption).filter(caption -> caption.toUpperCase().contains(valueUpper)).collect(Collectors.toList())));
+        unitListView.setItems(FXCollections.observableList(allUnits.stream().map(Unit::getCaption).filter(caption -> caption.toUpperCase().contains(valueUpper)).collect(Collectors.toList())));
     }
 
     private void importSelectedUnits() {
@@ -403,7 +405,7 @@ public class ImportExportController {
             return;
         }
         Set<String> selectedUnitSet = new HashSet<>(selectedUnits);
-        List<String> selectedUnitCodes = allUnits.stream().filter(unit -> selectedUnitSet.contains(unit.getCaption())).map(Units::getValue).collect(Collectors.toList());
+        List<String> selectedUnitCodes = allUnits.stream().filter(unit -> selectedUnitSet.contains(unit.getCaption())).map(Unit::getValue).collect(Collectors.toList());
         if (selectedUnitCodes.isEmpty()) {
             updateUI("Kindly, select values from unit list");
             return;

@@ -29,6 +29,6 @@ public class UnitListDetails {
     String desc;
 
     @JsonProperty("Units")
-    List<Units> units;
+    List<Unit> units;
 
 }

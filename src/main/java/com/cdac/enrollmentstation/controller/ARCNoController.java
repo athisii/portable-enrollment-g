@@ -264,8 +264,8 @@ public class ARCNoController {
 
         //throws exception -- /etc/data.txt
         try {
-            saveEnrollmentDetails.setEnrollmentStationUnitID(ServerAPI.getUnitId());
-            saveEnrollmentDetails.setEnrollmentStationID(ServerAPI.getStationId());
+            saveEnrollmentDetails.setEnrollmentStationUnitID(ServerAPI.getEnrollmentStationUnitId());
+            saveEnrollmentDetails.setEnrollmentStationID(ServerAPI.getEnrollmentStationId());
         } catch (GenericException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);

@@ -5,19 +5,17 @@
  */
 package com.cdac.enrollmentstation.controller;
 
-import com.cdac.enrollmentstation.model.FP;
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.api.APIServerCheck;
+import com.cdac.enrollmentstation.api.ServerAPI;
+import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.SaveEnrollmentResponse;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.ARCDetails;
-import com.cdac.enrollmentstation.model.ARCDetailsHolder;
-import com.cdac.enrollmentstation.model.IRIS;
-import com.cdac.enrollmentstation.model.SaveEnrollmentDetails;
+import com.cdac.enrollmentstation.model.*;
 import com.cdac.enrollmentstation.security.AESFileEncryptionDecryption;
 import com.cdac.enrollmentstation.service.ObjectReaderWriter;
 import com.cdac.enrollmentstation.util.DeleteSavedJsonFile;
-import com.cdac.enrollmentstation.util.TestProp;
+import com.cdac.enrollmentstation.util.PropertyFile;
 import com.fasterxml.jackson.core.Base64Variants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -39,7 +37,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * FXML Controller class
@@ -77,7 +74,6 @@ public class BiometricCaptureCompleteController implements Initializable {
 
     public APIServerCheck apiServerCheck = new APIServerCheck();
 
-    TestProp prop = new TestProp();
 
     //For Application Log
     private static final Logger LOGGER = ApplicationLog.getLogger(BiometricCaptureCompleteController.class);
@@ -132,11 +128,11 @@ public class BiometricCaptureCompleteController implements Initializable {
                 statusMsg("Please wait...");
 
                 //Removing the Old Photo while capturing Photo
-                String photocapturefileprop = prop.getProp().getProperty("photocaptureimg");
+                String photocapturefileprop = PropertyFile.getProperty(PropertyName.PHOTO_CAPTURE_IMG);
                 //String file1 = "/usr/share/enrollment/croppedimg/sub.png"; //changed from out.png to sub.png
                 File photocapturefile = new File(photocapturefileprop);
 
-                String fileoutput = prop.getProp().getProperty("outputfile");
+                String fileoutput = PropertyFile.getProperty(PropertyName.OUTPUT_FILE);
                 //String file1 = "/usr/share/enrollment/croppedimg/sub.png"; //changed from out.png to sub.png
                 File photooutfile = new File(fileoutput);
 
@@ -151,7 +147,7 @@ public class BiometricCaptureCompleteController implements Initializable {
                     //String file1 = "/usr/share/enrollment/croppedimg/out.png";
                     //Changed For sending sub.png (18-10-22)
                     //String file1 = prop.getProp().getProperty("outputfile");
-                    String file1 = prop.getProp().getProperty("subfile");
+                    String file1 = PropertyFile.getProperty(PropertyName.SUB_FILE);
                     //String file1 = "/usr/share/enrollment/croppedimg/sub.png"; //changed from out.png to sub.png
                     File outFile = new File(file1);
                     if (outFile.exists()) {
@@ -170,7 +166,7 @@ public class BiometricCaptureCompleteController implements Initializable {
                         }
 
                         //String fileCompressed = "/usr/share/enrollment/croppedimg/compressed.png";
-                        String fileCompressed = prop.getProp().getProperty("compressfile");
+                        String fileCompressed = PropertyFile.getProperty(PropertyName.COMPRESS_FILE);
 
                         File compressedFile = new File(fileCompressed);
                         if (compressedFile.exists()) {
@@ -232,29 +228,9 @@ public class BiometricCaptureCompleteController implements Initializable {
                         progressind.setVisible(false);
                         //statusMessage.setText("Problem reading Out Image file...");
                     }
+                    saveEnrollment.setEnrollmentStationID(ServerAPI.getEnrollmentStationId());
+                    saveEnrollment.setEnrollmentStationUnitID(ServerAPI.getEnrollmentStationUnitId());
 
-                    try (BufferedReader file = new BufferedReader(new FileReader("/etc/data.txt"))) {
-                        String line = file.lines().collect(Collectors.joining());
-                        String input = " ";
-                        String[] tokens = line.split(",");
-                        saveEnrollment.setEnrollmentStationID(tokens[2]);
-                        saveEnrollment.setEnrollmentStationUnitID(tokens[0]);
-                        file.close();
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                        //System.out.println("Problem reading file.");
-                        LOGGER.log(Level.INFO, "Problem reading UnitID from /etc/data file.");
-                        backhome.setDisable(false);
-                        fetcharc.setDisable(false);
-                        progressind.setVisible(false);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        //System.out.println("Problem reading file.");
-                        LOGGER.log(Level.INFO, "Problem reading UnitID from /etc/data file.");
-                        backhome.setDisable(false);
-                        fetcharc.setDisable(false);
-                        progressind.setVisible(false);
-                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     //System.out.println("Problem reading file.");
@@ -342,7 +318,7 @@ public class BiometricCaptureCompleteController implements Initializable {
                     String postJson;
                     String connurl_arc = apiServerCheck.getArcUrl();
                     String arcno = "123abc";
-                    String connectionStatus = apiServerCheck.checkGetARCNoAPI(connurl_arc, arcno);
+                    String connectionStatus = APIServerCheck.checkGetARCNoAPI(connurl_arc, arcno);
                     System.out.println("connection status :" + connectionStatus);
                     if (!connectionStatus.contentEquals("connected")) {
                         try {

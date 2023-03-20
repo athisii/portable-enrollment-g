@@ -9,9 +9,10 @@
  */
 package com.cdac.enrollmentstation.service;
 
+import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.SaveEnrollmentDetails;
-import com.cdac.enrollmentstation.util.TestProp;
+import com.cdac.enrollmentstation.util.PropertyFile;
 import com.fasterxml.jackson.core.Base64Variants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -29,7 +30,6 @@ public class ObjectReaderWriter {
 
     //For Application Log
     private static final Logger LOGGER = ApplicationLog.getLogger(ObjectReaderWriter.class);
-    TestProp prop = new TestProp();
 
     public ObjectReaderWriter() {
         //this.handler = appLog.getLogger();
@@ -41,7 +41,8 @@ public class ObjectReaderWriter {
     public void writer(SaveEnrollmentDetails saveEnrollment) {
         //SaveEnrollmentDetails saveEnrollment = new SaveEnrollmentDetails();
         try {
-            String objFilePath = prop.getProp().getProperty("saveenrollment");
+            String objFilePath = PropertyFile.getProperty(PropertyName.SAVE_ENROLLMENT);
+
                         /*System.out.println("Create Fileoutputstream");
 			FileOutputStream f = new FileOutputStream(new File(objFilePath));
                         System.out.println("Create Objectoutputstream");
@@ -83,7 +84,7 @@ public class ObjectReaderWriter {
     public SaveEnrollmentDetails reader() {
         SaveEnrollmentDetails saveEnrollment = new SaveEnrollmentDetails();
         try {
-            String objFilePath = prop.getProp().getProperty("saveenrollment");
+            String objFilePath = PropertyFile.getProperty(PropertyName.SAVE_ENROLLMENT);
                 /*FileInputStream fi = new FileInputStream(new File(objFilePath));
                 ObjectInputStream oi = new ObjectInputStream(fi);
 

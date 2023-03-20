@@ -32,7 +32,6 @@ public class LicenceInfoController implements Initializable {
     private Button gohome;
 
 
-    //TestProp prop = new TestProp();
 
     //For Application Log
     private static final Logger LOGGER = ApplicationLog.getLogger(LicenceInfoController.class);

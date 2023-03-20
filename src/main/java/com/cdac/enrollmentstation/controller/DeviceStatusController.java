@@ -2,7 +2,7 @@ package com.cdac.enrollmentstation.controller;
 
 
 import com.cdac.enrollmentstation.App;
-import com.cdac.enrollmentstation.api.APIServerCheck;
+import com.cdac.enrollmentstation.api.ServerAPI;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
@@ -132,15 +132,16 @@ public class DeviceStatusController {
 
     private void checkMafisApi() {
         try {
-            String connectionStatus = APIServerCheck.checkGetARCNoAPI(APIServerCheck.getArcUrl(), "123abc");
-            if (!connectionStatus.contentEquals("connected")) {
+            ServerAPI.fetchARCDetails(ServerAPI.getArcUrl(), "123abc");
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            if (ex.getMessage().toLowerCase().contains("connection")) {
                 mafisUrlImage.setImage(RED_CROSS_IMAGE);
             } else {
                 mafisUrlImage.setImage(GREEN_TICK_IMAGE);
             }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, () -> "An error occurred while connecting to MAFIS server.");
         }
+
 
     }
 }

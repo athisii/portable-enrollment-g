@@ -6,14 +6,14 @@
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
-import com.cdac.enrollmentstation.api.APIServerCheck;
 import com.cdac.enrollmentstation.api.CardReaderAPI;
 import com.cdac.enrollmentstation.api.CardReaderAPIURLs;
+import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.*;
 import com.cdac.enrollmentstation.security.AuthUtil;
 import com.cdac.enrollmentstation.security.HextoASNFormat;
-import com.cdac.enrollmentstation.util.TestProp;
+import com.cdac.enrollmentstation.util.PropertyFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mantra.midfingerauth.DeviceInfo;
@@ -76,8 +76,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     CardReaderAPI cardReaderAPI = new CardReaderAPI();
     //For Application Log
     private static final Logger LOGGER = ApplicationLog.getLogger(CardLoginController.class);
-    TestProp prop = new TestProp();
-    private MIDFingerAuth midFingerAuth = null; // For MID finger jar 
+    private MIDFingerAuth midFingerAuth = null; // For MID finger jar
     private DeviceInfo deviceInfo = null;
     private byte[] lastCaptureTemplat;
     int fingerprintinit;
@@ -86,8 +85,6 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     int fpQuality = 96;
     String fpquality = null;
     String response = "";
-
-    public APIServerCheck apiServerCheck = new APIServerCheck();
 
     public CardLoginController() {
         //this.handler = appLog.getLogger();
@@ -599,7 +596,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     public void fingerprintMatching(byte[] fingerData) throws IOException {
         response = "";
         try {
-            String fpqpath = prop.getProp().getProperty("fpquality");
+            String fpqpath = PropertyFile.getProperty(PropertyName.FP_QUALITY);
             if (fpqpath.isBlank() || fpqpath.isEmpty() || fpqpath == null) {
                 //System.out.println("The property 'fpquality' is empty, Please add it in properties");
                 LOGGER.log(Level.INFO, "The property 'fpquality' is empty, Please add it in properties");

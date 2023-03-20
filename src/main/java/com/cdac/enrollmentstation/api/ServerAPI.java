@@ -10,8 +10,8 @@ import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ARCDetails;
 import com.cdac.enrollmentstation.model.ARCDetailsList;
+import com.cdac.enrollmentstation.model.Unit;
 import com.cdac.enrollmentstation.model.UnitListDetails;
-import com.cdac.enrollmentstation.model.Units;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -22,8 +22,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
 import java.util.logging.Level;
@@ -67,6 +65,7 @@ public class ServerAPI {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
+        // throws GenericException
         String jsonResponse = sendHttpRequest(createPostHttpRequest(url, jsonRequestData));
         ARCDetails arcDetail;
         try {
@@ -118,7 +117,7 @@ public class ServerAPI {
      * @return List<Units>
      * @throws GenericException exception on connection timeout, error, json parsing exception etc.
      */
-    public static List<Units> fetchAllUnits() {
+    public static List<Unit> fetchAllUnits() {
         String jsonResponse = sendHttpRequest(createGetHttpRequest(getUnitListURL()));
         // if this line is reached, response received with status code 200
         UnitListDetails unitListDetails;
@@ -194,62 +193,38 @@ public class ServerAPI {
     }
 
     /**
-     * Returns MAFIS API home url from /etc/file.properties
-     * Caller must handle the exception.
-     *
      * @return String - MAFIS API home url
-     * @throws GenericException exception on connection timeout, error, json parsing exception etc.
      */
     public static String getMafisApiUrl() {
-        String mafisServerApi = extractValueFromDataFile(DataType.MAFIS_URL);
+        String mafisServerApi = PropertyFile.getProperty(PropertyName.MAFIS_API_URL);
+        if (mafisServerApi == null || mafisServerApi.isBlank()) {
+            throw new GenericException("'mafis.api.url' not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+        }
+
         if (mafisServerApi.endsWith("/")) {
             mafisServerApi = mafisServerApi.substring(0, mafisServerApi.lastIndexOf("/"));
         }
         return mafisServerApi + "/api/EnrollmentStation";
     }
 
-    public static String getStationId() {
-        return extractValueFromDataFile(DataType.STATION_ID);
-    }
-
-    public static String getUnitId() {
-        return extractValueFromDataFile(DataType.UNIT_ID);
-    }
-
-
-    enum DataType {
-        UNIT_ID,
-        MAFIS_URL,
-        STATION_ID
-    }
-
-    private static String extractValueFromDataFile(DataType type) {
-        try {
-            List<String> lines = Files.readAllLines(Paths.get(PropertyFile.getProperty(PropertyName.URL_DATA)));
-            if (lines.isEmpty() || lines.get(0).isBlank()) {
-                throw new GenericException(PropertyFile.getProperty(PropertyName.URL_DATA) + " is empty");
-            }
-            String line = lines.get(0);
-            // /etc/data.txt -> U1,http://X.X.X.X:X,XX
-            String[] tokens = line.split(",");
-            if (tokens.length < 3) {
-                throw new GenericException("Malformed values. Values should be separated by ','. Example- U1,http://X.X.X.X:X,XX");
-            }
-            switch (type) {
-                case UNIT_ID:
-                    return tokens[0];
-                case MAFIS_URL:
-                    return tokens[1];
-                case STATION_ID:
-                    return tokens[2];
-                default:
-                    throw new GenericException("Unknown type");
-            }
-        } catch (IOException e) {
-            LOGGER.log(Level.INFO, () -> "Problem reading file: " + PropertyFile.getProperty(PropertyName.URL_DATA));
-            e.printStackTrace();
-            throw new GenericException("Errored occurred reading " + PropertyFile.getProperty(PropertyName.URL_DATA));
+    public static String getEnrollmentStationId() {
+        String enrollmentStationId = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_ID);
+        if (enrollmentStationId == null || enrollmentStationId.isBlank()) {
+            throw new GenericException("'enrollment.station.id' not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
         }
-
+        return enrollmentStationId;
     }
+
+    public static String getEnrollmentStationUnitId() {
+        String enrollmentStationUnitId = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_ID);
+        if (enrollmentStationUnitId == null || enrollmentStationUnitId.isBlank()) {
+            throw new GenericException("'enrollment.station.unit.id' not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+        }
+        return enrollmentStationUnitId;
+    }
+
+    public static String getArcUrl() {
+        return getMafisApiUrl() + "/GetDetailsByARCNo";
+    }
+
 }

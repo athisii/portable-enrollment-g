@@ -14,19 +14,15 @@ import lombok.experimental.FieldDefaults;
  */
 @Getter
 @Setter
-//@ToString
+@ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Units {
+public class Unit {
     @JsonProperty("Caption")
     String caption;
 
     @JsonProperty("Value")
     String value;
 
-    @Override
-    public String toString() {
-        return caption;
-    }
 }

@@ -5,7 +5,7 @@
  */
 package com.cdac.enrollmentstation.event;
 
-import com.cdac.enrollmentstation.model.Units;
+import com.cdac.enrollmentstation.model.Unit;
 import static java.util.Locale.filter;
 
 import javafx.collections.FXCollections;
@@ -25,7 +25,7 @@ public class AutoCompleteComboBoxListener<T> implements EventHandler<KeyEvent> {
     //private ComboBox<Units> comboBox;
     private ComboBox comboBox;
     private StringBuilder sb;
-    private ObservableList<Units> data;
+    private ObservableList<Unit> data;
     private boolean moveCaretToPos = false;
     private int caretPos;
     private ComboBoxListViewSkin cbSkin;

@@ -9,7 +9,7 @@ public class ApplicationConstant {
         throw new AssertionError("The ApplicationConstant fields should be accessed statically");
     }
 
-    public static final String DEFAULT_PROPERTY_FILE = "/etc/file.properties";
+    public static final String DEFAULT_PROPERTY_FILE = "/etc/enrollment-app.properties";
     public static final String INTERNAL = "Internal";
     public static final String EXTERNAL = "External";
     public static final String GENERIC_ERR_MSG = "Something went wrong. Please try again.";

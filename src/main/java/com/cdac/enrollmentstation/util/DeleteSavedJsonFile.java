@@ -5,6 +5,7 @@
  */
 package com.cdac.enrollmentstation.util;
 
+import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.controller.BiometricCaptureCompleteController;
 
 import java.io.File;
@@ -19,19 +20,15 @@ import java.util.logging.Logger;
  */
 public class DeleteSavedJsonFile {
 
-    TestProp prop = new TestProp();
-
     public void delSavedfile() {
 
         PrintWriter writer = null;
         try {
-            String objFilePath = prop.getProp().getProperty("saveenrollment");
+            String objFilePath = PropertyFile.getProperty(PropertyName.SAVE_ENROLLMENT);
             File savedFile = new File(objFilePath);
             writer = new PrintWriter(savedFile);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(BiometricCaptureCompleteController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(DeleteSavedJsonFile.class.getName()).log(Level.SEVERE, null, ex);
         }
         writer.print("");
         writer.close();

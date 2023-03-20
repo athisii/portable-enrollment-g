@@ -49,6 +49,7 @@ public class SlapScannerController {
     private final static int TIME_TO_WAIT_FOR_SWITCHING_FINGER_TYPE_TO_SCAN_IN_MILLIS = 100;
     private final static int SECURITY_LEVEL_FOR_SEQUENCE_CHECK = 5; // range: 0~7
     private boolean isFpScanCompleted;
+    private final int fingerprintLivenessValue = Integer.parseInt(PropertyFile.getProperty(PropertyName.FINGERPRINT_LIVENESS_VALUE).trim());
 
 
     private volatile FingerSetType fingerSetTypeToScan = FingerSetType.LEFT; // global finger to scan holder to be used in common methods.
@@ -145,7 +146,6 @@ public class SlapScannerController {
 
     // calls automatically by JavaFX runtime
     public void initialize() {
-        // TODO; initialize buttons actions
         scanBtn.setOnAction(event -> scanBtnAction());
         leftScanBtn.setOnAction(event -> scanBtnAction());
         rightScanBtn.setOnAction(event -> rightScanBtnAction());
@@ -455,7 +455,7 @@ public class SlapScannerController {
         }
 
         // TODO: check for quality is required
-        if (liveness < 500) {
+        if (liveness < fingerprintLivenessValue) {
             LOGGER.log(Level.INFO, "Quality standard not met. Please try again.");
             updateUI("Quality standard not met. Please try again.");
             enableControls(backBtn, button);

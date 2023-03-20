@@ -19,7 +19,7 @@ public class ApplicationLog {
     }
 
     private static Handler handler;
-    private static final Logger LOG = Logger.getLogger(ApplicationLog.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ApplicationLog.class.getName());
 
     static {
         try {
@@ -28,20 +28,20 @@ public class ApplicationLog {
             handler = new FileHandler(logfileName, 1024000, 2); //1024000 is 1Mb - It will roll over after a file becomes 1Mb
             handler.setFormatter(new SimpleFormatter());
             handler.setLevel(Level.ALL);
-            LOG.addHandler(handler);
-            LOG.setLevel(Level.INFO);
+            LOGGER.addHandler(handler);
+            LOGGER.setLevel(Level.INFO);
         } catch (GenericException ex) {
             // throws by ProperFile class if /etc/file.properties is not found.
-            LOG.log(Level.SEVERE, "Property File not found. Shutting down.......");
+            LOGGER.log(Level.SEVERE, "Enrollment app properties file not found. Shutting down.......");
             System.exit(-1);
         } catch (IOException ex) {
-            LOG.log(Level.SEVERE, "Exception in Application Log. Failed to add new handler. Shutting down.......");
+            LOGGER.log(Level.SEVERE, "Exception in Application Log. Failed to add new handler. Shutting down.......");
             System.exit(-1);
         } catch (SecurityException ex) {
-            LOG.log(Level.SEVERE, "Exception in Application Log. Security Exception. Shutting down.......");
+            LOGGER.log(Level.SEVERE, "Exception in Application Log. Security Exception. Shutting down.......");
             System.exit(-1);
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, "Errored occurred in creating Application Log. Shutting down.......");
+            LOGGER.log(Level.SEVERE, "Errored occurred in creating Application Log. Shutting down.......");
             System.exit(-1);
         }
     }

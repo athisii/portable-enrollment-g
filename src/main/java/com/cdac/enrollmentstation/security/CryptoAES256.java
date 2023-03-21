@@ -127,88 +127,7 @@ public class CryptoAES256
             }
         }
     }
-    
-    public boolean encryptFile(final String inFilePath, final String outFilePath) throws Exception {
-        FileInputStream fileinput = null;
-        CipherInputStream cis = null;
-        FileOutputStream fos = null;
-        try {
-            final Key key = this.generateKey();
-            final Cipher cpr = Cipher.getInstance("AES");
-            cpr.init(1, key);
-            fileinput = new FileInputStream(inFilePath);
-            cis = new CipherInputStream(fileinput, cpr);
-            fos = new FileOutputStream(outFilePath);
-            this.writeData(cis, fos);
-            return true;
-        }
-        finally {
-            if (fileinput != null) {
-                fileinput.close();
-            }
-            if (cis != null) {
-                cis.close();
-            }
-            if (fos != null) {
-                fos.close();
-            }
-        }
-    }
-    
-    public boolean decryptFile(final String inFilePath, final String outFilePath) throws Exception {
-        FileInputStream fileinput = null;
-        CipherInputStream cis = null;
-        FileOutputStream fos = null;
-        try {
-            final Key key = this.generateKey();
-            final Cipher cpr = Cipher.getInstance("AES");
-            cpr.init(2, key);
-            fileinput = new FileInputStream(inFilePath);
-            cis = new CipherInputStream(fileinput, cpr);
-            fos = new FileOutputStream(outFilePath);
-            this.writeData(cis, fos);
-            return true;
-        }
-        finally {
-            if (fileinput != null) {
-                fileinput.close();
-            }
-            if (cis != null) {
-                cis.close();
-            }
-            if (fos != null) {
-                fos.close();
-            }
-        }
-    }
-    
-    public boolean encryptFile(final File inFilePath, final File outFilePath) throws Exception {
-        FileInputStream fileinput = null;
-        CipherInputStream cis = null;
-        FileOutputStream fos = null;
-        try {
-            final Key key = this.generateKey();
-            final Cipher cpr = Cipher.getInstance("AES");
-            cpr.init(1, key);
-            fileinput = new FileInputStream(inFilePath);
-            cis = new CipherInputStream(fileinput, cpr);
-            fos = new FileOutputStream(outFilePath);
-            this.writeData(cis, fos);
-            return true;
-        }
-        finally {
-            if (fileinput != null) {
-                fileinput.close();
-            }
-            if (cis != null) {
-                cis.close();
-            }
-            if (fos != null) {
-                fos.close();
-            }
-        }
-    }
-    
+
     public boolean decryptFile(final File inFilePath, final File outFilePath) throws Exception {
         FileInputStream fileinput = null;
         CipherInputStream cis = null;
@@ -235,17 +154,7 @@ public class CryptoAES256
             }
         }
     }
-    
-    public SecretKey getAESKey() throws NoSuchAlgorithmException {
-        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-        byte[] key = new byte[32];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(key);
-        keyGen.init(256, random);
 
-        return keyGen.generateKey();
-    }
-    
     public String generateRandomUUID(){
         return java.util.UUID.randomUUID().toString();
     }

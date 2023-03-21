@@ -15,6 +15,7 @@ import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.*;
 import com.cdac.enrollmentstation.security.AESFileEncryptionDecryption;
+import com.cdac.enrollmentstation.security.AesFileUtil;
 import com.cdac.enrollmentstation.service.ObjectReaderWriter;
 import com.cdac.enrollmentstation.util.DeleteSavedJsonFile;
 import com.cdac.enrollmentstation.util.PropertyFile;
@@ -107,6 +108,7 @@ public class BiometricCaptureCompleteController {
         Platform.runLater(() -> messageLabel.setText(message));
     }
 
+
     @FXML
     private void submitBtnAction() {
         submitBtn.setDisable(true);
@@ -178,9 +180,9 @@ public class BiometricCaptureCompleteController {
             return;
         }
 
-        String saveEnrollmentDetailsString;
+        String jsonData;
         try {
-            saveEnrollmentDetailsString = Singleton.getObjectMapper().writeValueAsString(saveEnrollmentDetails);
+            jsonData = Singleton.getObjectMapper().writeValueAsString(saveEnrollmentDetails);
         } catch (JsonProcessingException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             updateUI(ApplicationConstant.GENERIC_ERR_MSG);
@@ -188,27 +190,29 @@ public class BiometricCaptureCompleteController {
             Platform.runLater(() -> progressIndicator.setVisible(false));
             return;
         }
-        //TODO: encrypt saveEnrollmentString
-        String data = saveEnrollmentDetailsString; // <-- encrypt(saveEnrollmentString)
 
         SaveEnrollmentResponse saveEnrollmentResponse;
         try {
-            saveEnrollmentResponse = ServerAPI.postEnrollment(data);
+            saveEnrollmentResponse = ServerAPI.postEnrollment(jsonData);
         } catch (GenericException ex) {
-            if (ex.getMessage().toLowerCase().contains("timeout")) {
-                //TODO:
-                // encrypt and save locally
-                // updateUI
-            }
+            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
             return;
         }
+        // connection timeout
+        if (saveEnrollmentResponse == null) {
+            //TODO: throws exception must handle
+            encryptAndSaveLocally(arcDetails.getArcNo(), jsonData);
+            updateUI("Data encrypted and saved locally.");
+            return;
+        }
+
         if (!"0".equals(saveEnrollmentResponse.getErrorCode())) {
             LOGGER.log(Level.SEVERE, "Server desc: " + saveEnrollmentResponse.getDesc());
             Platform.runLater(() -> {
                 InputStream inputStream = BiometricCaptureCompleteController.class.getResourceAsStream("/img/redcross.png");
                 Image image = new Image(Objects.requireNonNull(inputStream));
                 statusImageView.setImage(image);
-                messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
+                messageLabel.setText(saveEnrollmentResponse.getDesc());
                 submitBtn.setDisable(true);
                 homeBtn.setDisable(false);
                 fetchArcBtn.setDisable(false);
@@ -256,6 +260,18 @@ public class BiometricCaptureCompleteController {
 
         }
         saveEnrollmentDetails.setEnrollmentStatus("PhotoCompleted");
+    }
+
+
+    // encrypt and save data by arc number as a fine name.
+    private void encryptAndSaveLocally(String arcNo, String jsonData) {
+        // pass temp path to for encryption.
+        String encFolderString = PropertyFile.getProperty(PropertyName.ENC_EXPORT_FOLDER);
+        if (encFolderString == null || encFolderString.isBlank()) {
+            throw new GenericException("No entry for '" + PropertyName.ENC_EXPORT_FOLDER + ", in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+        }
+        Path encOutputPath = Paths.get(encFolderString + "/" + arcNo + ".json.enc");
+        AesFileUtil.encrypt(jsonData, encOutputPath);
     }
 
     Runnable ShowProgressInd = new Runnable() {
@@ -418,10 +434,10 @@ public class BiometricCaptureCompleteController {
                             postJson = mapper.writeValueAsString(saveEnrollment);
                             String connurl = apiServerCheck.getArcUrl();
 
-                            String oirgjsonfile = "/usr/share/enrollment/json/export/orig/" + saveEnrollment.getArcNo() + ".json";
+                            String origjsonfile = "/usr/share/enrollment/json/export/orig/" + saveEnrollment.getArcNo() + ".json";
                             String encryptedjsonfile = "/usr/share/enrollment/json/export/enc/" + saveEnrollment.getArcNo() + ".json.enc";
                             String decryptedjsonfile = "/usr/share/enrollment/json/export/dec/" + saveEnrollment.getArcNo() + ".json";
-                            File json = new File(oirgjsonfile);
+                            File json = new File(origjsonfile);
                             FileOutputStream output = new FileOutputStream(json);
                             output.write(postJson.getBytes());
                             output.close();
@@ -430,9 +446,9 @@ public class BiometricCaptureCompleteController {
                             AESFileEncryptionDecryption aesencryptfile = new AESFileEncryptionDecryption();
                             String status = "";
                             try {
-                                status = aesencryptfile.encryptFile(oirgjsonfile, encryptedjsonfile);
+                                status = aesencryptfile.encryptFile(origjsonfile, encryptedjsonfile);
                                 if (status.equals("Success")) {
-                                    aesencryptfile.delFile(oirgjsonfile);
+                                    aesencryptfile.delFile(origjsonfile);
                                     System.out.println("Encrypted Sucessfully:::Original file deleted0");
                                     updateUI("Details Encrypted and saved locally");
                                     submitBtn.setDisable(true);
@@ -513,8 +529,7 @@ public class BiometricCaptureCompleteController {
                     });
 
 
-                    if (saveEnrollmentResponse.getDesc().contains("refused") || saveEnrollmentResponse.getDesc().contains("notreachable")
-                            || saveEnrollmentResponse.getDesc().contains("Exception")) {
+                    if (saveEnrollmentResponse.getDesc().contains("refused") || saveEnrollmentResponse.getDesc().contains("notreachable") || saveEnrollmentResponse.getDesc().contains("Exception")) {
                         InputStream inputStream = BiometricCaptureCompleteController.class.getResourceAsStream("/img/redcross.png");
                         Image image = new Image(inputStream);
                         statusImageView.setImage(image);

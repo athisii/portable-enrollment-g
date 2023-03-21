@@ -119,16 +119,26 @@ public class ServerConfigController {
     private void fetchUnits() {
         try {
             units = ServerAPI.fetchAllUnits();
-            if (units.isEmpty()) {
-                updateUI("No units for selected mafis url.");
-                return;
-            }
-            List<String> captions = units.stream().map(Unit::getCaption).collect(Collectors.toList());
-            enrollmentStationUnitIdsComboBox.setItems(FXCollections.observableArrayList(captions));
-            updateUI("Units fetched successfully.");
         } catch (GenericException ex) {
-            updateUI("Connection timeout. Failed to connect to server.");
+            updateUI(ex.getMessage());
+            enableControls(backBtn, homeBtn, editBtn, updateUnitBtn, fetchUnitsBtn);
+            return;
         }
+
+        if (units == null) {
+            updateUI("Connection timeout. Please try again.");
+            enableControls(backBtn, homeBtn, editBtn, updateUnitBtn, fetchUnitsBtn);
+            return;
+        }
+
+        if (units.isEmpty()) {
+            updateUI("No units for selected mafis url.");
+            enableControls(backBtn, homeBtn, editBtn, updateUnitBtn, fetchUnitsBtn);
+            return;
+        }
+        List<String> captions = units.stream().map(Unit::getCaption).collect(Collectors.toList());
+        Platform.runLater(() -> enrollmentStationUnitIdsComboBox.setItems(FXCollections.observableArrayList(captions)));
+        updateUI("Units fetched successfully.");
         enableControls(backBtn, homeBtn, editBtn, updateUnitBtn, fetchUnitsBtn);
 
     }
@@ -152,8 +162,7 @@ public class ServerConfigController {
         if (!errorMessage.isBlank()) {
             throw new GenericException(errorMessage);
         }
-        System.out.println(mafisUrl);
-        System.out.println(enrollmentStationId);
+
         mafisUrlTextField.setText(mafisUrl);
         enrollmentStationIdTextField.setText(enrollmentStationId);
         enrollmentStationUnitIdsComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {

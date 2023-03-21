@@ -6,6 +6,7 @@ import com.cdac.enrollmentstation.api.ServerAPI;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
+import com.cdac.enrollmentstation.model.ARCDetails;
 import com.cdac.enrollmentstation.util.DeviceUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import javafx.fxml.FXML;
@@ -132,14 +133,17 @@ public class DeviceStatusController {
 
     private void checkMafisApi() {
         try {
-            ServerAPI.fetchARCDetails(ServerAPI.getArcUrl(), "123abc");
+            ARCDetails arcDetails = ServerAPI.fetchARCDetails(ServerAPI.getArcUrl(), "123abc");
+            if (arcDetails == null) {
+                mafisUrlImage.setImage(RED_CROSS_IMAGE);
+                return;
+            }
+            mafisUrlImage.setImage(GREEN_TICK_IMAGE);
+
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            if (ex.getMessage().toLowerCase().contains("connection")) {
-                mafisUrlImage.setImage(RED_CROSS_IMAGE);
-            } else {
-                mafisUrlImage.setImage(GREEN_TICK_IMAGE);
-            }
+            // connected but throws exception on JSON parsing error
+            mafisUrlImage.setImage(GREEN_TICK_IMAGE);
         }
 
 

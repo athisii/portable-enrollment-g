@@ -13,6 +13,9 @@ import com.cdac.enrollmentstation.model.ARCDetails;
 import com.cdac.enrollmentstation.model.ARCDetailsList;
 import com.cdac.enrollmentstation.model.Unit;
 import com.cdac.enrollmentstation.model.UnitListDetails;
+import com.cdac.enrollmentstation.security.Aes256Util;
+import com.cdac.enrollmentstation.security.HmacUtil;
+import com.cdac.enrollmentstation.security.PkiUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -23,8 +26,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.time.Duration;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,6 +39,8 @@ public class ServerAPI {
     private static final int NO_OF_RETRIES = 1;
     private static final int CONNECTION_TIMEOUT = 10;
     private static final int WRITE_TIMEOUT = 30;
+    private static final String UNIQUE_KEY_HEADER = "UniqueKey";
+    private static final String HASH_KEY_HEADER = "HashKey";
 
 
     private static final Logger LOGGER = ApplicationLog.getLogger(ServerAPI.class);
@@ -44,8 +50,9 @@ public class ServerAPI {
         httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(CONNECTION_TIMEOUT)).build();
     }
 
-    //disables instantiation of this class.
+    //Suppress default constructor for noninstantiability
     private ServerAPI() {
+        throw new AssertionError("The ServerAPI methods should be accessed statically.");
     }
 
     /**
@@ -54,7 +61,7 @@ public class ServerAPI {
      *
      * @param url   url of the API.
      * @param arcNo unique id whose details are to be fetched
-     * @return ARCDetails
+     * @return ARCDetails or null on connection timeout
      * @throws GenericException exception on connection timeout, error, json parsing exception etc.
      */
 
@@ -66,17 +73,16 @@ public class ServerAPI {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
-        // throws GenericException
-        String jsonResponse = sendHttpRequest(createPostHttpRequest(url, jsonRequestData));
+        HttpResponse<String> response = sendHttpRequest(createPostHttpRequest(url, jsonRequestData, null));
+        if (response == null) {
+            return null;
+        }
         ARCDetails arcDetail;
         try {
-            arcDetail = Singleton.getObjectMapper().readValue(jsonResponse, ARCDetails.class);
+            arcDetail = Singleton.getObjectMapper().readValue(response.body(), ARCDetails.class);
         } catch (JsonProcessingException ignored) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
-        }
-        if (!"0".equals(arcDetail.getErrorCode())) {
-            throw new GenericException(arcDetail.getDesc());
         }
         return arcDetail;
     }
@@ -86,15 +92,62 @@ public class ServerAPI {
      * Caller must handle the exception.
      *
      * @param data request payload
-     * @throws GenericException exception on connection timeout, error, json parsing exception etc.
+     * @return SaveEnrollmentResponse or null on connection timeout
+     * @throws GenericException exception on error, json parsing exception etc.
      */
     public static SaveEnrollmentResponse postEnrollment(String data) {
-        //TODO:
+        // to avoid encrypt/decrypt problems
+        data = data.replace("\n", "");
+        // assigns random secret key at each call
+        String secret = Aes256Util.genUuid();
+
+        // for sending base64 encoded encrypted SECRET KEY to server in HEADER
+        byte[] pkiEncryptedUniqueKey = PkiUtil.encrypt(secret);
+        String base64EncodedPkiEncryptedUniqueKey = Base64.getEncoder().encodeToString(pkiEncryptedUniqueKey);
+
+        // encrypts the actual data passed from the method's argument
+        Key key = Aes256Util.genKey(secret);
+        byte[] encryptedData = Aes256Util.encrypt(data, key);
+        String base64EncodedEncryptedData = Base64.getEncoder().encodeToString(encryptedData);
+
+        // hashKey header
+        String messageDigest = HmacUtil.genHmacSha256(base64EncodedEncryptedData, secret);
+
         // need to add unique-key, hash value in request header
-        String response = sendHttpRequest(createPostHttpRequest(getSaveEnrollmentUrl(), data));
+        Map<String, String> headersMap = new HashMap<>();
+        headersMap.put(UNIQUE_KEY_HEADER, base64EncodedPkiEncryptedUniqueKey);
+        headersMap.put(HASH_KEY_HEADER, messageDigest);
+
+        HttpRequest postHttpRequest = createPostHttpRequest(getSaveEnrollmentUrl(), base64EncodedEncryptedData, headersMap);
+        HttpResponse<String> httpResponse = sendHttpRequest(postHttpRequest);
+        // connection timeout
+        if (httpResponse == null) {
+            return null;
+        }
+        Optional<String> base64EncodedUniqueKeyOptional = httpResponse.headers().firstValue(UNIQUE_KEY_HEADER);
+
+        if (base64EncodedUniqueKeyOptional.isEmpty()) {
+            throw new GenericException("Unique key header not found in http response");
+        }
+
+        String base64EncodedUniqueKeyFromServer = base64EncodedUniqueKeyOptional.get();
+
+        if (base64EncodedUniqueKeyFromServer.isBlank()) {
+            throw new GenericException("Unique Key From Server is Empty");
+        }
+        // received base64 encoded encrypted secret key from server
+        byte[] encryptedSecretKey = Base64.getDecoder().decode(base64EncodedUniqueKeyFromServer);
+        secret = PkiUtil.decrypt(encryptedSecretKey);
+        key = Aes256Util.genKey(secret);
+
+        // Received base64 encoded encrypted data
+        byte[] encryptedResponseBody = Base64.getDecoder().decode(httpResponse.body());
+        String receivedData = Aes256Util.decrypt(encryptedResponseBody, key);
+
+        // response data from server
         SaveEnrollmentResponse saveEnrollmentResponse;
         try {
-            saveEnrollmentResponse = Singleton.getObjectMapper().readValue(response, SaveEnrollmentResponse.class);
+            saveEnrollmentResponse = Singleton.getObjectMapper().readValue(receivedData, SaveEnrollmentResponse.class);
         } catch (JsonProcessingException ignored) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
@@ -107,10 +160,10 @@ public class ServerAPI {
      * Caller must handle the exception.
      *
      * @param httpRequest request payload
-     * @throws GenericException exception on connection timeout, error, json parsing exception etc.
+     * @return HttpResponse<String>  or null if timeout exception occurred
      */
 
-    private static String sendHttpRequest(HttpRequest httpRequest) {
+    private static HttpResponse<String> sendHttpRequest(HttpRequest httpRequest) {
         int noOfRetries = NO_OF_RETRIES;
         HttpResponse<String> response = null;
         while (noOfRetries > 0) {
@@ -126,30 +179,36 @@ public class ServerAPI {
                 Thread.currentThread().interrupt();
             }
         }
+        // connection timeout
         if (response == null || noOfRetries == 0) {
-            throw new GenericException("Connection timeout. Failed to connect to server. Please try again.");
+            LOGGER.log(Level.INFO, "Connection timeout");
+            return null;
         }
-        return response.body();
+        return response;
     }
 
     /**
      * Fetches all units.
      * Caller must handle the exception.
      *
-     * @return List<Units>
-     * @throws GenericException exception on connection timeout, error, json parsing exception etc.
+     * @return List<Units> or null on connection timeout
+     * @throws GenericException exception on error, json parsing exception etc.
      */
     public static List<Unit> fetchAllUnits() {
-        String jsonResponse = sendHttpRequest(createGetHttpRequest(getUnitListURL()));
+        HttpResponse<String> response = sendHttpRequest(createGetHttpRequest(getUnitListURL()));
+        if (response == null) {
+            return null;
+        }
         // if this line is reached, response received with status code 200
         UnitListDetails unitListDetails;
         try {
-            unitListDetails = Singleton.getObjectMapper().readValue(jsonResponse, UnitListDetails.class);
+            unitListDetails = Singleton.getObjectMapper().readValue(response.body(), UnitListDetails.class);
         } catch (JsonProcessingException ignored) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
         if (unitListDetails.getErrorCode() != 0) {
+            LOGGER.log(Level.SEVERE, ApplicationConstant.GENERIC_SERVER_ERR_MSG + unitListDetails.getDesc());
             throw new GenericException(unitListDetails.getDesc());
         }
         return unitListDetails.getUnits();
@@ -160,8 +219,8 @@ public class ServerAPI {
      * Fetches list of ARC based on unitCode.
      * Caller must handle the exception.
      *
-     * @return List<ARCDetails>
-     * @throws GenericException exception on connection timeout, error, json parsing exception etc.
+     * @return List<ARCDetails> or null on connection timeout
+     * @throws GenericException exception on error, json parsing exception etc.
      */
 
     public static List<ARCDetails> fetchArcListByUnitCode(String unitCode) {
@@ -172,15 +231,20 @@ public class ServerAPI {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
-        String jsonResponse = sendHttpRequest(createPostHttpRequest(getDemographicURL(), jsonRequestData));
+        HttpRequest postHttpRequest = createPostHttpRequest(getDemographicURL(), jsonRequestData, null);
+        HttpResponse<String> httpResponse = sendHttpRequest(postHttpRequest);
+        if (httpResponse == null) {
+            return null;
+        }
         ARCDetailsList arcDetailsList;
         try {
-            arcDetailsList = Singleton.getObjectMapper().readValue(jsonResponse, ARCDetailsList.class);
+            arcDetailsList = Singleton.getObjectMapper().readValue(httpResponse.body(), ARCDetailsList.class);
         } catch (JsonProcessingException e) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
         if (arcDetailsList.getErrorCode() != 0) {
+            LOGGER.log(Level.INFO, ApplicationConstant.GENERIC_SERVER_ERR_MSG + arcDetailsList.getDesc());
             throw new GenericException(arcDetailsList.getDesc());
         }
         return arcDetailsList.getArcDetails();
@@ -195,14 +259,18 @@ public class ServerAPI {
                 .build();
     }
 
-    private static HttpRequest createPostHttpRequest(String url, String data) {
-        return HttpRequest.newBuilder()
-                .uri(URI.create(url))
+    private static HttpRequest createPostHttpRequest(String url, String data, Map<String, String> extraHeaders) {
+        HttpRequest.Builder builder = HttpRequest.newBuilder();
+        if (extraHeaders != null) {
+            extraHeaders.forEach(builder::header);
+        }
+        return builder.uri(URI.create(url))
                 .POST(BodyPublishers.ofString(data))
                 .header(HttpHeader.CONTENT_TYPE, "application/json; utf-8")
                 .header(HttpHeader.ACCEPT, "application/json")
                 .timeout(Duration.ofSeconds(WRITE_TIMEOUT))
                 .build();
+
     }
 
 

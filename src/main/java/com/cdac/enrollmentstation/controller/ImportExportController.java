@@ -323,35 +323,44 @@ public class ImportExportController {
 
     // runs in WorkerThread
     private void fetchAllUnits() {
+        List<String> unitCaptions = new ArrayList<>();
+        allUnits.clear();
+        List<Unit> units;
+
         try {
-            List<String> unitCaptions = new ArrayList<>();
-            allUnits.clear();
-            // throws exception
-            ServerAPI.fetchAllUnits().stream()
-                    .sorted(Comparator.comparing(Unit::getCaption))
-                    .forEach(unit -> {
-                        unitCaptions.add(unit.getCaption());
-                        allUnits.add(unit);
-                    });
-
-            if (allUnits.isEmpty()) {
-                updateUI("No units available.");
-            }
-
-            Platform.runLater(() -> {
-                unitListView.setItems(FXCollections.observableArrayList(unitCaptions));
-                messageLabel.setText("");
-                enableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportDataBtn);
-            });
+            // returns null on connection timeout
+            units = ServerAPI.fetchAllUnits();
         } catch (GenericException ex) {
-            LOGGER.log(Level.SEVERE, ex::getMessage);
             allUnits.clear();
             Platform.runLater(() -> {
                 unitListView.getItems().clear();
                 messageLabel.setText(ex.getMessage());
                 disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportDataBtn);
             });
+            return;
         }
+        if (units == null) {
+            Platform.runLater(() -> {
+                unitListView.getItems().clear();
+                messageLabel.setText("Connection timeout. Please try again.");
+                disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportDataBtn);
+            });
+            return;
+        }
+        units.stream().sorted(Comparator.comparing(Unit::getCaption)).forEach(unit -> {
+            unitCaptions.add(unit.getCaption());
+            allUnits.add(unit);
+        });
+
+        if (allUnits.isEmpty()) {
+            updateUI("No units available.");
+        }
+
+        Platform.runLater(() -> {
+            unitListView.setItems(FXCollections.observableArrayList(unitCaptions));
+            messageLabel.setText("");
+            enableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportDataBtn);
+        });
     }
 
 
@@ -423,34 +432,34 @@ public class ImportExportController {
         String unitCaption;
         List<ARCDetails> arcDetailsList;
         try {
-            // throws exception
+            // returns null on connection timeout
             arcDetailsList = ServerAPI.fetchArcListByUnitCode(unitCode);
-            if (arcDetailsList.isEmpty()) {
-                updateUI("No ARC found for imported unit.");
-                return;
-            }
-            var firstArcDetails = arcDetailsList.get(0);
-            unitId = firstArcDetails.getArcNo().split("-")[0];
-            unitCaption = firstArcDetails.getUnit();
-
         } catch (GenericException ex) {
-            String exceptionMessage = ex.getMessage();
-            LOGGER.log(Level.SEVERE, exceptionMessage);
-            // Special case, if network connection is interrupted while importing units
-            if (exceptionMessage != null && exceptionMessage.toUpperCase().contains("CONNECTION TIMEOUT")) {
-                Platform.runLater(() -> {
-                    unitListView.getItems().clear();
-                    disableControls(importUnitBtn);
-                });
-                updateUI(ex.getMessage());
-                return;
-            }
             Platform.runLater(() -> {
                 enableControls(importUnitBtn);
-                messageLabel.setText(exceptionMessage);
+                messageLabel.setText(ex.getMessage());
             });
             return;
         }
+
+        if (arcDetailsList == null) {
+            Platform.runLater(() -> {
+                unitListView.getItems().clear();
+                disableControls(importUnitBtn);
+                messageLabel.setText("Connection timeout. Please try again.");
+            });
+            return;
+        }
+
+        if (arcDetailsList.isEmpty()) {
+            updateUI("No ARC found for imported unit.");
+            return;
+        }
+
+        var firstArcDetails = arcDetailsList.get(0);
+        unitId = firstArcDetails.getArcNo().split("-")[0];
+        unitCaption = firstArcDetails.getUnit();
+
 
         String jsonArcList;
         try {
@@ -481,18 +490,15 @@ public class ImportExportController {
     private void updateImportedListView() {
         // throws exception
         try (Stream<Path> importFolder = Files.walk(Path.of(PropertyFile.getProperty(PropertyName.IMPORT_JSON_FOLDER)))) {
-            List<String> unitCaptions = importFolder
-                    .filter(Files::isRegularFile)
-                    .map(file -> {
-                        String[] splitFileName = file.getFileName().toString().split("-");
-                        if (splitFileName.length > 2) {
-                            //00001-INSI-INS INDIA
-                            return splitFileName[2];
-                        }
-                        LOGGER.log(Level.SEVERE, () -> "Malformed filename: " + file.getFileName());
-                        return "";
-                    }).filter(unitCaption -> !unitCaption.isBlank())
-                    .collect(Collectors.toList());
+            List<String> unitCaptions = importFolder.filter(Files::isRegularFile).map(file -> {
+                String[] splitFileName = file.getFileName().toString().split("-");
+                if (splitFileName.length > 2) {
+                    //00001-INSI-INS INDIA
+                    return splitFileName[2];
+                }
+                LOGGER.log(Level.SEVERE, () -> "Malformed filename: " + file.getFileName());
+                return "";
+            }).filter(unitCaption -> !unitCaption.isBlank()).collect(Collectors.toList());
 
             Platform.runLater(() -> {
                 importedUnitListView.setItems(FXCollections.observableList(unitCaptions));
@@ -511,17 +517,16 @@ public class ImportExportController {
         }
         // throws exception
         try (Stream<Path> importFolder = Files.walk(Path.of(PropertyFile.getProperty(PropertyName.IMPORT_JSON_FOLDER)))) {
-            Optional<Path> optionalPath = importFolder
-                    .filter(file -> {
-                        if (Files.isRegularFile(file)) {
-                            String[] splitFileName = file.getFileName().toString().split("-");
-                            if (splitFileName.length > 2) {
-                                //00001-INSI-INS INDIA
-                                return selectedImportedUnit.equals(splitFileName[2]);
-                            }
-                        }
-                        return false;
-                    }).findFirst();
+            Optional<Path> optionalPath = importFolder.filter(file -> {
+                if (Files.isRegularFile(file)) {
+                    String[] splitFileName = file.getFileName().toString().split("-");
+                    if (splitFileName.length > 2) {
+                        //00001-INSI-INS INDIA
+                        return selectedImportedUnit.equals(splitFileName[2]);
+                    }
+                }
+                return false;
+            }).findFirst();
             if (optionalPath.isEmpty()) {
                 return;
             }
@@ -558,15 +563,14 @@ public class ImportExportController {
     private void updateCapturedBiometric() {
         try (Stream<Path> encExportFolder = Files.walk(Path.of(PropertyFile.getProperty(PropertyName.ENC_EXPORT_FOLDER)))) {
             List<String> capturedArcs = new ArrayList<>();
-            encExportFolder
-                    .forEach(path -> {
-                        if (Files.isRegularFile(path)) {
-                            String[] splitFilename = path.getFileName().toString().split("\\.");
-                            if (splitFilename.length > 1) {
-                                capturedArcs.add(splitFilename[0]);
-                            }
-                        }
-                    });
+            encExportFolder.forEach(path -> {
+                if (Files.isRegularFile(path)) {
+                    String[] splitFilename = path.getFileName().toString().split("\\.");
+                    if (splitFilename.length > 1) {
+                        capturedArcs.add(splitFilename[0]);
+                    }
+                }
+            });
 
             Collections.sort(capturedArcs);
             Platform.runLater(() -> {

@@ -130,15 +130,8 @@ public class ServerAPI {
             LOGGER.log(Level.SEVERE, "Unique key header not found in http response");
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
-
-        String base64EncodedUniqueKeyFromServer = base64EncodedUniqueKeyOptional.get();
-
-        if (base64EncodedUniqueKeyFromServer.isBlank()) {
-            LOGGER.log(Level.SEVERE, "Unique Key From Server is Empty");
-            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
-        }
         // received base64 encoded encrypted secret key from server
-        byte[] encryptedSecretKey = Base64.getDecoder().decode(base64EncodedUniqueKeyFromServer);
+        byte[] encryptedSecretKey = Base64.getDecoder().decode(base64EncodedUniqueKeyOptional.get());
         secret = PkiUtil.decrypt(encryptedSecretKey);
         key = Aes256Util.genKey(secret);
 

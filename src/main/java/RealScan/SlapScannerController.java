@@ -1122,11 +1122,9 @@ public class SlapScannerController {
     }
 
     private void enableControls(Node... nodes) {
-        Platform.runLater(() -> {
             for (Node node : nodes) {
                 node.setDisable(false);
             }
-        });
     }
 
 }

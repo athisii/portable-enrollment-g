@@ -18,6 +18,7 @@ import com.cdac.enrollmentstation.model.ARCDetails;
 import com.cdac.enrollmentstation.model.SaveEnrollmentDetails;
 import com.cdac.enrollmentstation.model.Unit;
 import com.cdac.enrollmentstation.security.AESFileEncryptionDecryption;
+import com.cdac.enrollmentstation.security.AesFileUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.Base64Variants;
@@ -71,7 +72,7 @@ public class ImportExportController {
     @FXML
     public Text capturedBiometricText;
     @FXML
-    public Button exportDataBtn;
+    public Button exportBtn;
     @FXML
     private Button importUnitBtn;
     @FXML
@@ -118,15 +119,105 @@ public class ImportExportController {
         return filename.replaceAll(extPattern, "");
     }
 
-    @FXML
-    private void exportDataOld() {
+    public void initialize() {
+        refreshIcon.setOnMouseClicked(mouseEvent -> refresh());
+        importUnitBtn.setOnAction(event -> importSelectedUnits());
+        clearImportBtn.setOnAction(event -> clearSingleImportedUnit());
+        clearAllImportBtn.setOnAction(event -> clearAllImportedUnits());
+        exportBtn.setOnAction(event -> exportBtnAction());
 
-        try {
-            exportthread = new Thread(exportjsonFile);
-            exportthread.start();
-        } catch (Exception e) {
-            System.out.println("Error in loop::" + e);
+        searchText.textProperty().addListener((observable, oldVal, newVal) -> searchFilter(newVal));
+        // should not allow multiple selections of units
+        // some units might not have Arc number
+        // error message will get override if multiple units are selected
+//        unitListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE)
+        unitListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            selectedUnits.clear();
+            selectedUnits.addAll(new ArrayList<>(unitListView.getSelectionModel().getSelectedItems()));
+        });
+        disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportBtn);
+        messageLabel.setText("Fetching units.....");
+        ForkJoinPool.commonPool().execute(this::fetchAllUnits);
+        ForkJoinPool.commonPool().execute(this::updateImportedListView);
+        ForkJoinPool.commonPool().execute(this::updateCapturedBiometric);
+
+    }
+
+    private void exportBtnAction() {
+        messageLabel.setText("Exporting. Please Wait...");
+        disableControls(exportBtn);
+        ForkJoinPool.commonPool().execute(this::exportData);
+    }
+
+    private void exportData() {
+        String encFolderString = PropertyFile.getProperty(PropertyName.ENC_EXPORT_FOLDER);
+        if (encFolderString == null || encFolderString.isBlank()) {
+            LOGGER.log(Level.SEVERE, "Entry for '" + PropertyName.ENC_EXPORT_FOLDER + "' not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
+        Path encFolderPath = Paths.get(encFolderString);
+
+        List<Path> encryptedArcPaths;
+        // collects encrypted arc files to List
+        try (Stream<Path> encFolderStream = Files.walk(encFolderPath)) {
+            encryptedArcPaths = encFolderStream.filter(path -> {
+                if (Files.isRegularFile(path)) {
+                    String[] splitFilename = path.getFileName().toString().split("\\.");
+                    // return only this format -> 00-A-AA.json.enc
+                    return splitFilename.length == 3;
+                }
+                return false;
+            }).collect(Collectors.toList());
+        } catch (IOException ex) {
+            LOGGER.log(Level.SEVERE, "Error occurred while getting encrypted arc files for exporting.");
+            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+            disableControls(exportBtn);
+            return;
+        }
+        // now decrypt the data and calls the save API
+        boolean isAllSubmitted = false;
+        String decryptedJsonData;
+        for (Path encryptedArcPath : encryptedArcPaths) {
+            updateUI("Exporting Arc: " + encryptedArcPath.getFileName().toString().split("\\.")[0]);
+            // throws GenericException
+            try {
+                decryptedJsonData = AesFileUtil.decrypt(encryptedArcPath);
+            } catch (GenericException ex) {
+                updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+                return;
+            }
+
+            SaveEnrollmentResponse saveEnrollmentResponse;
+            try {
+                saveEnrollmentResponse = ServerAPI.postEnrollment(decryptedJsonData);
+            } catch (GenericException ignored) {
+                updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+                return;
+            }
+            // timeout connection
+            if (saveEnrollmentResponse == null) {
+                updateUI("Connection timeout. Please try again.");
+                enableControls(exportBtn);
+                return;
+            }
+            if (!"0".equals(saveEnrollmentResponse.getErrorCode())) {
+                LOGGER.log(Level.SEVERE, "Server desc: " + saveEnrollmentResponse.getDesc());
+                updateUI(saveEnrollmentResponse.getDesc());
+                return;
+            }
+
+            try {
+                Files.delete(encryptedArcPath);
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage());
+                updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+                return;
+            }
+        }
+        updateUI("Data exported successfully.");
+        updateCapturedBiometric();
+        clearAllImportedUnits();
+
     }
 
     Runnable exportjsonFile = new Runnable() {
@@ -332,18 +423,18 @@ public class ImportExportController {
             units = ServerAPI.fetchAllUnits();
         } catch (GenericException ex) {
             allUnits.clear();
+            disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportBtn);
             Platform.runLater(() -> {
                 unitListView.getItems().clear();
                 messageLabel.setText(ex.getMessage());
-                disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportDataBtn);
             });
             return;
         }
         if (units == null) {
+            disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportBtn);
             Platform.runLater(() -> {
                 unitListView.getItems().clear();
                 messageLabel.setText("Connection timeout. Please try again.");
-                disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportDataBtn);
             });
             return;
         }
@@ -359,33 +450,10 @@ public class ImportExportController {
         Platform.runLater(() -> {
             unitListView.setItems(FXCollections.observableArrayList(unitCaptions));
             messageLabel.setText("");
-            enableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportDataBtn);
         });
+        enableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportBtn);
     }
 
-
-    public void initialize() {
-        refreshIcon.setOnMouseClicked(mouseEvent -> refresh());
-        importUnitBtn.setOnAction(event -> importSelectedUnits());
-        clearImportBtn.setOnAction(event -> clearSingleImportedUnit());
-        clearAllImportBtn.setOnAction(event -> clearAllImportedUnits());
-        searchText.textProperty().addListener((observable, oldVal, newVal) -> searchFilter(newVal));
-        // should not allow multiple selections of units
-        // some units might not have Arc number
-        // error message will get override if multiple units are selected
-//        unitListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE)
-        unitListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            selectedUnits.clear();
-            selectedUnits.addAll(new ArrayList<>(unitListView.getSelectionModel().getSelectedItems()));
-        });
-        disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportDataBtn);
-        messageLabel.setText("Fetching units.....");
-        ForkJoinPool.commonPool().execute(this::fetchAllUnits);
-        ForkJoinPool.commonPool().execute(this::updateImportedListView);
-        ForkJoinPool.commonPool().execute(this::updateCapturedBiometric);
-
-
-    }
 
     private void disableControls(Node... nodes) {
         for (var node : nodes) {
@@ -435,10 +503,8 @@ public class ImportExportController {
             // returns null on connection timeout
             arcDetailsList = ServerAPI.fetchArcListByUnitCode(unitCode);
         } catch (GenericException ex) {
-            Platform.runLater(() -> {
-                enableControls(importUnitBtn);
-                messageLabel.setText(ex.getMessage());
-            });
+            enableControls(importUnitBtn);
+            updateUI(ex.getMessage());
             return;
         }
 
@@ -475,10 +541,8 @@ public class ImportExportController {
         try {
             // throws exception
             Files.writeString(Path.of(filePath), jsonArcList, StandardCharsets.UTF_8);
-            Platform.runLater(() -> {
-                enableControls(importUnitBtn);
-                messageLabel.setText("");
-            });
+            enableControls(importUnitBtn);
+            updateUI("");
             updateImportedListView();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
@@ -566,7 +630,7 @@ public class ImportExportController {
             encExportFolder.forEach(path -> {
                 if (Files.isRegularFile(path)) {
                     String[] splitFilename = path.getFileName().toString().split("\\.");
-                    if (splitFilename.length > 1) {
+                    if (splitFilename.length == 3) {
                         capturedArcs.add(splitFilename[0]);
                     }
                 }
@@ -580,6 +644,7 @@ public class ImportExportController {
 
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error occurred while getting the count of captured biometric data");
+            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 }

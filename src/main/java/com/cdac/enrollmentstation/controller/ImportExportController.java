@@ -248,7 +248,7 @@ public class ImportExportController {
             unitListView.setItems(FXCollections.observableArrayList(unitCaptions));
             messageLabel.setText("");
         });
-        enableControls(importUnitBtn);
+        enableControls(importUnitBtn,exportBtn,clearImportBtn,clearAllImportBtn);
     }
 
 

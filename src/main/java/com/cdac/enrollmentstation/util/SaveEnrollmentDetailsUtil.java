@@ -57,8 +57,11 @@ public class SaveEnrollmentDetailsUtil {
             return Singleton.getObjectMapper().readValue(content, SaveEnrollmentDetails.class);
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+            //if error occurs, then overwrite with new data
+            writeToFile(new SaveEnrollmentDetails());
+            return readFromFile();
         }
+
     }
 
     public static void delete() {

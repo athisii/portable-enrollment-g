@@ -1,5 +1,6 @@
 package com.cdac.enrollmentstation.security;
 
+import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 
@@ -45,7 +46,7 @@ public class AesFileUtil {
             cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         } catch (GeneralSecurityException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            throw new GenericException(ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 
@@ -66,7 +67,7 @@ public class AesFileUtil {
             Files.write(encOutputPath, byteArrayOutputStream.toByteArray());
         } catch (GeneralSecurityException | IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            throw new GenericException(ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 
@@ -87,7 +88,7 @@ public class AesFileUtil {
             return new String(decryptedBytes, StandardCharsets.UTF_8);
         } catch (GeneralSecurityException | IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            throw new GenericException(ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
 
     }
@@ -100,7 +101,7 @@ public class AesFileUtil {
             return new SecretKeySpec(secretKey.getEncoded(), "AES");
         } catch (GeneralSecurityException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            throw new GenericException(ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 

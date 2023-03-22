@@ -1,5 +1,6 @@
 package com.cdac.enrollmentstation.security;
 
+import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 
@@ -64,7 +65,8 @@ public class Aes256Util {
             return byteArrayOutputStream.toByteArray();
         } catch (GeneralSecurityException | IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            throw new GenericException(ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+
         }
     }
 
@@ -78,7 +80,7 @@ public class Aes256Util {
             return new String(decryptedData, StandardCharsets.UTF_8);
         } catch (GeneralSecurityException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            throw new GenericException(ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 }

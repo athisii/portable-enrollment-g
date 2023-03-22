@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -30,7 +31,8 @@ public class SaveEnrollmentDetailsUtil {
             String saveEnrollmentDetailsString = Singleton.getObjectMapper().writeValueAsString(saveEnrollmentDetails);
             Files.writeString(path, saveEnrollmentDetailsString, StandardCharsets.UTF_8);
         } catch (IOException ex) {
-            throw new GenericException(ex.getMessage());
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
 
     }
@@ -38,7 +40,8 @@ public class SaveEnrollmentDetailsUtil {
     private static Path getFilePath() {
         String saveEnrollmentFileString = PropertyFile.getProperty(PropertyName.SAVE_ENROLLMENT);
         if (saveEnrollmentFileString == null || saveEnrollmentFileString.isBlank()) {
-            throw new GenericException("'save.enrollment' entry not found or is empty in" + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+            LOGGER.log(Level.SEVERE, "'save.enrollment' entry not found or is empty in" + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
         return Path.of(saveEnrollmentFileString);
     }
@@ -46,13 +49,15 @@ public class SaveEnrollmentDetailsUtil {
     public static SaveEnrollmentDetails readFromFile() {
         Path path = getFilePath();
         if (!Files.exists(path)) {
-            throw new GenericException("saveEnrollment.txt file not found.");
+            LOGGER.log(Level.SEVERE, "saveEnrollment.txt file not found.");
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
         try {
             String content = Files.readString(path, StandardCharsets.UTF_8);
             return Singleton.getObjectMapper().readValue(content, SaveEnrollmentDetails.class);
         } catch (IOException ex) {
-            throw new GenericException(ex.getMessage());
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 
@@ -61,7 +66,8 @@ public class SaveEnrollmentDetailsUtil {
         try {
             Files.delete(path);
         } catch (IOException ex) {
-            throw new GenericException((ex.getMessage()));
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 

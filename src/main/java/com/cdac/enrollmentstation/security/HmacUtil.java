@@ -9,6 +9,7 @@ package com.cdac.enrollmentstation.security;
  * @author root
  */
 
+import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 
@@ -36,7 +37,7 @@ public class HmacUtil {
             mac = Mac.getInstance(algorithm);
         } catch (GeneralSecurityException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            throw new GenericException(ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 
@@ -48,7 +49,7 @@ public class HmacUtil {
             return bytesToHex(bytes);
         } catch (GeneralSecurityException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            throw new GenericException(ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
 
     }

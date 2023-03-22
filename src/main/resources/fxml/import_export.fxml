@@ -102,7 +102,7 @@
                         <Font name="System Bold" size="17.0"/>
                     </font>
                 </Label>
-                <Button layoutX="497.0" layoutY="612.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0"
+                <Button fx:id="backBtn" layoutX="497.0" layoutY="612.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0"
                         minWidth="150.0" mnemonicParsing="false" onAction="#back" prefHeight="36.0" prefWidth="150.0"
                         style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;" text="Back"
                         textFill="WHITE">
@@ -110,7 +110,7 @@
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <Button layoutX="777.0" layoutY="612.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0"
+                <Button fx:id="homeBtn" layoutX="777.0" layoutY="612.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0"
                         minWidth="150.0" mnemonicParsing="false" onAction="#home" prefHeight="35.0" prefWidth="150.0"
                         style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="Home"
                         textFill="WHITE">

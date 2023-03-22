@@ -7,7 +7,6 @@ package com.cdac.enrollmentstation.controller;
 
 
 import com.cdac.enrollmentstation.App;
-import com.cdac.enrollmentstation.api.APIServerCheck;
 import com.cdac.enrollmentstation.api.ServerAPI;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
@@ -15,16 +14,11 @@ import com.cdac.enrollmentstation.dto.SaveEnrollmentResponse;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ARCDetails;
-import com.cdac.enrollmentstation.model.SaveEnrollmentDetails;
 import com.cdac.enrollmentstation.model.Unit;
-import com.cdac.enrollmentstation.security.AESFileEncryptionDecryption;
 import com.cdac.enrollmentstation.security.AesFileUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
-import com.fasterxml.jackson.core.Base64Variants;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -36,21 +30,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.text.Text;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
@@ -68,11 +52,15 @@ public class ImportExportController {
     private static final String IMPORTED_TEXT = "IMPORTED: ";
     private static final String CAPTURED_BIOMETRIC_TEXT = "CAPTURED BIOMETRIC: ";
     @FXML
-    public Text importedUnitText;
+    private Button homeBtn;
     @FXML
-    public Text capturedBiometricText;
+    private Text importedUnitText;
     @FXML
-    public Button exportBtn;
+    private Text capturedBiometricText;
+    @FXML
+    private Button exportBtn;
+    @FXML
+    private Button backBtn;
     @FXML
     private Button importUnitBtn;
     @FXML
@@ -86,38 +74,16 @@ public class ImportExportController {
     private final List<Unit> allUnits = new ArrayList<>();
     private final List<String> selectedUnits = new ArrayList<>();
 
-    private APIServerCheck apiServerCheck = new APIServerCheck();
-
-    private SaveEnrollmentResponse saveEnrollmentResponse;
     @FXML
     private Label messageLabel;
-    //private String importjson="/usr/share/enrollment/json/import/arclistimported.json"
-    private String importjson = null;
-    //private String export="/usr/share/enrollment/json/export"
-    private SaveEnrollmentResponse enrollmentResponse;
-    private String export = null;
     @FXML
     private ImageView refreshIcon;
-    private Thread exportthread = null;
 
     @FXML
     private ListView<String> unitListView;
     @FXML
     private TextField searchText;
 
-
-    private void updateUI(String message) {
-        Platform.runLater(() -> messageLabel.setText(message));
-    }
-
-    public static String removeFileExtension(String filename, boolean removeAllExtensions) {
-        if (filename == null || filename.isEmpty()) {
-            return filename;
-        }
-
-        String extPattern = "(?<!^)[.]" + (removeAllExtensions ? ".*" : "[^.]*$");
-        return filename.replaceAll(extPattern, "");
-    }
 
     public void initialize() {
         refreshIcon.setOnMouseClicked(mouseEvent -> refresh());
@@ -145,7 +111,7 @@ public class ImportExportController {
 
     private void exportBtnAction() {
         messageLabel.setText("Exporting. Please Wait...");
-        disableControls(exportBtn);
+        disableControls(exportBtn, homeBtn, backBtn);
         ForkJoinPool.commonPool().execute(this::exportData);
     }
 
@@ -172,6 +138,7 @@ public class ImportExportController {
             LOGGER.log(Level.SEVERE, "Error occurred while getting encrypted arc files for exporting.");
             updateUI(ApplicationConstant.GENERIC_ERR_MSG);
             disableControls(exportBtn);
+            enableControls(homeBtn, backBtn);
             return;
         }
         // now decrypt the data and calls the save API
@@ -184,6 +151,7 @@ public class ImportExportController {
                 decryptedJsonData = AesFileUtil.decrypt(encryptedArcPath);
             } catch (GenericException ex) {
                 updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+                enableControls(homeBtn, backBtn);
                 return;
             }
 
@@ -192,17 +160,20 @@ public class ImportExportController {
                 saveEnrollmentResponse = ServerAPI.postEnrollment(decryptedJsonData);
             } catch (GenericException ignored) {
                 updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+                enableControls(homeBtn, backBtn);
                 return;
             }
             // timeout connection
             if (saveEnrollmentResponse == null) {
                 updateUI("Connection timeout. Please try again.");
                 enableControls(exportBtn);
+                enableControls(homeBtn, backBtn);
                 return;
             }
             if (!"0".equals(saveEnrollmentResponse.getErrorCode())) {
                 LOGGER.log(Level.SEVERE, "Server desc: " + saveEnrollmentResponse.getDesc());
                 updateUI(saveEnrollmentResponse.getDesc());
+                enableControls(homeBtn, backBtn);
                 return;
             }
 
@@ -211,189 +182,15 @@ public class ImportExportController {
             } catch (IOException ex) {
                 LOGGER.log(Level.SEVERE, ex.getMessage());
                 updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+                enableControls(homeBtn, backBtn);
                 return;
             }
         }
         updateUI("Data exported successfully.");
         updateCapturedBiometric();
         clearAllImportedUnits();
-
+        enableControls(homeBtn, backBtn);
     }
-
-    Runnable exportjsonFile = new Runnable() {
-        @Override
-        public void run() {
-            String response = "";
-            response = "Exporting Please Wait...";
-            updateUI(response);
-            SaveEnrollmentDetails saveEnrollment = new SaveEnrollmentDetails();
-            String postJson = "";
-            String connurl = APIServerCheck.getArcUrl();
-            String arcno = "123abc";
-            String connectionStatus = APIServerCheck.checkGetARCNoAPI(connurl, arcno);
-            System.out.println("connection status :" + connectionStatus);
-
-            if (!connectionStatus.contentEquals("connected")) {
-                response = "Network Connection Issue. Check Connection and Try Again";
-                updateUI(response);
-                return;
-            }
-
-            try {
-                export = PropertyFile.getProperty(PropertyName.EXPORT_FOLDER);
-            } catch (GenericException ex) {
-                Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
-                response = "Export Folder Not Found on the System";
-                updateUI(response);
-                return;
-            }
-            try {
-                importjson = PropertyFile.getProperty(PropertyName.IMPORT_JSON_FOLDER);
-                File dire = new File(importjson);
-                File[] dirlisting = dire.listFiles();
-                if (dirlisting.length != 0) {
-                    System.out.println("Inside Import directory listing");
-                    for (File children : dirlisting) {
-                        children.delete();
-                    }
-                }
-            } catch (GenericException ex) {
-                Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            File dir = new File(export + "/enc");
-            System.out.println(export + "/enc");
-            File[] directoryListing = dir.listFiles();
-            System.out.println("file count" + directoryListing.length);
-            if (directoryListing.length != 0) {
-                System.out.println("Inside directory listing");
-                for (File child : directoryListing) {
-                    System.out.println("Inside directory listing - for loop");
-                    response = "Exporting Please Wait...";
-                    updateUI(response);
-                    AESFileEncryptionDecryption aesDecryptFile = new AESFileEncryptionDecryption();
-                    try {
-                        aesDecryptFile.decryptFile(child.getAbsolutePath(), export + "/dec/" + child.getName());
-
-                    } catch (IOException ex) {
-                        Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
-                        response = "Decryption Problem, Try Again";
-                        updateUI(response);
-                        return;
-                    } catch (NoSuchAlgorithmException ex) {
-                        Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
-                        response = "Decryption Problem, Try Again";
-                        updateUI(response);
-                        return;
-                    } catch (InvalidKeySpecException ex) {
-                        Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
-                        response = "Decryption Problem, Try Again";
-                        updateUI(response);
-                        return;
-                    } catch (NoSuchPaddingException ex) {
-                        Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
-                        response = "Decryption Problem, Try Again";
-                        updateUI(response);
-                        return;
-                    } catch (InvalidKeyException ex) {
-                        Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
-                        response = "Decryption Problem, Try Again";
-                        updateUI(response);
-                        return;
-                    } catch (InvalidAlgorithmParameterException ex) {
-                        Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
-                        response = "Decryption Problem, Try Again";
-                        updateUI(response);
-                        return;
-                    } catch (IllegalBlockSizeException ex) {
-                        Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
-                        response = "Decryption Problem, Try Again";
-                        updateUI(response);
-                        return;
-                    } catch (BadPaddingException ex) {
-                        Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
-                        response = "Decryption Problem, Try Again";
-                        updateUI(response);
-                        return;
-                    }
-                    FileReader file = null;
-                    try {
-                        file = new FileReader(export + "/dec/" + child.getName());
-                        ObjectMapper mapper = new ObjectMapper();
-                        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-                        mapper.setBase64Variant(Base64Variants.MIME_NO_LINEFEEDS);
-                        saveEnrollment = mapper.readValue(Paths.get(export + "/dec/" + child.getName()).toFile(), SaveEnrollmentDetails.class);
-                        postJson = mapper.writeValueAsString(saveEnrollment);
-                    } catch (FileNotFoundException ex) {
-                        Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
-                        response = "File not Found, Try Again";
-                        updateUI(response);
-                        return;
-                    } catch (IOException ex) {
-                        Logger.getLogger(ImportExportController.class.getName()).log(Level.SEVERE, null, ex);
-                        response = "File not Found, Try Again";
-                        updateUI(response);
-                        return;
-                    }
-
-                    try {
-                        ObjectMapper objMapper = new ObjectMapper();
-                        ObjectMapper objMappersave = new ObjectMapper();
-                        String decResponse = "";
-                        System.out.println("Decrypted Json::" + postJson);
-                        connurl = apiServerCheck.getEnrollmentSaveURL();
-                        decResponse = apiServerCheck.getEnrollmentSaveAPI(connurl, postJson);
-                        System.out.println("dec response : " + decResponse);
-                        if (decResponse.contains("Exception:")) {
-                            updateUI(decResponse);
-                            return;
-                        }
-                        saveEnrollmentResponse = objMapper.readValue(decResponse.toString(), SaveEnrollmentResponse.class);
-                        System.out.println(" save enrollment : " + saveEnrollmentResponse.toString());
-                        enrollmentResponse = objMappersave.readValue(decResponse.toString(), SaveEnrollmentResponse.class);
-                        System.out.println(" save enrollment : " + enrollmentResponse.toString());
-                        if (enrollmentResponse.getErrorCode().equals("0")) {
-                            child.delete();
-                            aesDecryptFile.delFile(export + "/dec/" + child.getName());
-                            aesDecryptFile.delFile(export + "/enc/" + child.getName());
-
-                            System.out.println(removeFileExtension(child.getName(), true) + " - " + enrollmentResponse.getDesc());
-                            response = "Biometric data exported successfully";
-                            updateUI(response);
-
-                        } else if (enrollmentResponse.getErrorCode().equals("-1")) {
-                            response = enrollmentResponse.getDesc();
-
-                            updateUI(response);
-                            child.delete();
-                            aesDecryptFile.delFile(export + "/dec/" + child.getName());
-                            aesDecryptFile.delFile(export + "/enc/" + child.getName());
-                        } else {
-
-                            System.out.println(removeFileExtension(child.getName(), true) + " - " + enrollmentResponse.getDesc());
-                            response = enrollmentResponse.getDesc();
-
-                            updateUI(response);
-                        }
-
-                    } catch (Exception e) {
-                        System.out.println("Exception in Export" + e);
-                        response = "Exception in Export" + e;
-                        updateUI(response);
-                    }
-                }
-                updateImportedListView();
-                updateCapturedBiometric();
-            } else {
-
-                System.out.println("The Directory is empty.. No encrypted files");
-                response = "No Biometric Data to Export";
-                updateUI(response);
-                return;
-
-            }
-            updateUI(response);
-        }
-    };
 
     @FXML
     public void home() throws IOException {
@@ -451,7 +248,7 @@ public class ImportExportController {
             unitListView.setItems(FXCollections.observableArrayList(unitCaptions));
             messageLabel.setText("");
         });
-        enableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportBtn);
+        enableControls(importUnitBtn);
     }
 
 
@@ -554,16 +351,21 @@ public class ImportExportController {
     private void updateImportedListView() {
         // throws exception
         try (Stream<Path> importFolder = Files.walk(Path.of(PropertyFile.getProperty(PropertyName.IMPORT_JSON_FOLDER)))) {
-            List<String> unitCaptions = importFolder.filter(Files::isRegularFile).map(file -> {
-                String[] splitFileName = file.getFileName().toString().split("-");
-                if (splitFileName.length > 2) {
-                    //00001-INSI-INS INDIA
-                    return splitFileName[2];
-                }
-                LOGGER.log(Level.SEVERE, () -> "Malformed filename: " + file.getFileName());
-                return "";
-            }).filter(unitCaption -> !unitCaption.isBlank()).collect(Collectors.toList());
+            List<String> unitCaptions = importFolder
+                    .filter(Files::isRegularFile)
+                    .map(file -> {
+                        String[] splitFileName = file.getFileName().toString().split("-");
+                        if (splitFileName.length > 2) {
+                            //00001-INSI-INS INDIA
+                            return splitFileName[2];
+                        }
+                        LOGGER.log(Level.SEVERE, () -> "Malformed filename: " + file.getFileName());
+                        return "";
+                    }).filter(unitCaption -> !unitCaption.isBlank()).collect(Collectors.toList());
 
+            if (unitCaptions.isEmpty()) {
+                disableControls(clearImportBtn, clearAllImportBtn);
+            }
             Platform.runLater(() -> {
                 importedUnitListView.setItems(FXCollections.observableList(unitCaptions));
                 importedUnitText.setText(IMPORTED_TEXT + unitCaptions.size());
@@ -627,6 +429,7 @@ public class ImportExportController {
     private void updateCapturedBiometric() {
         try (Stream<Path> encExportFolder = Files.walk(Path.of(PropertyFile.getProperty(PropertyName.ENC_EXPORT_FOLDER)))) {
             List<String> capturedArcs = new ArrayList<>();
+
             encExportFolder.forEach(path -> {
                 if (Files.isRegularFile(path)) {
                     String[] splitFilename = path.getFileName().toString().split("\\.");
@@ -637,6 +440,10 @@ public class ImportExportController {
             });
 
             Collections.sort(capturedArcs);
+
+            if (capturedArcs.isEmpty()) {
+                disableControls(exportBtn);
+            }
             Platform.runLater(() -> {
                 capturedBiometricText.setText(CAPTURED_BIOMETRIC_TEXT + capturedArcs.size());
                 capturedArcListView.setItems(FXCollections.observableList(capturedArcs));
@@ -646,5 +453,9 @@ public class ImportExportController {
             LOGGER.log(Level.SEVERE, "Error occurred while getting the count of captured biometric data");
             updateUI(ApplicationConstant.GENERIC_ERR_MSG);
         }
+    }
+
+    private void updateUI(String message) {
+        Platform.runLater(() -> messageLabel.setText(message));
     }
 }

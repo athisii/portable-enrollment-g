@@ -24,7 +24,9 @@ public class ApplicationLog {
     static {
         try {
             // /var/log/enrollment/enrollmentstationapp.log
-            String logfileName = PropertyFile.getProperty(PropertyName.LOG_FILE).split("\\.")[0] + "-" + LocalDateTime.now().withSecond(0).withNano(0) + "-log";
+            LocalDateTime now = LocalDateTime.now();
+            String time = now.getDayOfMonth() + "-" + now.getMonth() + "-" + now.getYear() + "-" + now.getHour() + "-" + now.getMinute();
+            String logfileName = PropertyFile.getProperty(PropertyName.LOG_FILE).split("\\.")[0] + "-" + time + "-log";
             handler = new FileHandler(logfileName, 1024000, 2); //1024000 is 1Mb - It will roll over after a file becomes 1Mb
             handler.setFormatter(new SimpleFormatter());
             handler.setLevel(Level.ALL);

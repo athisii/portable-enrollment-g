@@ -197,15 +197,15 @@ public class ARCNoController {
         boolean alreadyCaptured;
         ARCDetails arcDetails;
         // check if already captured
-        ForkJoinTask<Boolean> alreadyCapturedCallable = ForkJoinPool.commonPool().submit(this::checkIfAlreadyCaptured);
+        ForkJoinTask<Boolean> alreadyCapturedFuture = ForkJoinPool.commonPool().submit(this::checkIfAlreadyCaptured);
 
         // check if arc number exists
-        ForkJoinTask<ARCDetails> arcDetailsCallable = ForkJoinPool.commonPool().submit(this::checkIfArcNumberExist);
+        ForkJoinTask<ARCDetails> arcDetailsFuture = ForkJoinPool.commonPool().submit(this::checkIfArcNumberExist);
 
         // waits for both the worker threads to finish
         try {
-            alreadyCaptured = alreadyCapturedCallable.get();
-            arcDetails = arcDetailsCallable.get();
+            alreadyCaptured = alreadyCapturedFuture.get();
+            arcDetails = arcDetailsFuture.get();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return;

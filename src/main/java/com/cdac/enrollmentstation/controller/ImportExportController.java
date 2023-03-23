@@ -36,7 +36,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -96,7 +98,6 @@ public class ImportExportController {
         // should not allow multiple selections of units
         // some units might not have Arc number
         // error message will get override if multiple units are selected
-//        unitListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE)
         unitListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             selectedUnits.clear();
             selectedUnits.addAll(new ArrayList<>(unitListView.getSelectionModel().getSelectedItems()));
@@ -141,18 +142,51 @@ public class ImportExportController {
             enableControls(homeBtn, backBtn);
             return;
         }
+
         // now decrypt the data and calls the save API
-        boolean isAllSubmitted = false;
+        // run in multiple threads if size is greater than 3
+        ForkJoinTask<Boolean> future = null;
+        if (encryptedArcPaths.size() > 3) {
+            future = ForkJoinPool.commonPool().submit(() -> decryptAndSendToServer(encryptedArcPaths.subList(encryptedArcPaths.size() / 2, encryptedArcPaths.size())));
+        }
+        boolean result = decryptAndSendToServer(encryptedArcPaths);
+        if (future == null) {
+            if (result) {
+                updateUI("Data exported successfully.");
+                updateCapturedBiometric();
+                clearAllImportedUnits();
+                enableControls(homeBtn, backBtn);
+            }
+            return;
+        }
+        try {
+            boolean workerThreadResult = future.get();
+            if (workerThreadResult && result) {
+                updateUI("Data exported successfully.");
+                updateCapturedBiometric();
+                clearAllImportedUnits();
+                enableControls(homeBtn, backBtn);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException ignored) {
+        }
+    }
+
+
+    private boolean decryptAndSendToServer(List<Path> paths) {
         String decryptedJsonData;
-        for (Path encryptedArcPath : encryptedArcPaths) {
-            updateUI("Exporting Arc: " + encryptedArcPath.getFileName().toString().split("\\.")[0]);
+        boolean shouldDelete;
+        for (Path path : paths) {
+            shouldDelete = true;
+            updateUI("Exporting Arc: " + path.getFileName().toString().split("\\.")[0]);
             // throws GenericException
             try {
-                decryptedJsonData = AesFileUtil.decrypt(encryptedArcPath);
+                decryptedJsonData = AesFileUtil.decrypt(path);
             } catch (GenericException ex) {
                 updateUI(ApplicationConstant.GENERIC_ERR_MSG);
                 enableControls(homeBtn, backBtn);
-                return;
+                return false;
             }
 
             SaveEnrollmentResponse saveEnrollmentResponse;
@@ -161,35 +195,35 @@ public class ImportExportController {
             } catch (GenericException ignored) {
                 updateUI(ApplicationConstant.GENERIC_ERR_MSG);
                 enableControls(homeBtn, backBtn);
-                return;
+                return false;
             }
             // timeout connection
             if (saveEnrollmentResponse == null) {
                 updateUI("Connection timeout. Please try again.");
                 enableControls(exportBtn);
                 enableControls(homeBtn, backBtn);
-                return;
+                return false;
             }
             if (!"0".equals(saveEnrollmentResponse.getErrorCode())) {
                 LOGGER.log(Level.SEVERE, "Server desc: " + saveEnrollmentResponse.getDesc());
-                updateUI(saveEnrollmentResponse.getDesc());
-                enableControls(homeBtn, backBtn);
-                return;
+                //TODO: check if already submitted/given
+                if (!saveEnrollmentResponse.getDesc().toLowerCase().contains("already") && !saveEnrollmentResponse.getDesc().toLowerCase().contains("submitted") && !saveEnrollmentResponse.getDesc().toLowerCase().contains("given")) {
+                    updateUI(saveEnrollmentResponse.getDesc());
+                    enableControls(homeBtn, backBtn);
+                    return false;
+                }
             }
 
             try {
-                Files.delete(encryptedArcPath);
+                Files.delete(path);
             } catch (IOException ex) {
                 LOGGER.log(Level.SEVERE, ex.getMessage());
                 updateUI(ApplicationConstant.GENERIC_ERR_MSG);
                 enableControls(homeBtn, backBtn);
-                return;
+                return false;
             }
         }
-        updateUI("Data exported successfully.");
-        updateCapturedBiometric();
-        clearAllImportedUnits();
-        enableControls(homeBtn, backBtn);
+        return true;
     }
 
     @FXML
@@ -248,7 +282,7 @@ public class ImportExportController {
             unitListView.setItems(FXCollections.observableArrayList(unitCaptions));
             messageLabel.setText("");
         });
-        enableControls(importUnitBtn,exportBtn,clearImportBtn,clearAllImportBtn);
+        enableControls(importUnitBtn, exportBtn, clearImportBtn, clearAllImportBtn);
     }
 
 

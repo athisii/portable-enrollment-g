@@ -169,7 +169,7 @@ public class BiometricCaptureCompleteController {
         }
         // starts another thread for encrypting data to avoid wasting cpu time when API call fails.
         // but this encrypted data file must be DELETED if API call succeeds
-        ForkJoinTask<Boolean> encryptionProcessStatus = ForkJoinPool.commonPool().submit(() -> startEncryptionProcess(arcDetails.getArcNo(), jsonData));
+        ForkJoinTask<Boolean> encryptionProcessFuture = ForkJoinPool.commonPool().submit(() -> startEncryptionProcess(arcDetails.getArcNo(), jsonData));
 
         SaveEnrollmentResponse saveEnrollmentResponse;
         // try submitting to the server.
@@ -184,7 +184,7 @@ public class BiometricCaptureCompleteController {
         // saves the data locally
         if (saveEnrollmentResponse == null) {
             try {
-                boolean result = encryptionProcessStatus.get();
+                boolean result = encryptionProcessFuture.get();
                 // encrypted successfully
                 if (result) {
                     Platform.runLater(() -> {
@@ -233,7 +233,7 @@ public class BiometricCaptureCompleteController {
 
         // deletes encrypted file saved by worker thread.
         try {
-            boolean result = encryptionProcessStatus.get();
+            boolean result = encryptionProcessFuture.get();
             if (result) {
                 Files.delete(Paths.get(PropertyFile.getProperty(PropertyName.ENC_EXPORT_FOLDER) + "/" + arcDetails.getArcNo() + ".json.enc"));
             }

@@ -187,6 +187,11 @@ public class BiometricCaptureCompleteController {
                     homeBtn.setDisable(false);
                     fetchArcBtn.setDisable(false);
                 });
+                try {
+                    SaveEnrollmentDetailsUtil.delete();
+                } catch (GenericException ignored) {
+                    onErrorUpdateUiControls();
+                }
             } catch (GenericException ex) {
                 onErrorUpdateUiControls();
             }

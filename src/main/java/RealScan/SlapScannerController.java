@@ -45,9 +45,11 @@ import static com.cdac.enrollmentstation.model.ARCDetailsHolder.getArcDetailsHol
 public class SlapScannerController {
     private static final Logger LOGGER = ApplicationLog.getLogger(SlapScannerController.class);
     private final static int TIME_TO_WAIT_FOR_NEXT_CAPTURE_IN_SEC = 3; // to be on safe side
+    private final static int TIME_TO_WAIT_FOR_USER_IN_SEC = 3; // wait for users to place their fingers on sensor
     private final static int TIME_TO_WAIT_FOR_SWITCHING_FINGER_TYPE_TO_SCAN_IN_MILLIS = 100;
     private final static int SECURITY_LEVEL_FOR_SEQUENCE_CHECK = 5; // range: 0~7
     private boolean isFpScanCompleted;
+    // cannot be static.
     private final int fingerprintLivenessValue = Integer.parseInt(PropertyFile.getProperty(PropertyName.FINGERPRINT_LIVENESS_VALUE).trim());
 
 
@@ -154,8 +156,6 @@ public class SlapScannerController {
         confirmNoBtn.setOnAction(event -> confirmStay());
         confirmYesBtn.setOnAction(event -> confirmBack());
 
-        //TODO: uncomment this
-        /*
         try {
             initIEngineLicense();
         } catch (Exception ex) {
@@ -176,12 +176,12 @@ public class SlapScannerController {
         rightFingerToFingerTypeLinkedHashMap = getFingersToScanSeqMap(getArcDetailsHolder().getArcDetails().getFingers(), FingerSetType.RIGHT);
         thumbToFingerTypeLinkedHashMap = getFingersToScanSeqMap(getArcDetailsHolder().getArcDetails().getFingers(), FingerSetType.THUMB);
 
-         */
-
+        // TODO: only for testing
+         /*
         leftFingerToFingerTypeLinkedHashMap = getFingersToScanSeqMap(List.of(""), FingerSetType.LEFT);
         rightFingerToFingerTypeLinkedHashMap = getFingersToScanSeqMap(List.of(""), FingerSetType.RIGHT);
         thumbToFingerTypeLinkedHashMap = getFingersToScanSeqMap(List.of(""), FingerSetType.THUMB);
-
+         */
 
         if (getArcDetailsHolder().getArcDetails() != null && getArcDetailsHolder().getArcDetails().getArcNo() != null) {
             displayArcLabel.setText("ARC: " + getArcDetailsHolder().getArcDetails().getArcNo());
@@ -310,6 +310,14 @@ public class SlapScannerController {
             return;
         }
 
+        if (leftFingerToFingerTypeLinkedHashMap.size() > 3) {
+            updateUI("Place your four left fingers on the sensor.");
+        } else {
+            // Place your Left Index, Left Middle finger(s) on the sensor.
+            String fingers = leftFingerToFingerTypeLinkedHashMap.keySet().stream().map(fingerAbrvToLFMap::get).collect(Collectors.joining(", "));
+            updateUI("Place your  " + fingers + " finger(s) on the sensor.");
+        }
+
         // throws GenericException
         try {
             // when fingers are already placed on the sensor at the time of initialization, it fails
@@ -318,15 +326,6 @@ public class SlapScannerController {
         } catch (GenericException ex) {
             updateUI(ex.getMessage());
             enableControls(backBtn, leftScanBtn);
-            return;
-        }
-
-        if (leftFingerToFingerTypeLinkedHashMap.size() > 3) {
-            updateUI("Place your left four fingers on the sensor.");
-        } else {
-            // Place your Left Index, Left Middle finger(s) on the sensor.
-            String fingers = leftFingerToFingerTypeLinkedHashMap.keySet().stream().map(fingerAbrvToLFMap::get).collect(Collectors.joining(", "));
-            updateUI("Place your  " + fingers + " finger(s) on the sensor.");
         }
 
     }
@@ -354,6 +353,13 @@ public class SlapScannerController {
             startThumbScan();
             return;
         }
+        if (rightFingerToFingerTypeLinkedHashMap.size() > 3) {
+            updateUI("Place your four right fingers on the sensor.");
+        } else {
+            // Place your Right Index, Right Middle finger(s) on the sensor.
+            String fingers = rightFingerToFingerTypeLinkedHashMap.keySet().stream().map(fingerAbrvToLFMap::get).collect(Collectors.joining(", "));
+            updateUI("Place your " + fingers + " finger(s) on the sensor.");
+        }
 
         // throws GenericException
         try {
@@ -363,16 +369,8 @@ public class SlapScannerController {
         } catch (GenericException ex) {
             updateUI(ex.getMessage());
             enableControls(backBtn, rightScanBtn);
-            return;
         }
 
-        if (rightFingerToFingerTypeLinkedHashMap.size() > 3) {
-            updateUI("Place your right four fingers on the sensor.");
-        } else {
-            // Place your Right Index, Right Middle finger(s) on the sensor.
-            String fingers = rightFingerToFingerTypeLinkedHashMap.keySet().stream().map(fingerAbrvToLFMap::get).collect(Collectors.joining(", "));
-            updateUI("Place your " + fingers + " finger(s) on the sensor.");
-        }
 
     }
 
@@ -398,6 +396,13 @@ public class SlapScannerController {
             convertToTemplate();
             return;
         }
+        if (thumbToFingerTypeLinkedHashMap.size() > 1) {
+            updateUI("Place your two thumbs on the sensor.");
+        } else {
+            // Place your Left thumb on the sensor.
+            String thumb = thumbToFingerTypeLinkedHashMap.keySet().stream().map(fingerAbrvToLFMap::get).collect(Collectors.joining(", "));
+            updateUI("Place your " + thumb + " on the sensor.");
+        }
 
         // throws GenericException
         try {
@@ -407,15 +412,6 @@ public class SlapScannerController {
         } catch (GenericException ex) {
             updateUI(ex.getMessage());
             enableControls(backBtn, thumbScanBtn);
-            return;
-        }
-
-        if (thumbToFingerTypeLinkedHashMap.size() > 1) {
-            updateUI("Place your two thumbs on the sensor.");
-        } else {
-            // Place your Left thumb on the sensor.
-            String thumb = thumbToFingerTypeLinkedHashMap.keySet().stream().map(fingerAbrvToLFMap::get).collect(Collectors.joining(", "));
-            updateUI("Place your " + thumb + " on the sensor.");
         }
     }
 
@@ -438,16 +434,10 @@ public class SlapScannerController {
             LOGGER.log(Level.SEVERE, "Unsupported finger set type.");
             throw new GenericException("Unsupported finger set type.");
         }
-
+        // very important
+        // error message set by RS_TakeCurrentImageData call in setModeAndStartCapture ()
+        // so just return.
         if (errorCode != RS_SUCCESS) {
-            // generic message for all warnings. errorCode > 0
-            jniErrorMsg = "Quality too poor. Please try again.";
-            if (errorCode == RS_ERR_SENSOR_DIRTY || errorCode == RS_ERR_FINGER_EXIST) {
-                jniErrorMsg = RS_GetErrString(errorCode);
-            }
-            LOGGER.log(Level.SEVERE, jniErrorMsg);
-            updateUI(jniErrorMsg);
-            enableControls(backBtn, button);
             return;
         }
 
@@ -594,16 +584,46 @@ public class SlapScannerController {
                 RS_ERR_CAPTURE_IS_RUNNING - A capture process is already running.
          */
         // returns immediately, callbacks are executed in background thread.
-        jniReturnedCode = RS_StartCapture(deviceHandler, true, 0); // TODO: check for manual with timeout but use callbacks
-        if (jniReturnedCode == RS_SUCCESS) {
-            return;
+        jniReturnedCode = RS_StartCapture(deviceHandler, false, 0); // TODO: check for manual with timeout but use callbacks
+        if (jniReturnedCode != RS_SUCCESS) {
+            if (jniReturnedCode != RS_ERR_SENSOR_DIRTY && jniReturnedCode != RS_ERR_FINGER_EXIST) {
+                LOGGER.log(Level.SEVERE, RS_GetErrString(jniReturnedCode));
+                throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
+            } else {
+                LOGGER.log(Level.SEVERE, RS_GetErrString(jniReturnedCode));
+                throw new GenericException("Sensor is too dirty or a finger exists on the sensor. Please try again.");
+            }
         }
-        if (jniReturnedCode != RS_ERR_SENSOR_DIRTY && jniReturnedCode != RS_ERR_FINGER_EXIST) {
-            LOGGER.log(Level.SEVERE, RS_GetErrString(jniReturnedCode));
-            throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
-        } else {
-            LOGGER.log(Level.SEVERE, RS_GetErrString(jniReturnedCode));
-            throw new GenericException("Sensor is too dirty or a finger exists on the sensor. Please try again.");
+
+        // now good to go.
+
+        // To wait for user to place their fingers on the sensor
+        try {
+            Thread.sleep(TimeUnit.SECONDS.toMillis(TIME_TO_WAIT_FOR_USER_IN_SEC));
+        } catch (InterruptedException e) {
+            throw new GenericException("Interrupted while sleeping.");
+        }
+
+        /*
+        RS_TakeCurrentImageData Error Codes:
+                RS_SUCCESS - An image is captured successfully.
+                RS_ERR_SDK_UNINITIALIZED - The SDK is not yet initialized.
+                RS_ERR_INVALID_HANDLE - The device handle is invalid.
+                RS_ERR_CAPTURE_DISABLED - The capture mode is disabled.
+                RS_ERR_CAPTURE_TIMEOUT - Cannot capture an image within the specified timeout period.
+                RS_ERR_ROLL_PART_LIFT - A part of the rolling finger is lifted.
+                RS_ERR_ROLL_DIRTY - The sensor surface is dirty, or more than one finger is detected.
+                RS_ERR_ROLL_TOO_FAST - Rolling speed is too fast.
+                RS_ERR_ROLL_SHIFTED - The finger is heavily shifted or rotated.
+                RS_ERR_ROLL_DRY - The finger could not be recognized correctly because of bad image contrast or smeared finger patterns
+                RS_ERR_ROLL_WRONG_DIR - The rolling does not confirm to the specified direction.
+                RS_ERR_ROLL_TOO_SHORT - Rolling time is too short.
+         */
+        jniReturnedCode = RS_TakeCurrentImageData(deviceHandler, 10000, new RSImageInfo()); // TODO: check timeout/
+        if (jniReturnedCode != RS_SUCCESS) {
+            jniErrorMsg = RS_GetErrString(jniReturnedCode);
+            LOGGER.log(Level.INFO, "******RS_TakeCurrentImageData returned message: " + jniErrorMsg);
+            throw new GenericException("Quality too poor. Please try again.");
         }
     }
 

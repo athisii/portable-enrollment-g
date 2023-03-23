@@ -146,7 +146,7 @@ public class SlapScannerController {
     // calls automatically by JavaFX runtime
     public void initialize() {
         scanBtn.setOnAction(event -> scanBtnAction());
-        leftScanBtn.setOnAction(event -> scanBtnAction());
+        leftScanBtn.setOnAction(event -> leftScanBtnAction());
         rightScanBtn.setOnAction(event -> rightScanBtnAction());
         thumbScanBtn.setOnAction(event -> thumbScanBtnAction());
         backBtn.setOnAction(event -> back());
@@ -154,6 +154,8 @@ public class SlapScannerController {
         confirmNoBtn.setOnAction(event -> confirmStay());
         confirmYesBtn.setOnAction(event -> confirmBack());
 
+        //TODO: uncomment this
+        /*
         try {
             initIEngineLicense();
         } catch (Exception ex) {
@@ -174,6 +176,12 @@ public class SlapScannerController {
         rightFingerToFingerTypeLinkedHashMap = getFingersToScanSeqMap(getArcDetailsHolder().getArcDetails().getFingers(), FingerSetType.RIGHT);
         thumbToFingerTypeLinkedHashMap = getFingersToScanSeqMap(getArcDetailsHolder().getArcDetails().getFingers(), FingerSetType.THUMB);
 
+         */
+
+        leftFingerToFingerTypeLinkedHashMap = getFingersToScanSeqMap(List.of(""), FingerSetType.LEFT);
+        rightFingerToFingerTypeLinkedHashMap = getFingersToScanSeqMap(List.of(""), FingerSetType.RIGHT);
+        thumbToFingerTypeLinkedHashMap = getFingersToScanSeqMap(List.of(""), FingerSetType.THUMB);
+
 
         if (getArcDetailsHolder().getArcDetails() != null && getArcDetailsHolder().getArcDetails().getArcNo() != null) {
             displayArcLabel.setText("ARC: " + getArcDetailsHolder().getArcDetails().getArcNo());
@@ -190,6 +198,7 @@ public class SlapScannerController {
             RS_ERR_CANNOT_GET_USB_DEVICE - Cannot get device information from USB.
             RS_ERR_SDK_ALREADY_INITIALIZED - There remain unreleased devices.
         */
+
         int numOfScanners = RS_InitSDK("", 0);
         jniReturnedCode = RS_GetLastError();
         if (jniReturnedCode != RS_SUCCESS && jniReturnedCode != RS_ERR_SDK_ALREADY_INITIALIZED) {
@@ -209,10 +218,18 @@ public class SlapScannerController {
             RS_ERR_INVALID_DEVICE_INDEX - The device index is invalid.
             RS_ERR_DEVICE_ALREADY_INITIALIZED - The device is already initialized.
             RS_ERR_CANNOT_OPEN_DEVICE - Cannot connect to the device.
+            RS_ERR_SENSOR_DIRTY - A finger is on the sensor or Sensor is too dirty. Clean the sensor and try again
+            RS_ERR_FINGER_EXIST - A finger is on the sensor or Sensor is too dirty. Clean the sensor and try again
          */
         deviceHandler = RS_InitDevice(0);
         // only stop if these errors occur
         jniReturnedCode = RS_GetLastError();
+        if (jniReturnedCode == RS_ERR_SENSOR_DIRTY || jniReturnedCode == RS_ERR_FINGER_EXIST) {
+            String errorMessage = RS_GetErrString(jniReturnedCode);
+            LOGGER.log(Level.SEVERE, errorMessage);
+            throw new GenericException(errorMessage);
+        }
+
         if (jniReturnedCode != RS_SUCCESS && jniReturnedCode != RS_ERR_DEVICE_ALREADY_INITIALIZED) {
             LOGGER.log(Level.SEVERE, RS_GetErrString(jniReturnedCode));
             throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
@@ -256,46 +273,33 @@ public class SlapScannerController {
         } catch (GenericException ex) {
             messageLabel.setText(ex.getMessage());
             scanBtn.setDisable(false);
-            releaseDevice();
             return;
         }
         clearFingerprintOnUI();
         ForkJoinPool.commonPool().execute(this::startLeftScan);
     }
 
+    private void leftScanBtnAction() {
+        disableControls(scanBtn, leftScanBtn, rightScanBtn, thumbScanBtn, backBtn, captureIrisBtn);
+        ForkJoinPool.commonPool().execute(this::startLeftScan);
+    }
+
     private void rightScanBtnAction() {
         disableControls(scanBtn, leftScanBtn, rightScanBtn, thumbScanBtn, backBtn, captureIrisBtn);
-        try {
-            initScanner();
-        } catch (GenericException ex) {
-            updateUI(ex.getMessage());
-            enableControls(rightScanBtn);
-            releaseDevice();
-            return;
-        }
         ForkJoinPool.commonPool().execute(this::startRightScan);
     }
 
     private void thumbScanBtnAction() {
         disableControls(scanBtn, leftScanBtn, rightScanBtn, thumbScanBtn, backBtn, captureIrisBtn);
-        try {
-            initScanner();
-        } catch (GenericException ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage());
-            messageLabel.setText(ex.getMessage());
-            thumbScanBtn.setDisable(false);
-            releaseDevice();
-            return;
-        }
         ForkJoinPool.commonPool().execute(this::startThumbScan);
     }
 
     private void startLeftScan() {
         fingerSetTypeToScan = FingerSetType.LEFT;
-        // when fingers are already placed on the sensor at the time of initialization, it fails
         if (!isDeviceInitialised) {
+            LOGGER.log(Level.SEVERE, "Device is not initialised. Status of isDeviceInitialised is 'false'.");
             updateUI(ApplicationConstant.GENERIC_RS_ERR_MSG);
-            enableControls(backBtn, scanBtn);
+            enableControls(backBtn, leftScanBtn);
             return;
         }
 
@@ -308,12 +312,12 @@ public class SlapScannerController {
 
         // throws GenericException
         try {
+            // when fingers are already placed on the sensor at the time of initialization, it fails
             // set capture mode, register a callback, start capture and return immediately
             setModeAndStartCapture();
         } catch (GenericException ex) {
             updateUI(ex.getMessage());
-            enableControls(backBtn, scanBtn);
-            releaseDevice();
+            enableControls(backBtn, leftScanBtn);
             return;
         }
 
@@ -339,6 +343,7 @@ public class SlapScannerController {
         }
 
         if (!isDeviceInitialised) {
+            LOGGER.log(Level.SEVERE, "Device is not initialised. Status of isDeviceInitialised is 'false'. ");
             updateUI(ApplicationConstant.GENERIC_RS_ERR_MSG);
             enableControls(backBtn, rightScanBtn);
             return;
@@ -352,12 +357,12 @@ public class SlapScannerController {
 
         // throws GenericException
         try {
+            // when fingers are already placed on the sensor at the time of initialization, it fails
             // set capture mode, register a callback, start capture and return immediately
             setModeAndStartCapture();
         } catch (GenericException ex) {
             updateUI(ex.getMessage());
             enableControls(backBtn, rightScanBtn);
-            releaseDevice();
             return;
         }
 
@@ -383,6 +388,7 @@ public class SlapScannerController {
         }
 
         if (!isDeviceInitialised) {
+            LOGGER.log(Level.SEVERE, "Device is not initialised. Status of isDeviceInitialised is 'false'.");
             updateUI(ApplicationConstant.GENERIC_RS_ERR_MSG);
             enableControls(backBtn, thumbScanBtn);
             return;
@@ -395,12 +401,12 @@ public class SlapScannerController {
 
         // throws GenericException
         try {
+            // when fingers are already placed on the sensor at the time of initialization, it fails
             // set capture mode, register a callback, start capture and return immediately
             setModeAndStartCapture();
         } catch (GenericException ex) {
             updateUI(ex.getMessage());
             enableControls(backBtn, thumbScanBtn);
-            releaseDevice();
             return;
         }
 
@@ -420,7 +426,7 @@ public class SlapScannerController {
         if (FingerSetType.LEFT == fingerSetTypeToScan) {
             scannedFingerTypeToRsImageInfoMap.clear(); // for fresh start
             figerSetTypeToRsImageInfoMap.clear(); // for fresh start
-            button = scanBtn;
+            button = leftScanBtn;
             successMessage = "Left fingerprints captured successfully. Please wait.";
         } else if (FingerSetType.RIGHT == fingerSetTypeToScan) {
             button = rightScanBtn;
@@ -434,11 +440,10 @@ public class SlapScannerController {
         }
 
         if (errorCode != RS_SUCCESS) {
+            // generic message for all warnings. errorCode > 0
+            jniErrorMsg = "Quality too poor. Please try again.";
             if (errorCode == RS_ERR_SENSOR_DIRTY || errorCode == RS_ERR_FINGER_EXIST) {
                 jniErrorMsg = RS_GetErrString(errorCode);
-            } else {
-                jniErrorMsg = ApplicationConstant.GENERIC_RS_ERR_MSG;
-                releaseDevice();
             }
             LOGGER.log(Level.SEVERE, jniErrorMsg);
             updateUI(jniErrorMsg);
@@ -448,7 +453,6 @@ public class SlapScannerController {
 
         if (imageData == null || imageHeight == 0 || imageWidth == 0) {
             updateUI("Something went wrong. Please try again.");
-            releaseDevice();
             enableControls(backBtn, button);
             return;
         }
@@ -478,7 +482,6 @@ public class SlapScannerController {
             Thread.sleep(TIME_TO_WAIT_FOR_SWITCHING_FINGER_TYPE_TO_SCAN_IN_MILLIS);
         } catch (GenericException ex) {
             updateUI(ex.getMessage());
-            releaseDevice();
             enableControls(backBtn, button);
             isFromPrevScan = false;
             return;
@@ -758,6 +761,7 @@ public class SlapScannerController {
                 throw new GenericException("Quality not good or something went wrong. Please try again.");
             } else {
                 LOGGER.log(Level.SEVERE, jniErrorMsg);
+                LOGGER.log(Level.SEVERE, "ERROR CODE:" + jniReturnedCode);
                 throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
             }
         }
@@ -1122,9 +1126,9 @@ public class SlapScannerController {
     }
 
     private void enableControls(Node... nodes) {
-            for (Node node : nodes) {
-                node.setDisable(false);
-            }
+        for (Node node : nodes) {
+            node.setDisable(false);
+        }
     }
 
 }

@@ -36,7 +36,9 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -165,6 +167,9 @@ public class BiometricCaptureCompleteController {
             onErrorUpdateUiControls();
             return;
         }
+        // starts another thread for encrypting data to avoid wasting cpu time when API call fails.
+        // but this encrypted data file must be DELETED if API call succeeds
+        ForkJoinTask<Boolean> encryptionProcessStatus = ForkJoinPool.commonPool().submit(() -> startEncryptionProcess(arcDetails.getArcNo(), jsonData));
 
         SaveEnrollmentResponse saveEnrollmentResponse;
         // try submitting to the server.
@@ -174,27 +179,35 @@ public class BiometricCaptureCompleteController {
             onErrorUpdateUiControls();
             return;
         }
+
         // connection timeout error
         // saves the data locally
         if (saveEnrollmentResponse == null) {
-            //TODO: throws exception must handle
             try {
-                encryptAndSaveLocally(arcDetails.getArcNo(), jsonData);
-                Platform.runLater(() -> {
-                    messageLabel.setText("Data encrypted and saved locally.");
-                    submitBtn.setDisable(true);
-                    progressIndicator.setVisible(false);
-                    homeBtn.setDisable(false);
-                    fetchArcBtn.setDisable(false);
-                });
-                try {
-                    SaveEnrollmentDetailsUtil.delete();
-                } catch (GenericException ignored) {
-                    onErrorUpdateUiControls();
+                boolean result = encryptionProcessStatus.get();
+                // encrypted successfully
+                if (result) {
+                    Platform.runLater(() -> {
+                        messageLabel.setText("Data encrypted and saved locally.");
+                        submitBtn.setDisable(true);
+                        progressIndicator.setVisible(false);
+                        homeBtn.setDisable(false);
+                        fetchArcBtn.setDisable(false);
+                    });
+                    try {
+                        SaveEnrollmentDetailsUtil.delete();
+                    } catch (GenericException ignored) {
+                        onErrorUpdateUiControls();
+                    }
+                    return;
                 }
-            } catch (GenericException ex) {
-                onErrorUpdateUiControls();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (ExecutionException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage());
             }
+            // if reached this line, encryption failed/exception thrown.
+            onErrorUpdateUiControls();
             return;
         }
 
@@ -208,11 +221,36 @@ public class BiometricCaptureCompleteController {
         // else saved successfully on the server
         // runs on main thread
         updateUiIconOnServerResponse(true, "Data submitted to server successfully.");
-        // deletes the backup data
+
+
+        // now that data is saved on server, lets do the cleanup
         try {
             SaveEnrollmentDetailsUtil.delete();
-        } catch (GenericException ignored) {
+        } catch (GenericException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
             onErrorUpdateUiControls();
+        }
+
+        // deletes encrypted file saved by worker thread.
+        try {
+            boolean result = encryptionProcessStatus.get();
+            if (result) {
+                Files.delete(Paths.get(PropertyFile.getProperty(PropertyName.ENC_EXPORT_FOLDER) + "/" + arcDetails.getArcNo() + ".json.enc"));
+            }
+        } catch (InterruptedException | ExecutionException | IOException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            onErrorUpdateUiControls();
+        }
+
+    }
+
+    private boolean startEncryptionProcess(String arcNumber, String jsonData) {
+        try {
+            encryptAndSaveLocally(arcNumber, jsonData);
+            return true;
+        } catch (GenericException ex) {
+            onErrorUpdateUiControls();
+            return false;
         }
     }
 

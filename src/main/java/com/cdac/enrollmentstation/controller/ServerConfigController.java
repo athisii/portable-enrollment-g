@@ -167,14 +167,11 @@ public class ServerConfigController {
         enrollmentStationIdTextField.setText(enrollmentStationId);
         enrollmentStationUnitIdsComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             // sometimes old and new value will be null.
-            if (oldValue != null && newValue != null) {
-                if (!newValue.equals(oldValue)) {
-                    Optional<Unit> unitOptional = units.stream().filter(u -> u.getCaption().equals(newValue)).findFirst();
-                    unitOptional.ifPresent(u -> unit = u);
-                }
-
+            if (newValue != null) {
+                Optional<Unit> unitOptional = units.stream().filter(u -> u.getCaption().equals(newValue)).findFirst();
+                unitOptional.ifPresent(u -> unit = u);
+                updateUnitBtn.setDisable(false);
             }
-            disableControls(fetchUnitsBtn);
         });
 
     }

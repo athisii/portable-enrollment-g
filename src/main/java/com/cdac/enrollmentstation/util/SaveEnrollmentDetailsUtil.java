@@ -48,10 +48,6 @@ public class SaveEnrollmentDetailsUtil {
 
     public static SaveEnrollmentDetails readFromFile() {
         Path path = getFilePath();
-        if (!Files.exists(path)) {
-            LOGGER.log(Level.SEVERE, "saveEnrollment.txt file not found.");
-            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
-        }
         try {
             String content = Files.readString(path, StandardCharsets.UTF_8);
             return Singleton.getObjectMapper().readValue(content, SaveEnrollmentDetails.class);
@@ -59,6 +55,7 @@ public class SaveEnrollmentDetailsUtil {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             //if error occurs, then overwrite with new data
             writeToFile(new SaveEnrollmentDetails());
+            // recursive call
             return readFromFile();
         }
 

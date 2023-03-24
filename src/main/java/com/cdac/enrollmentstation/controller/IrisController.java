@@ -6,11 +6,11 @@
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
+import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.*;
-import com.cdac.enrollmentstation.service.ObjectReaderWriter;
+import com.cdac.enrollmentstation.util.SaveEnrollmentDetailsUtil;
 import com.fasterxml.jackson.core.Base64Variants;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.mantra.midirisenroll.DeviceInfo;
@@ -1218,27 +1218,12 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         mapper.setBase64Variant(Base64Variants.MIME_NO_LINEFEEDS);
 
-
-        String postJson;
         try {
-            postJson = mapper.writeValueAsString(saveEnrollment);
-            //Code Added by K. Karthikeyan - 18-4-22 - Start
-            ObjectReaderWriter objReadWrite = new ObjectReaderWriter();
-            objReadWrite.writer(saveEnrollment);
-            System.out.println("Save Enrollment Object write");
-            SaveEnrollmentDetails s = objReadWrite.reader();
-            System.out.println("Enrollment Status " + s.getEnrollmentStatus());
-            //Code Added by K. Karthikeyan - 18-4-22 - Finish
-
-            //     System.out.println("post json iris :"+ postJson);
-        } catch (JsonProcessingException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            SaveEnrollmentDetailsUtil.writeToFile(saveEnrollment);
+        } catch (GenericException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+//            Platform.runLater(()->);
         }
-       
-            /*Commented For only Photo
-        mIDIrisEnroll.Uninit();
-        App.setRoot("camera");
-        */
 
         // Added For Biometric Options
         if (holder.getArcDetails().getBiometricOptions().contains("Biometric")) {

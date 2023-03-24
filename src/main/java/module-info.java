@@ -56,8 +56,6 @@ module com.cdac.enrollmentstation {
     opens com.cdac.enrollmentstation.api to javafx.fxml;
     exports com.cdac.enrollmentstation.logging;
     opens com.cdac.enrollmentstation.logging to javafx.fxml;
-    exports com.cdac.enrollmentstation.service;
-    opens com.cdac.enrollmentstation.service to javafx.fxml;
     exports com.cdac.enrollmentstation.util;
     opens com.cdac.enrollmentstation.util to javafx.fxml;
 

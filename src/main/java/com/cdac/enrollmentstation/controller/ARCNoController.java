@@ -101,24 +101,6 @@ public class ARCNoController {
     }
 
     private void setNextScreen() {
-        // /usr/share/enrollment/save/saveEnrollment.txt
-        String saveEnrollmentFileString = PropertyFile.getProperty(PropertyName.SAVE_ENROLLMENT);
-        if (saveEnrollmentFileString == null || saveEnrollmentFileString.isBlank()) {
-            LOGGER.log(Level.SEVERE, "'save.enrollment' entry not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
-            updateUiLabel(null);
-            messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
-            return;
-        }
-        Path saveEnrollmentFilePath = Path.of(saveEnrollmentFileString);
-        if (!Files.exists(saveEnrollmentFilePath)) {
-            try {
-                SaveEnrollmentDetailsUtil.writeToFile(new SaveEnrollmentDetails());
-            } catch (GenericException ex) {
-                LOGGER.log(Level.SEVERE, ex.getMessage());
-                messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
-                return;
-            }
-        }
         SaveEnrollmentDetails saveEnrollmentDetails;
         try {
             saveEnrollmentDetails = SaveEnrollmentDetailsUtil.readFromFile();

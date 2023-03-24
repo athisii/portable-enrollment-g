@@ -4,7 +4,7 @@ import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.service.DirectoryLookup;
+import com.cdac.enrollmentstation.api.DirectoryLookup;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;

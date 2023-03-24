@@ -37,8 +37,8 @@ import static java.net.http.HttpResponse.BodyHandlers;
 
 public class ServerAPI {
     private static final int NO_OF_RETRIES = 1;
-    private static final int CONNECTION_TIMEOUT = 10;
-    private static final int WRITE_TIMEOUT = 30;
+    private static final int CONNECTION_TIMEOUT_IN_SEC = 5;
+    private static final int WRITE_TIMEOUT_IN_SEC = 30;
     private static final String UNIQUE_KEY_HEADER = "UniqueKey";
     private static final String HASH_KEY_HEADER = "HashKey";
 
@@ -47,7 +47,7 @@ public class ServerAPI {
     private static final HttpClient httpClient;
 
     static {
-        httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(CONNECTION_TIMEOUT)).build();
+        httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(CONNECTION_TIMEOUT_IN_SEC)).build();
     }
 
     //Suppress default constructor for noninstantiability
@@ -250,7 +250,7 @@ public class ServerAPI {
                 .uri(URI.create(url))
                 .header(HttpHeader.CONTENT_TYPE, "application/json; utf-8")
                 .header(HttpHeader.ACCEPT, "application/json")
-                .timeout(Duration.ofSeconds(WRITE_TIMEOUT))
+                .timeout(Duration.ofSeconds(WRITE_TIMEOUT_IN_SEC))
                 .build();
     }
 
@@ -263,7 +263,7 @@ public class ServerAPI {
                 .POST(BodyPublishers.ofString(data))
                 .header(HttpHeader.CONTENT_TYPE, "application/json; utf-8")
                 .header(HttpHeader.ACCEPT, "application/json")
-                .timeout(Duration.ofSeconds(WRITE_TIMEOUT))
+                .timeout(Duration.ofSeconds(WRITE_TIMEOUT_IN_SEC))
                 .build();
 
     }

@@ -23,6 +23,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -80,6 +81,12 @@ public class ARCNoController {
         backBtn.setOnAction(event -> back());
         showArcBtn.setOnAction(event -> showArcDetails());
         continueBtn.setOnAction(event -> continueBtnAction());
+
+        arcNumberTextField.setOnKeyPressed(event -> {
+            if (event.getCode().equals(KeyCode.ENTER)) {
+                showArcDetails();
+            }
+        });
     }
 
     private void continueBtnAction() {

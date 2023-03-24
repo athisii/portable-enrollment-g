@@ -1,14 +1,8 @@
 package com.cdac.enrollmentstation.util;
 
-import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.innovatrics.iengine.ansiiso.AnsiIso;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -21,42 +15,36 @@ public class LicenseUtil {
 
     //Suppress default constructor for noninstantiability
     private LicenseUtil() {
-        throw new AssertionError("The LicenseUtil methods should be accessed statically");
+        throw new AssertionError("The LicenseUtil methods must be accessed statically.");
     }
 
     // TODO -- to be implemented
-    // throws GenericRuntime Exception
-    public static AnsiIso getAnsiIso() throws IOException {
-        // lic --> /etc/licence/iengine.lic
-        if (ansiIso == null) {
-            byte[] bytes = Files.readAllBytes(Paths.get(PropertyFile.getProperty(PropertyName.SLAP_LICENSE)));
-            LOGGER.log(Level.INFO, () -> "license content : " + Arrays.toString(bytes));
-            LOGGER.log(Level.INFO, () -> "hardware ID : " + Arrays.toString(AnsiIso.getHardwareId()));
-            ansiIso = new AnsiIso();
-            ansiIso.setLicenseContent(bytes, bytes.length);
-            ansiIso.init();
-        }
-        return ansiIso;
+    // throws GenericException
+    public static void getAnsiIso() {
+        throw new AssertionError("Not implemented.");
     }
 
     // TODO -- to be implemented
-    // throws GenericRuntime Exception
-
+    // throws GenericException
     public static void checkFpScannerLicense() {
+        throw new AssertionError("Not implemented.");
     }
 
     // TODO -- to be implemented
-    // throws GenericRuntime Exception
+    // throws GenericException
     public static void checkIrisLicense() {
+        throw new AssertionError("Not implemented.");
     }
 
     // TODO -- to be implemented
-    // throws GenericRuntime Exception
+    // throws GenericException
     public static void checkBarcodeLicense() {
+        throw new AssertionError("Not implemented.");
     }
 
     // TODO -- to be implemented
-    // throws GenericRuntime Exception
+    // throws GenericException
     public static void checkCardReaderLicense() {
+        throw new AssertionError("Not implemented.");
     }
 }

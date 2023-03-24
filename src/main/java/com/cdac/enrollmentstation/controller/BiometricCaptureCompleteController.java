@@ -277,15 +277,15 @@ public class BiometricCaptureCompleteController {
 
     // adds photo to GLOBAL saveEnrollment object
     private void addPhoto(SaveEnrollmentDetails saveEnrollmentDetails) {
-        String subPhoto = PropertyFile.getProperty(PropertyName.SUB_FILE);
+        String subPhoto = PropertyFile.getProperty(PropertyName.IMG_SUB_FILE);
         if (subPhoto == null || subPhoto.isBlank()) {
-            LOGGER.log(Level.SEVERE, "No entry for '" + PropertyName.SUB_FILE + ", in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+            LOGGER.log(Level.SEVERE, "No entry for '" + PropertyName.IMG_SUB_FILE + ", in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
 
-        String compressPhoto = PropertyFile.getProperty(PropertyName.COMPRESS_FILE);
+        String compressPhoto = PropertyFile.getProperty(PropertyName.IMG_COMPRESS_FILE);
         if (compressPhoto == null || compressPhoto.isBlank()) {
-            LOGGER.log(Level.SEVERE, "No entry for '" + PropertyName.COMPRESS_FILE + ", in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+            LOGGER.log(Level.SEVERE, "No entry for '" + PropertyName.IMG_COMPRESS_FILE + ", in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
 

@@ -1,25 +1,25 @@
 package com.cdac.enrollmentstation.util;
 
 
-import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
+import com.cdac.enrollmentstation.logging.ApplicationLog;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import org.opencv.core.Mat;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-/**
- * Provide general purpose methods for handling OpenCV-JavaFX data conversion.
- * Moreover, expose some "low level" methods for matching few JavaFX behavior.
- *
- * @author <a href="mailto:luigi.derussis@polito.it">Luigi De Russis</a>
- * @author <a href="http://max-z.de">Maximilian Zuleger</a>
- * @version 1.0 (2016-09-17)
- * @since 1.0
- */
-public final class Utils {
+
+public final class OpenCvUtils {
+    //Suppress default constructor for noninstantiability
+    private OpenCvUtils() {
+        throw new AssertionError("The OpenCvUtils methods must be accessed statically.");
+    }
+
+    private static final Logger LOGGER = ApplicationLog.getLogger(OpenCvUtils.class);
+
     /**
      * Convert a Mat object (OpenCV) in the corresponding Image for JavaFX
      *
@@ -30,33 +30,14 @@ public final class Utils {
         try {
             return SwingFXUtils.toFXImage(matToBufferedImage(frame), null);
         } catch (Exception e) {
-            System.err.println("Cannot convert the Mat obejct: " + e);
+            LOGGER.log(Level.SEVERE, e.getMessage());
             return null;
         }
     }
 
-    /**
-     * Generic method for putting element running on a non-JavaFX thread on the
-     * JavaFX thread, to properly update the UI
-     *
-     * @param property a {@link ObjectProperty}
-     * @param value    the value to set for the given {@link ObjectProperty}
-     */
-    public static <T> void onFXThread(final ObjectProperty<T> property, final T value) {
-        Platform.runLater(() -> {
-            property.set(value);
-        });
-    }
 
-    /**
-     * Support for the {@link mat2image()} method
-     *
-     * @param original the {@link Mat} object in BGR or grayscale
-     * @return the corresponding {@link BufferedImage}
-     */
     private static BufferedImage matToBufferedImage(Mat original) {
-        // init
-        BufferedImage image = null;
+        BufferedImage image;
         int width = original.width(), height = original.height(), channels = original.channels();
         byte[] sourcePixels = new byte[width * height * channels];
         original.get(0, 0, sourcePixels);

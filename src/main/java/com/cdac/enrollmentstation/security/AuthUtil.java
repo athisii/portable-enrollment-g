@@ -1,17 +1,12 @@
 package com.cdac.enrollmentstation.security;
 
-import com.cdac.enrollmentstation.App;
+import com.cdac.enrollmentstation.api.DirectoryLookup;
+import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.api.DirectoryLookup;
 import com.cdac.enrollmentstation.util.PropertyFile;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,61 +16,29 @@ import java.util.logging.Logger;
  */
 public class AuthUtil {
     private static final Logger LOGGER = ApplicationLog.getLogger(AuthUtil.class);
-    private static final int MAX_LENGTH = 15;
 
     //Suppresses default constructor for noninstantiability
     private AuthUtil() {
     }
 
-    public static void authenticate(TextField textField, PasswordField passwordField, Label message, String fxml) {
-        if (passwordField.getText().length() == 0 || textField.getText().length() == 0) {
-            message.setText("Please provide the username and password");
-            return;
+    public static boolean authenticate(String username, String password) {
+        if (password.length() == 0 || username.length() == 0) {
+            throw new GenericException("Please provide the username and password");
         }
 
+        // PROD environment
         if ("0".equals(PropertyFile.getProperty(PropertyName.ENV))) {
-            // PROD environment
             LOGGER.log(Level.INFO, () -> "***** Authenticating using LDAP ********");
-            try {
-                DirectoryLookup.doLookup(textField.getText(), passwordField.getText());
-            } catch (GenericException exception) {
-                message.setText(exception.getMessage());
-                passwordField.setText("");
-                textField.setText("");
-                textField.requestFocus();
-                return;
-            }
-            try {
-                App.setRoot(fxml);
-            } catch (Exception e) {
-                throw new GenericException("Error occurred while loading : " + fxml);
-            }
+            return DirectoryLookup.doLookup(username, password);
         } else {
             // DEV environment
-            LOGGER.log(Level.INFO, () -> "***** Authenticating using file ********");
-            try (BufferedReader file = new BufferedReader(new FileReader("/etc/adminpwd"))) {
-                String line = file.readLine();
-                if (line != null) {
-                    if (line.equals(passwordField.getText())) {
-                        App.setRoot(fxml);
-                    } else {
-                        message.setText("Username or password is wrong");
-                        passwordField.setText("");
-                        textField.setText("");
-                        textField.requestFocus();
-                    }
-                }
-            } catch (Exception e) {
-                throw new GenericException("Error reading file.");
+            LOGGER.log(Level.INFO, () -> "***** Authenticating using properties ********");
+            String adminPasswd = PropertyFile.getProperty(PropertyName.ADMIN_PASSWD);
+            if (adminPasswd == null || adminPasswd.isBlank()) {
+                LOGGER.log(Level.SEVERE, "No entry for '" + PropertyName.ADMIN_PASSWD + "' in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+                throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
             }
-        }
-
-
-    }
-
-    public static void limitCharacters(TextField textField, String oldValue, String newValue) {
-        if (newValue.length() > MAX_LENGTH) {
-            textField.setText(oldValue);
+            return adminPasswd.equals(password);
         }
     }
 }

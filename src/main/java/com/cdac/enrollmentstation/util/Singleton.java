@@ -29,7 +29,7 @@ public class Singleton {
 
     //Suppress default constructor for noninstantiability
     private Singleton() {
-        throw new AssertionError("The Singleton methods should be accessed statically");
+        throw new AssertionError("The Singleton methods must be accessed statically.");
     }
 
 

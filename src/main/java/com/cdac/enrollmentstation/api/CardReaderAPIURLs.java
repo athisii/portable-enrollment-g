@@ -22,52 +22,52 @@ public class CardReaderAPIURLs {
 
     public String getInitializeURL() {
         // return "http://localhost:8088/N_Initialize"
-        return requireNonBlank(PropertyFile.getProperty(PropertyName.INITIALIZE));
+        return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_INITIALIZE));
     }
 
     public String getWaitConnect() {
         // return "http://localhost:8088/N_Wait_for_Connect"
-        return requireNonBlank(PropertyFile.getProperty(PropertyName.WAIT_FOR_CONNECT));
+        return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_WAIT_FOR_CONNECT));
     }
 
     public String getSelectApp() {
         //  return "http://localhost:8088/N_SelectApp"
-        return requireNonBlank(PropertyFile.getProperty(PropertyName.SELECT_APP));
+        return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_SELECT_APP));
     }
 
     public String readDataFromNaval() {
         // return "http://localhost:8088/N_readDatafromNaval"
-        return requireNonBlank(PropertyFile.getProperty(PropertyName.READ_DATA));
+        return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_READ_DATA));
     }
 
     public String storeDataOnNaval() {
         // return "http://localhost:8088/N_storeDataonNaval"
-        return requireNonBlank(PropertyFile.getProperty(PropertyName.STORE_DATA));
+        return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_STORE_DATA));
     }
 
     public String verifyCertificate() {
         //  return "http://localhost:8088/N_verifyCertificate"
-        return requireNonBlank(PropertyFile.getProperty(PropertyName.VERIFY_CERT));
+        return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_VERIFY_CERT));
     }
 
     public String pkiAuth() {
         //  return "http://localhost:8088/N_PKIAuth"
-        return requireNonBlank(PropertyFile.getProperty(PropertyName.PKI_AUTH));
+        return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_PKI_AUTH));
     }
 
     public String cardRemoval() {
         //  return "http://localhost:8088/N_Wait_for_Removal"
-        return requireNonBlank(PropertyFile.getProperty(PropertyName.WAIT_FOR_REMOVAL));
+        return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_WAIT_FOR_REMOVAL));
     }
 
     public String deInitialize() {
         //   return "http://localhost:8088/N_DeInitialize"
-        return requireNonBlank(PropertyFile.getProperty(PropertyName.DE_INITIALIZE));
+        return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_DE_INITIALIZE));
     }
 
     public String getListOfReaders() {
         //   return "http://localhost:8088/listOfReaders"
-        return requireNonBlank(PropertyFile.getProperty(PropertyName.LIST_OF_READERS));
+        return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_LIST_OF_READERS));
     }
 
     public String requireNonBlank(String value) {

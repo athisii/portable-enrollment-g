@@ -6,6 +6,7 @@
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
+import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.security.AuthUtil;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -21,6 +22,8 @@ import java.io.IOException;
  * @author root
  */
 public class OnlineLoginController {
+    private static final int MAX_LENGTH = 15;
+
     @FXML
     private Label statusMsg;
 
@@ -38,13 +41,26 @@ public class OnlineLoginController {
 
     @FXML
     public void showPrimaryScreen() {
-        AuthUtil.authenticate(textField, passwordField, statusMsg, "main_screen");
+        try {
+            if (AuthUtil.authenticate(textField.getText(), passwordField.getText())) {
+                App.setRoot("main_screen");
+                return;
+            }
+            statusMsg.setText("Wrong username or password.");
+        } catch (GenericException | IOException ex) {
+            statusMsg.setText(ex.getMessage());
+        }
+        // clean up UI on failure
+        textField.requestFocus();
+        textField.setText("");
+        passwordField.setText("");
+
     }
 
     public void initialize() {
         //restrict the TextField Length
-        textField.textProperty().addListener((observable, oldValue, newValue) -> AuthUtil.limitCharacters(textField, oldValue, newValue));
-        passwordField.textProperty().addListener((observable, oldValue, newValue) -> AuthUtil.limitCharacters(passwordField, oldValue, newValue));
+        textField.textProperty().addListener((observable, oldValue, newValue) -> limitCharacters(textField, oldValue, newValue));
+        passwordField.textProperty().addListener((observable, oldValue, newValue) -> limitCharacters(passwordField, oldValue, newValue));
         textField.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
                 passwordField.requestFocus();
@@ -56,6 +72,11 @@ public class OnlineLoginController {
                 showPrimaryScreen();
             }
         });
+    }
+    private void limitCharacters(TextField textField, String oldValue, String newValue) {
+        if (newValue.length() > MAX_LENGTH) {
+            textField.setText(oldValue);
+        }
     }
 
 }

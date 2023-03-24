@@ -6,7 +6,7 @@ import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ARCDetailsHolder;
 import com.cdac.enrollmentstation.util.PropertyFile;
-import com.cdac.enrollmentstation.util.Utils;
+import com.cdac.enrollmentstation.util.OpenCvUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -66,9 +66,9 @@ public class CameraController {
 
     static {
         try {
-            INPUT_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.INPUT_FILE));
-            WEBCAM_COMMAND = requireNonBlank(PropertyFile.getProperty(PropertyName.WEBCAM_COMMAND));
-            SUB_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.SUB_FILE));
+            INPUT_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.IMG_INPUT_FILE));
+            WEBCAM_COMMAND = requireNonBlank(PropertyFile.getProperty(PropertyName.PYTHON_WEBCAM_COMMAND));
+            SUB_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.IMG_SUB_FILE));
             // loads --> /com/cdac/enrollmentstation/img/
             NO_MASK_IMAGE = loadFileFromImgDirectory("nomask.png");
             NO_GLASSES_IMAGE = loadFileFromImgDirectory("no-goggles.jpg");
@@ -281,7 +281,7 @@ public class CameraController {
                 );
                 Platform.runLater(() -> message.setText("Move your face to fit in REDBOX"));
             }
-            updateImageView(liveImageView, Utils.mat2Image(matrix));
+            updateImageView(liveImageView, OpenCvUtils.mat2Image(matrix));
         }
         if (videoCapture.isOpened()) {
             videoCapture.release();

@@ -6,7 +6,7 @@ package com.cdac.enrollmentstation.constant;/*
 public class ApplicationConstant {
     //Suppress default constructor for noninstantiability
     private ApplicationConstant() {
-        throw new AssertionError("The ApplicationConstant fields should be accessed statically");
+        throw new AssertionError("The ApplicationConstant fields must be accessed statically.");
     }
 
     public static final String DEFAULT_PROPERTY_FILE = "/etc/enrollment-app.properties";

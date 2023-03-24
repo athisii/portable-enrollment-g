@@ -22,7 +22,7 @@ public class SaveEnrollmentDetailsUtil {
 
     //Suppress default constructor for noninstantiability
     private SaveEnrollmentDetailsUtil() {
-        throw new AssertionError("The SaveEnrollmentUtil methods should be accessed statically");
+        throw new AssertionError("The SaveEnrollmentUtil methods must be accessed statically.");
     }
 
     public static void writeToFile(SaveEnrollmentDetails saveEnrollmentDetails) {

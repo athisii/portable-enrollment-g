@@ -11,7 +11,6 @@ import com.cdac.enrollmentstation.api.CardReaderAPIURLs;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.*;
-import com.cdac.enrollmentstation.security.AuthUtil;
 import com.cdac.enrollmentstation.security.HextoASNFormat;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,6 +26,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
@@ -35,7 +35,6 @@ import javax.imageio.ImageIO;
 import javax.xml.bind.DatatypeConverter;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -50,10 +49,8 @@ import java.util.stream.Collectors;
  * @author padmanabhanj
  */
 public class CardLoginController implements MIDFingerAuth_Callback {
+    private static final int MAX_LENGTH = 15;
 
-    /**
-     * Initializes the controller class.
-     */
 
     @FXML
     public Button showContractDetails;
@@ -66,13 +63,12 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     private Label statusMsg;
 
     @FXML
-    private PasswordField usertxt;
+    private PasswordField userTxt;
 
     @FXML
     private ImageView m_FingerPrintImage;
 
 
-    CardReaderAPIURLs CardReaderAPIURLs = new CardReaderAPIURLs();
     CardReaderAPI cardReaderAPI = new CardReaderAPI();
     //For Application Log
     private static final Logger LOGGER = ApplicationLog.getLogger(CardLoginController.class);
@@ -137,9 +133,15 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         }
     }
 
+    private void limitCharacters(TextField textField, String oldValue, String newValue) {
+        if (newValue.length() > MAX_LENGTH) {
+            textField.setText(oldValue);
+        }
+    }
+
     public void initialize() {
         /* add ChangeListner to TextField to restrict the TextField Length*/
-        usertxt.textProperty().addListener((observable, oldValue, newValue) -> AuthUtil.limitCharacters(usertxt, oldValue, newValue));
+        userTxt.textProperty().addListener((observable, oldValue, newValue) -> limitCharacters(userTxt, oldValue, newValue));
         // TODO - need to implement
         /*
         usertxt.setOnKeyPressed(event -> {
@@ -153,7 +155,6 @@ public class CardLoginController implements MIDFingerAuth_Callback {
 
     @FXML
     private void showHome() throws IOException {
-        //App.setRoot("main_screen");
         App.setRoot("login");
 
     }
@@ -163,17 +164,12 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     }
 
     public void responseStatus(String message) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                statusMsg.setText(message);
-            }
-        });
+        Platform.runLater(() -> statusMsg.setText(message));
     }
 
 
     @FXML
-    public void readCardDetails() throws MalformedURLException, IOException, IllegalStateException {
+    public void readCardDetails() throws IllegalStateException {
         String response = "";
     /* 
     if(usertxt.getText().isEmpty()){
@@ -516,13 +512,13 @@ public class CardLoginController implements MIDFingerAuth_Callback {
                         if (contractorID != null && !contractorID.isEmpty()) {
                             //App.setRoot("list_contract");
                             System.out.println("Inside Card read Details");
-                            if (usertxt.getText().isEmpty()) {
+                            if (userTxt.getText().isEmpty()) {
                                 response = "Kindly Enter the Card PNo";
                                 LOGGER.log(Level.INFO, "Inside User Text");
                                 messageStatus(response);
                                 return response;
                             }
-                            if (contractorID.equals(usertxt.getText())) {
+                            if (contractorID.equals(userTxt.getText())) {
                                 try {
                                     System.out.println("Equals ContractID");
                                     response = "success";

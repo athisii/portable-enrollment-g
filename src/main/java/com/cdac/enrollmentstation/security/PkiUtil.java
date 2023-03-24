@@ -2,8 +2,10 @@ package com.cdac.enrollmentstation.security;
 
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
+import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
+import com.cdac.enrollmentstation.util.PropertyFile;
 
 import javax.crypto.Cipher;
 import java.io.FileInputStream;
@@ -24,23 +26,25 @@ public class PkiUtil {
 
     //Suppress default constructor for noninstantiability
     private PkiUtil() {
-        throw new AssertionError("The PkiUtil methods should be accessed statically");
+        throw new AssertionError("The PkiUtil methods must be accessed statically.");
     }
 
     private final static KeyStore keyStore;
     private final static InputStream inputStream;
-    private final static String password = "12qwaszx";// TODO: get from PropertyFile.
-    private final static String alias = "sample encryption test"; // TODO: get from PropertyFile.
+    private final static String password;
+    private final static String alias;
     private final static Cipher cipher;
     private final static KeyPair keyPair;
 
     static {
         try {
-            inputStream = new FileInputStream("/usr/share/enrollment/jks/cacert.jks"); //TODO get from PropertyFile.
+            password = PropertyFile.getProperty(PropertyName.JKS_PASSWORD);
+            alias = PropertyFile.getProperty(PropertyName.JKS_ALIAS);
+            inputStream = new FileInputStream(PropertyFile.getProperty(PropertyName.JKS_CERT_FILE));
             keyStore = KeyStore.getInstance("PKCS12");
             keyStore.load(inputStream, password.toCharArray());
             if (!keyStore.containsAlias(alias)) {
-                throw new GenericException("Alias for key not found");
+                throw new GenericException("Not found for key with alias: " + alias);
             }
             PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, password.toCharArray());
             Certificate certificate = keyStore.getCertificate(alias);
@@ -49,12 +53,12 @@ public class PkiUtil {
             cipher = Cipher.getInstance("RSA");
         } catch (GeneralSecurityException | IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            throw new GenericException(ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 
 
-    // return encrypts bytes
+    // return encrypted bytes
     public static byte[] encrypt(String data) {
         try {
             cipher.init(Cipher.ENCRYPT_MODE, keyPair.getPublic());

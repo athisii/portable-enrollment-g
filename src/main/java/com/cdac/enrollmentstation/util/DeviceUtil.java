@@ -14,7 +14,7 @@ import org.opencv.videoio.VideoCapture;
 public class DeviceUtil {
     //Suppress default constructor for noninstantiability
     private DeviceUtil() {
-        throw new AssertionError("The DeviceUtil methods should be accessed statically");
+        throw new AssertionError("The DeviceUtil methods must be accessed statically.");
     }
 
     // returns true if number of connected device >= expectedNoOfDev else false

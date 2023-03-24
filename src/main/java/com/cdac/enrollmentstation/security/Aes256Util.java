@@ -40,7 +40,7 @@ public class Aes256Util {
             cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         } catch (GeneralSecurityException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            throw new GenericException(ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 

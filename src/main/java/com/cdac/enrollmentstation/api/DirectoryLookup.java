@@ -27,8 +27,8 @@ public class DirectoryLookup {
 
     private static final Logger LOGGER = ApplicationLog.getLogger(DirectoryLookup.class);
 
-    public static void doLookup(String username, String password) {
-        String domain = PropertyFile.getProperty(PropertyName.DOMAIN);
+    public static boolean doLookup(String username, String password) {
+        String domain = PropertyFile.getProperty(PropertyName.LDAP_DOMAIN);
         String ldapUrl = PropertyFile.getProperty(PropertyName.LDAP_URL);
         // domain = "CDACAD"
         // ldapUrl = "ldap://10.184.36.14"
@@ -41,8 +41,9 @@ public class DirectoryLookup {
         properties.put(Context.SECURITY_CREDENTIALS, password);
         try {
             new InitialDirContext(properties);
+            return true;
         } catch (AuthenticationException e) {
-            LOGGER.log(Level.SEVERE, () -> "Failed to authenticate user");
+            LOGGER.log(Level.SEVERE, () -> "Failed to authenticate user.");
             throw new GenericException(ApplicationConstant.INVALID_CREDENTIALS);
         } catch (NamingException e) {
             LOGGER.log(Level.SEVERE, e::getMessage);

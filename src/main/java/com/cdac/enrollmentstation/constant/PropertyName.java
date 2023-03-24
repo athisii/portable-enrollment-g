@@ -9,32 +9,33 @@ package com.cdac.enrollmentstation.constant;
 public class PropertyName {
     //Suppress default constructor for noninstantiability
     private PropertyName() {
-        throw new AssertionError("The PropertyName fields should be accessed statically");
+        throw new AssertionError("The PropertyName fields must be accessed statically.");
     }
 
     //DEFAULT_PROPERTY_FILE = "/etc/enrollment-app.properties"
 
     public static final String LOG_FILE = "log.file";
-    public static final String INITIALIZE = "initialize";
-    public static final String WAIT_FOR_CONNECT = "wait.for.connect";
-    public static final String SELECT_APP = "select.app";
-    public static final String READ_DATA = "read.data";
-    public static final String STORE_DATA = "store.data";
-    public static final String VERIFY_CERT = "verify.cert";
-    public static final String PKI_AUTH = "pki.auth";
-    public static final String WAIT_FOR_REMOVAL = "wait.for.removal";
-    public static final String DE_INITIALIZE = "de.initialize";
-    public static final String LIST_OF_READERS = "list.of.readers";
-    public static final String CERT_FILE = "cert.file";
-    public static final String PASSPHRASE = "passphrase";
+    public static final String CARD_API_INITIALIZE = "card.api.initialize";
+    public static final String CARD_API_WAIT_FOR_CONNECT = "card.api.wait.for.connect";
+    public static final String CARD_API_SELECT_APP = "card.api.select.app";
+    public static final String CARD_API_READ_DATA = "card.api.read.data";
+    public static final String CARD_API_STORE_DATA = "card.api.store.data";
+    public static final String CARD_API_VERIFY_CERT = "card.api.verify.cert";
+    public static final String CARD_API_PKI_AUTH = "card.api.pki.auth";
+    public static final String CARD_API_WAIT_FOR_REMOVAL = "card.api.wait.for.removal";
+    public static final String CARD_API_DE_INITIALIZE = "card.api.de.initialize";
+    public static final String CARD_API_LIST_OF_READERS = "card.api.list.of.readers";
+    public static final String JKS_CERT_FILE = "jks.cert.file";
+    public static final String JKS_PASSWORD = "jks.password";
+    public static final String JKS_ALIAS = "jks.alias";
     public static final String URL_DATA = "url.data";
     public static final String FP_QUALITY = "fp.quality";
     public static final String ADMIN_PASSWD = "admin.passwd";
-    public static final String INPUT_FILE = "input.file";
-    public static final String CAP_COMMAND = "cap.command";
-    public static final String WEBCAM_COMMAND = "webcam.command";
-    public static final String OUTPUT_FILE = "output.file";
-    public static final String COMPRESS_FILE = "compress.file";
+    public static final String IMG_INPUT_FILE = "img.input.file";
+    public static final String PYTHON_CAP_COMMAND = "python.cap.command";
+    public static final String PYTHON_WEBCAM_COMMAND = "python.webcam.command";
+    public static final String IMG_OUTPUT_FILE = "img.output.file";
+    public static final String IMG_COMPRESS_FILE = "img.compress.file";
     public static final String IMPORT_JSON_FILE = "import.json.file";
     public static final String EXPORT_FOLDER = "export.folder";
     public static final String SAVE_ENROLLMENT = "save.enrollment";
@@ -43,7 +44,7 @@ public class PropertyName {
     public static final String CAMERA_FILE_PATH = "camera.file.path";
     public static final String BARCODE_FILE_PATH = "barcode.file.path";
     public static final String SLAP_LICENSE = "slap.license";
-    public static final String DOMAIN = "domain";
+    public static final String LDAP_DOMAIN = "ldap.domain";
     public static final String LDAP_URL = "ldap.url";
     public static final String SERIAL_PORT_FILE = "serial.port.file";
     public static final String IMPORT_JSON_FOLDER = "import.json.folder";
@@ -51,7 +52,7 @@ public class PropertyName {
     public static final String ENC_EXPORT_FOLDER = "enc.export.folder";
     public static final String CAMERA_ID = "camera.id";
     public static final String PHOTO_CAPTURE_IMG = "photo.capture.img";
-    public static final String SUB_FILE = "sub.file";
+    public static final String IMG_SUB_FILE = "img.sub.file";
     public static final String ENV = "env";
     public static final String LIC_IENGINE = "lic.iengine";
     public static final String MAFIS_API_URL = "mafis.api.url";
@@ -60,6 +61,5 @@ public class PropertyName {
     public static final String FINGERPRINT_LIVENESS_MAX = "fingerprint.liveness.max";
     public static final String FINGERPRINT_LIVENESS_MIN = "fingerprint.liveness.min";
     public static final String FINGERPRINT_LIVENESS_VALUE = "fingerprint.liveness.value";
-
 
 }

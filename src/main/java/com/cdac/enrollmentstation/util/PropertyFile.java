@@ -16,7 +16,7 @@ public class PropertyFile {
 
     //Suppress default constructor for noninstantiability
     private PropertyFile() {
-        throw new AssertionError("The PropertyFile methods should be accessed statically");
+        throw new AssertionError("The PropertyFile methods must be accessed statically.");
     }
 
     // Global properties to be accessed from anywhere in the app.

@@ -1,5 +1,6 @@
 package com.cdac.enrollmentstation.security;
 
+import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
@@ -19,7 +20,7 @@ import java.util.logging.Logger;
  * Created on 21/03/23
  */
 public class PkiUtil {
-    private final static Logger LOGGER = ApplicationLog.getLogger(PKIUtil.class);
+    private final static Logger LOGGER = ApplicationLog.getLogger(App.class);
 
     //Suppress default constructor for noninstantiability
     private PkiUtil() {

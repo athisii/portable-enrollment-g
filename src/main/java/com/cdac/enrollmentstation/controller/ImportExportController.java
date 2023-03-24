@@ -150,6 +150,7 @@ public class ImportExportController {
             future = ForkJoinPool.commonPool().submit(() -> decryptAndSendToServer(encryptedArcPaths.subList(encryptedArcPaths.size() / 2, encryptedArcPaths.size())));
         }
         boolean result = decryptAndSendToServer(encryptedArcPaths);
+        // size <= 3
         if (future == null) {
             if (result) {
                 updateUI("Data exported successfully.");
@@ -159,6 +160,7 @@ public class ImportExportController {
             }
             return;
         }
+        // if reached here, size > 3, so we need to check both results for proper message.
         try {
             boolean workerThreadResult = future.get();
             if (workerThreadResult && result) {
@@ -171,14 +173,13 @@ public class ImportExportController {
             Thread.currentThread().interrupt();
         } catch (ExecutionException ignored) {
         }
+        // error message already updated in call to decryptAndSendToServer()
     }
 
 
     private boolean decryptAndSendToServer(List<Path> paths) {
         String decryptedJsonData;
-        boolean shouldDelete;
         for (Path path : paths) {
-            shouldDelete = true;
             updateUI("Exporting Arc: " + path.getFileName().toString().split("\\.")[0]);
             // throws GenericException
             try {

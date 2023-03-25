@@ -8,7 +8,10 @@ package com.cdac.enrollmentstation.controller;
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.*;
+import com.cdac.enrollmentstation.model.ARCDetails;
+import com.cdac.enrollmentstation.model.ARCDetailsHolder;
+import com.cdac.enrollmentstation.model.IRIS;
+import com.cdac.enrollmentstation.model.SaveEnrollmentDetails;
 import com.cdac.enrollmentstation.util.SaveEnrollmentDetailsUtil;
 import com.fasterxml.jackson.core.Base64Variants;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -101,148 +104,12 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
     public Boolean irisCapturedRight = false;
 
 
-    SaveEnrollmentDetails saveEnrollment;
-    EnrollmentDetailsHolder enrollmentDetailsHolder = null;
-
     Set<IRIS> irisSet = new HashSet<>();
     private static final Logger LOGGER = ApplicationLog.getLogger(IrisController.class);
 
-    public IrisController() {
-
-        //this.handler = appLog.getLogger();
-        //LOGGER.addHandler(handler); 
-        //Comented for IRIs device not connected error from slapscanner
-        /*
-        mIDIrisEnroll = new MIDIrisEnroll(this);
-        //mIDIrisEnroll.SetLogProperties("/home/boss/MIDIris.log", LogLevel.MIDIRIS_ENROLL_LVL_LOG_ERROR);
-        String version = mIDIrisEnroll.GetSDKVersion();
-        System.out.println("sdk version :"+ version);
-        
-        //supported device list
-        List<String> deviceList = new ArrayList<String>();
-        int ret = mIDIrisEnroll.GetSupportedDevices(deviceList);
-        System.out.println("return value :"+ ret);
-        if (ret == 0) {
-            //lblerror.setText(mIDIrisEnroll.GetErrorMessage(ret));
-            lblerror.setText("Device is not connected, Kindly connect the IRIS Device");
-            //return;
-        }
-        
-        List<String> ls = new ArrayList<String>();
-        for (String list : deviceList) {
-            ls.add(list);
-        }
-        IrisSide[] irisSides = new IrisSide[1];
-        if(mIDIrisEnroll.IsDeviceConnected(DeviceModel.MATISX, irisSides)) {
-            List<String> deviceListConnected = new ArrayList<String>();
-        int retConnected = mIDIrisEnroll.GetConnectedDevices(deviceListConnected);
-        if (retConnected != 0) {
-            lblerror.setText("Device is not connected, Kindly connect the IRIS Device");
-            return;
-        }
-        System.out.println("connected devices :"+ deviceListConnected);
-
-        String model = "";
-        //Initialize Iris Device
-        if(deviceListConnected.size()>0) {
-         model = deviceListConnected.get(0);
-        }
-     
-        System.out.println("DEVICE NAME:"+model);
-        DeviceInfo info = new DeviceInfo();
-        
-        retInit = mIDIrisEnroll.Init(DeviceModel.valueFor(model), info, irisSides);
-        if (retInit != 0) {
-            deviceInfo = null;
-
-            System.out.println("Device err :" + mIDIrisEnroll.GetErrorMessage(ret));
-             isDeviceInitialized = false;
-//            showDeviceInfo(null);
-//            jblIrisLeftIcon.setIcon(null);
-//            jblIrisRightIcon.setIcon(null);
-//            showLogs(mIDIrisEnroll.GetErrorMessage(ret));
-            //return;
-        }else {
-
-            ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
-            SaveEnrollmentDetails saveEnrollment = holder.getenrollmentDetails();
-            System.out.println("details : " + saveEnrollment.getArcNo());
-            saveEnrollment.setiRISScannerSerailNo(info.SerialNo);
-            saveEnrollment.setEnrollmentStatus("IRIS Capture Completed");
-            holder.setEnrollmentDetails(saveEnrollment);
-            System.out.println("DEVICE INITIALIZED");
-            isDeviceInitialized = true;
-        }
-        
-        //StartCapture
-        System.out.println("show Iris :::");
-        ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
-        ARCDetails a= holder.getARC();
-       
-       List<String> iris = a.getIris();
-        
-        if(iris.size() == 0) {
-            irisCaptureInfo = "RI, LI";
-            try {
-                int retStartCapture = mIDIrisEnroll.StartCapture(IrisSide.MIDIRIS_ENROLL_IRIS_SIDE_BOTH, minQuality, timeout);
-                if (retStartCapture != 0) {
-                    lblerror.setText(mIDIrisEnroll.GetErrorMessage(retStartCapture));
-
-                    return;
-                }else {
-                System.out.println("CAPTUTRED");
-
-                }
-            }
-            catch(Exception e){
-                System.out.println("Error : "+e.getMessage());
-            }
-        }
-        else if(iris.get(0).contains("LI")) {
-            irisCaptureInfo = "RI";
-            try {
-                int retStartCapture = mIDIrisEnroll.StartCapture(IrisSide.MIDIRIS_ENROLL_IRIS_SIDE_RIGHT, minQuality, timeout);
-                if (retStartCapture != 0) {
-                    lblerror.setText(mIDIrisEnroll.GetErrorMessage(retStartCapture));
-
-                    return;
-                }else {
-                System.out.println("CAPTUTRED");
-
-                }
-            }
-            catch(Exception e){
-                System.out.println("Error : "+e.getMessage());
-            }
-        }
-        else if(iris.get(0).contains("RI")) {
-            irisCaptureInfo = "LI";
-            try {
-                int retStartCapture = mIDIrisEnroll.StartCapture(IrisSide.MIDIRIS_ENROLL_IRIS_SIDE_LEFT, minQuality, timeout);
-                if (retStartCapture != 0) {
-                    lblerror.setText(mIDIrisEnroll.GetErrorMessage(retStartCapture));
-
-                    return;
-                }else {
-                    System.out.println("CAPTUTRED");
-
-                }
-            }
-            catch(Exception e){
-                    System.out.println("Error : "+e.getMessage());
-            }
-        }
-        }
-        else {
-            lblerror.setText("Device is not connected, Kindly reconnect the IRIS");
-        }
-        //connected device list
-       */
-    }
-
 
     @FXML
-    private void captureIris() throws IOException {
+    private void captureIris() {
         try {
             //connected device list
             captureIris.setDisable(true);
@@ -266,41 +133,18 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                 if (deviceListConnected.size() > 0) {
                     model = deviceListConnected.get(0);
                 }
-                //System.out.println("DEVICE NAME:"+model);
                 LOGGER.log(Level.INFO, "DEVICE NAME:" + model);
                 DeviceInfo info = new DeviceInfo();
 
-//        retInit = mIDIrisEnroll.Init(DeviceModel.valueFor(model), info, irisSides);
-//        if (retInit != 0) {
-//            deviceInfo = null;
-//            System.out.println("Device err :" + mIDIrisEnroll.GetErrorMessage(retInit));
-////            showDeviceInfo(null);
-////            jblIrisLeftIcon.setIcon(null);
-////            jblIrisRightIcon.setIcon(null);
-////            showLogs(mIDIrisEnroll.GetErrorMessage(ret));
-//                lblerror.setText(mIDIrisEnroll.GetErrorMessage(retInit));
-//            return;
-//        }else {
-//            System.out.println("DEVICE INITIALIZED");
-//        }
-//       
-
-//Initialize Iris Device
                 if (isDeviceInitialized == false) {
 
                     retInit = mIDIrisEnroll.Init(DeviceModel.valueFor(model), info, irisSides);
                     if (retInit != 0) {
                         deviceInfo = null;
                         LOGGER.log(Level.SEVERE, "Device initialization error :" + mIDIrisEnroll.GetErrorMessage(retInit));
-                        //System.out.println("Device err :" + mIDIrisEnroll.GetErrorMessage(retInit));
                         isDeviceInitialized = false;
-//            showDeviceInfo(null);
-//            jblIrisLeftIcon.setIcon(null);
-//            jblIrisRightIcon.setIcon(null);
-//            showLogs(mIDIrisEnroll.GetErrorMessage(ret));
-                        //return;
+
                     } else {
-                        //LOGGER.log(Level.INFO, "IRIS Device initialization successfull :");
                         ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
                         SaveEnrollmentDetails saveEnrollment = holder.getSaveEnrollmentDetails();
                         System.out.println("details : " + saveEnrollment.getArcNo());
@@ -308,29 +152,22 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                         saveEnrollment.setEnrollmentStatus("IRIS Capture Completed");
                         holder.setSaveEnrollmentDetails(saveEnrollment);
                         LOGGER.log(Level.INFO, "IRIS Device initialization successfull :");
-                        //System.out.println("DEVICE INITIALIZED");
                         isDeviceInitialized = true;
                     }
 
                 }
-                //StartCapture
 
-                //System.out.println("show Iris ::");
                 ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
                 ARCDetails a = holder.getArcDetails();
 
                 List<String> iris = a.getIris();
-                // System.out.println("Inside IrisController getIris");
                 LOGGER.log(Level.INFO, iris.toString() + "Inside IrisController getIris ");
                 if (iris.size() == 0) {
                     irisCaptureInfo = "RI, LI";
                     int retStartCapture = mIDIrisEnroll.StartCapture(IrisSide.MIDIRIS_ENROLL_IRIS_SIDE_BOTH, minQuality, timeout);
                     if (retStartCapture != 0) {
                         lblerror.setText(mIDIrisEnroll.GetErrorMessage(retStartCapture));
-
-                        return;
                     } else {
-//            System.out.println("CAPTUTRED");
                         LOGGER.log(Level.INFO, "CAPTUTRED");
 
 
@@ -342,10 +179,7 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                         int retStartCapture = mIDIrisEnroll.StartCapture(IrisSide.MIDIRIS_ENROLL_IRIS_SIDE_RIGHT, minQuality, timeout);
                         if (retStartCapture != 0) {
                             lblerror.setText(mIDIrisEnroll.GetErrorMessage(retStartCapture));
-
-                            return;
                         } else {
-                            //System.out.println("CAPTUTRED");
                             LOGGER.log(Level.INFO, "CAPTUTRED");
 
                         }
@@ -354,8 +188,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                         int retStartCapture = mIDIrisEnroll.StartCapture(IrisSide.MIDIRIS_ENROLL_IRIS_SIDE_LEFT, minQuality, timeout);
                         if (retStartCapture != 0) {
                             lblerror.setText(mIDIrisEnroll.GetErrorMessage(retStartCapture));
-
-                            return;
                         } else {
                             System.out.println("CAPTUTRED");
 
@@ -373,7 +205,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                 lblerror.setText("Device is not connected, Kindly reconnect the IRIS Scanner");
                 LOGGER.log(Level.INFO, "Device is not connected, Kindly reconnect the IRIS Scanner");
                 captureIris.setDisable(false);
-                return;
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Exception:" + e);
@@ -389,13 +220,10 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
             ARCDetails a = holder.getArcDetails();
             labelarc.setText("ARC: " + a.getArcNo());
 
-            //Added now 21122021 getting Error Message
             mIDIrisEnroll = new MIDIrisEnroll(this);
-            //mIDIrisEnroll.SetLogProperties("/home/boss/MIDIris.log", LogLevel.MIDIRIS_ENROLL_LVL_LOG_ERROR);
             String version = mIDIrisEnroll.GetSDKVersion();
             System.out.println("sdk version :" + version);
 
-            //supported device list
             List<String> deviceList = new ArrayList<String>();
             int ret = mIDIrisEnroll.GetSupportedDevices(deviceList);
             System.out.println("return value :" + ret);
@@ -409,130 +237,11 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
             for (String list : deviceList) {
                 ls.add(list);
             }
-        
-        /*
-        IrisSide[] irisSides = new IrisSide[1];   
-        if(mIDIrisEnroll.IsDeviceConnected(DeviceModel.MATISX, irisSides)) {
-           LOGGER.log(Level.INFO,"mIDIrisEnroll.IsDeviceConnected function status:"+mIDIrisEnroll.IsDeviceConnected(DeviceModel.MATISX, irisSides));
-           lblerror.setText("IRIS Device Connected");
-        }else{
-           LOGGER.log(Level.INFO,"mIDIrisEnroll.IsDeviceConnected function status:"+mIDIrisEnroll.IsDeviceConnected(DeviceModel.MATISX, irisSides));
-           //lblerror.setText("Device is not connected, Kindly reconnect the IRIS");
-           lblerror.setText("IRIS Device MalFunction, Kindly contact Device Admin");
-        }*/
+
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Exception:" + e);
             lblerror.setText("Exception:" + e);
         }
-
-        //Commented on 21/04/22
-       /*
-        IrisSide[] irisSides = new IrisSide[1];
-        if(mIDIrisEnroll.IsDeviceConnected(DeviceModel.MATISX, irisSides)) {
-            List<String> deviceListConnected = new ArrayList<String>();
-        int retConnected = mIDIrisEnroll.GetConnectedDevices(deviceListConnected);
-        if (retConnected != 0) {
-            lblerror.setText("Device is not connected, Kindly connect the IRIS Device");
-            return;
-        }
-        System.out.println("connected devices :"+ deviceListConnected);
-
-        String model = "";
-        //Initialize Iris Device
-        if(deviceListConnected.size()>0) {
-         model = deviceListConnected.get(0);
-        }
-     
-        System.out.println("DEVICE NAME:"+model);
-        DeviceInfo info = new DeviceInfo();
-        
-        retInit = mIDIrisEnroll.Init(DeviceModel.valueFor(model), info, irisSides);
-        if (retInit != 0) {
-            deviceInfo = null;
-
-            System.out.println("Device err :" + mIDIrisEnroll.GetErrorMessage(ret));
-             isDeviceInitialized = false;
-//            showDeviceInfo(null);
-//            jblIrisLeftIcon.setIcon(null);
-//            jblIrisRightIcon.setIcon(null);
-//            showLogs(mIDIrisEnroll.GetErrorMessage(ret));
-            //return;
-        }else {
-
-          //  ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
-            SaveEnrollmentDetails saveEnrollment = holder.getenrollmentDetails();
-            System.out.println("details : " + saveEnrollment.getArcNo());
-            saveEnrollment.setiRISScannerSerailNo(info.SerialNo);
-            saveEnrollment.setEnrollmentStatus("IRIS Capture Completed");
-            holder.setEnrollmentDetails(saveEnrollment);
-            System.out.println("DEVICE INITIALIZED");
-            isDeviceInitialized = true;
-        }
-        
-        //StartCapture
-        System.out.println("show Iris :::");
-//        ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
-//        ARCDetails a= holder.getARC();
-       
-       List<String> iris = a.getIris();
-        
-        if(iris.size() == 0) {
-            irisCaptureInfo = "RI, LI";
-            try {
-                int retStartCapture = mIDIrisEnroll.StartCapture(IrisSide.MIDIRIS_ENROLL_IRIS_SIDE_BOTH, minQuality, timeout);
-                if (retStartCapture != 0) {
-                    lblerror.setText(mIDIrisEnroll.GetErrorMessage(retStartCapture));
-
-                    return;
-                }else {
-                System.out.println("CAPTUTRED");
-
-                }
-            }
-            catch(Exception e){
-                System.out.println("Error : "+e.getMessage());
-            }
-        }
-        else if(iris.get(0).contains("LI")) {
-            irisCaptureInfo = "RI";
-            try {
-                int retStartCapture = mIDIrisEnroll.StartCapture(IrisSide.MIDIRIS_ENROLL_IRIS_SIDE_RIGHT, minQuality, timeout);
-                if (retStartCapture != 0) {
-                    lblerror.setText(mIDIrisEnroll.GetErrorMessage(retStartCapture));
-
-                    return;
-                }else {
-                System.out.println("CAPTUTRED");
-
-                }
-            }
-            catch(Exception e){
-                System.out.println("Error : "+e.getMessage());
-            }
-        }
-        else if(iris.get(0).contains("RI")) {
-            irisCaptureInfo = "LI";
-            try {
-                int retStartCapture = mIDIrisEnroll.StartCapture(IrisSide.MIDIRIS_ENROLL_IRIS_SIDE_LEFT, minQuality, timeout);
-                if (retStartCapture != 0) {
-                    lblerror.setText(mIDIrisEnroll.GetErrorMessage(retStartCapture));
-
-                    return;
-                }else {
-                    System.out.println("CAPTUTRED");
-
-                }
-            }
-            catch(Exception e){
-                    System.out.println("Error : "+e.getMessage());
-            }
-        }
-        }
-        else {
-            lblerror.setText("Device is not connected, Kindly reconnect the IRIS");
-        }
-         */
-
     }
 
     public class MyIcon implements Icon {
@@ -613,61 +322,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
 
     @Override
     public void OnDeviceDetection(String DeviceName, IrisSide irisSide, DeviceDetection detection) {
-//         if (detection == DeviceDetection.CONNECTED) {
-//          System.out.println(DeviceName + " Connected");
-//          deviceName = DeviceName;
-//          System.out.println("DEvice Name:"+deviceName );
-//        IrisSide[] irisSides = new IrisSide[1];
-//        if(mIDIrisEnroll.IsDeviceConnected(DeviceModel.MATISX, irisSides)) {
-//            List<String> deviceListConnected = new ArrayList<String>();
-//        int retConnected = mIDIrisEnroll.GetConnectedDevices(deviceListConnected);
-//        if (retConnected != 0) {
-//            //lblerror.setText("Device is not connected");
-//           // return;
-//        }
-//
-//        System.out.println("connected devices :"+ deviceListConnected);
-//        String model = "";
-//        //Initialize Iris Device
-//        if(deviceListConnected.size()>0) {
-//         model = deviceListConnected.get(0);
-//        }
-//     
-//        System.out.println("DEVICE NAME:"+model);
-//        DeviceInfo info = new DeviceInfo();
-//        
-//        retInit = mIDIrisEnroll.Init(DeviceModel.valueFor(model), info, irisSides);
-//        if (retInit != 0) {
-//            deviceInfo = null;
-//     
-//
-//            System.out.println("Device err :" + mIDIrisEnroll.GetErrorMessage(retInit));
-////            showDeviceInfo(null);
-////            jblIrisLeftIcon.setIcon(null);
-////            jblIrisRightIcon.setIcon(null);
-////            showLogs(mIDIrisEnroll.GetErrorMessage(ret));
-//            //return;
-//        }else {
-//     
-//            ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
-//            SaveEnrollmentDetails saveEnrollment = holder.getenrollmentDetails();
-//            System.out.println("details : " + saveEnrollment.getArcNo());
-//            saveEnrollment.setiRISScannerSerailNo(info.SerialNo);
-//            saveEnrollment.setEnrollmentStatus("IRIS Capture Completed");
-//            holder.setEnrollmentDetails(saveEnrollment);
-//            System.out.println("DEVICE INITIALIZED");
-//        }
-//        }
-//          //  jcbConnectedDevices.addItem(DeviceName);
-//           //lblerror.setText(DeviceName + " Connected88");
-//        } 
-//         else { //DETACHED
-//           // jcbConnectedDevices.removeItem(DeviceName);
-//            System.out.println(DeviceName + " Disconnected");
-//            //showLogs(DeviceName + " Disconnected");
-//
-//            
-//        }
         try {
             if (detection == DeviceDetection.CONNECTED) {
                 LOGGER.log(Level.INFO, "IRIS deviedetection from SDK:" + DeviceDetection.CONNECTED);
@@ -675,16 +329,12 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                 deviceName = DeviceName;
                 LOGGER.log(Level.INFO, "Device Name:" + deviceName);
                 isDeviceConnected = true;
-                //  jcbConnectedDevices.addItem(DeviceName);
-                //lblerror.setText(DeviceName + " Connected88");
             } else { //DETACHED
-                // jcbConnectedDevices.removeItem(DeviceName);
                 LOGGER.log(Level.INFO, "IRIS deviedetection from SDK:" + DeviceDetection.CONNECTED);
                 isDeviceConnected = false;
                 isDeviceInitialized = false;
                 mIDIrisEnroll.Uninit();
                 LOGGER.log(Level.INFO, "Disconnected" + DeviceName);
-                //showLogs(DeviceName + " Disconnected");
 
 
             }
@@ -699,10 +349,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
     @Override
     public void OnPreview(int ErrorCode, ImageQuality imageQuality, final ImagePara imagePara) {
         try {
-            //showLogs("Capture Success");
-//            jblIrisLeft.setText("Quality: " + imageQuality.LeftIrisQuality);
-//            jblIrisRight.setText("Quality: " + imageQuality.RightIrisQuality);
-
             if (imagePara.LeftImageBufferLen > 0) {
                 displayImage(imagePara.LeftImageBuffer, imageQuality.LeftIrisQuality,
                         imageQuality.LeftIrisX, imageQuality.LeftIrisY, imageQuality.LeftIrisR, lefticon, mLeftIrisImage);
@@ -719,29 +365,22 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
             ex.printStackTrace();
             LOGGER.log(Level.SEVERE, "IRIS Device, Error while OnPreview ");
         }
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void OnComplete(int ErrorCode, ImageQuality imageQuality, final ImagePara imagePara) {
         try {
-//            showLogs("Capture Success");
-//            jblIrisLeft.setText("Quality: " + imageQuality.LeftIrisQuality);
-//            jblIrisRight.setText("Quality: " + imageQuality.RightIrisQuality);
             if (imagePara == null) {
                 System.out.println("stream empty");
                 irisCapturedLeft = false;
                 irisCapturedRight = false;
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        InputStream inputStream = IrisController.class.getResourceAsStream("/img/redcross.png");
-                        Image image = new Image(inputStream);
-                        camera.setDisable(true);
-                        captureIris.setDisable(false);
-                        showFinger.setDisable(false);
-                        statusImage.setImage(image);
-                    }
+                Platform.runLater(() -> {
+                    InputStream inputStream = IrisController.class.getResourceAsStream("/img/redcross.png");
+                    Image image = new Image(inputStream);
+                    camera.setDisable(true);
+                    captureIris.setDisable(false);
+                    showFinger.setDisable(false);
+                    statusImage.setImage(image);
                 });
 
                 return;
@@ -765,47 +404,34 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
             ex.printStackTrace();
             LOGGER.log(Level.SEVERE, "IRIS Device, Error while Oncomplete ");
         }
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 
     void displayImage(final byte[] buffer, final int qty, final int x, final int y, final int r, final ImageView jLabel, final MyIcon icon) throws IOException {
+        new Thread(() -> {
+            try {
+                InputStream in = new ByteArrayInputStream(buffer);
+                BufferedImage bufferedImage = ImageIO.read(in);
+                System.out.println("BUFFFF" + bufferedImage.getData());
 
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    InputStream in = new ByteArrayInputStream(buffer);
-                    BufferedImage bufferedImage = ImageIO.read(in);
-                    System.out.println("BUFFFF" + bufferedImage.getData());
-//                    icon.setImage(bufferedImage, qty, x, y, r);
-
-                    WritableImage wr = null;
-                    if (bufferedImage != null) {
-                        System.out.println("BUFDREA not null");
-                        System.out.println("WR in display image:::" + wr);
-                        wr = new WritableImage(bufferedImage.getWidth(), bufferedImage.getHeight());
-                        PixelWriter pw = wr.getPixelWriter();
-                        for (int x = 0; x < bufferedImage.getWidth(); x++) {
-                            for (int y = 0; y < bufferedImage.getHeight(); y++) {
-                                pw.setArgb(x, y, bufferedImage.getRGB(x, y));
-                            }
+                WritableImage wr = null;
+                if (bufferedImage != null) {
+                    System.out.println("BUFDREA not null");
+                    System.out.println("WR in display image:::" + wr);
+                    wr = new WritableImage(bufferedImage.getWidth(), bufferedImage.getHeight());
+                    PixelWriter pw = wr.getPixelWriter();
+                    for (int x1 = 0; x1 < bufferedImage.getWidth(); x1++) {
+                        for (int y1 = 0; y1 < bufferedImage.getHeight(); y1++) {
+                            pw.setArgb(x1, y1, bufferedImage.getRGB(x1, y1));
                         }
                     }
-
-                    ImageView imView = new ImageView(wr);
-                    System.out.println("IMAGEEEE-displayimage" + imView.getImage().toString());
-                    jLabel.setImage(wr);
-                    // righticon.setImage(wr);
-
-                    //Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-                    //lefticon.setImage(image);
-                    //jLabel.setIcon(icon);
-                    //jLabel.repaint();
-                } catch (Exception e) {
-                    System.out.println("Error : " + e.getMessage());
                 }
+
+                ImageView imView = new ImageView(wr);
+                System.out.println("IMAGEEEE-displayimage" + imView.getImage().toString());
+                jLabel.setImage(wr);
+            } catch (Exception e) {
+                System.out.println("Error : " + e.getMessage());
             }
         }).start();
 
@@ -816,7 +442,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
             ImagePara imagePara = new ImagePara();
             int ret = mIDIrisEnroll.GetImage(imagePara, compressionRatio, format);
             if (ret != 0) {
-                //showLogs(mIDIrisEnroll.GetErrorMessage(ret));
             } else {
                 if (imagePara.LeftImageBufferLen > 0) {
                     byte[] finalLeftBuffer = new byte[imagePara.LeftImageBufferLen];
@@ -829,14 +454,12 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                     System.arraycopy(imagePara.RightImageBuffer, 0, finalRightBuffer, 0, imagePara.RightImageBufferLen);
                     rightIrisImage = finalRightBuffer;
                 }
-                // showLogs("Image Save");
             }
             ImageFormat formatIso = ImageFormat.valueOf("IIR_K7_2011");
             int compressionRatioIso = 1;
             ImagePara imageParaIso = new ImagePara();
             int retIso = mIDIrisEnroll.GetImage(imageParaIso, compressionRatioIso, formatIso);
             if (retIso != 0) {
-                //showLogs(mIDIrisEnroll.GetErrorMessage(ret));
             } else {
                 if (imageParaIso.LeftImageBufferLen > 0) {
                     byte[] finalLeftBuffer = new byte[imageParaIso.LeftImageBufferLen];
@@ -850,7 +473,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                     System.arraycopy(imageParaIso.RightImageBuffer, 0, finalRightBuffer, 0, imageParaIso.RightImageBufferLen);
                     rightIrisTemplate = finalRightBuffer;
                 }
-                // showLogs("Image Save");
             }
         } catch (Exception e) {
             LOGGER.log(Level.INFO, "Exception:" + e + ":Try Again");
@@ -861,44 +483,32 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
     private void displayImageComplete(final byte[] buffer, final int qty, final int x, final int y, final int r, final ImageView jLabel, final MyIcon icon) {
 
         try {
-            new Thread(new Runnable() {
+            new Thread(() -> {
+                try {
+                    InputStream in = new ByteArrayInputStream(buffer);
+                    BufferedImage bufferedImage = ImageIO.read(in);
+                    System.out.println("BUFFFF" + bufferedImage.getData());
 
-                @Override
-                public void run() {
-                    try {
-                        InputStream in = new ByteArrayInputStream(buffer);
-                        BufferedImage bufferedImage = ImageIO.read(in);
-                        System.out.println("BUFFFF" + bufferedImage.getData());
-//                    icon.setImage(bufferedImage, qty, x, y, r);
-
-                        WritableImage wr = null;
-                        if (bufferedImage != null) {
-                            System.out.println("BUFDREA not null");
-                            wr = new WritableImage(bufferedImage.getWidth(), bufferedImage.getHeight());
-                            System.out.println("WR in display image complete:::" + wr);
-                            PixelWriter pw = wr.getPixelWriter();
-                            for (int x = 0; x < bufferedImage.getWidth(); x++) {
-                                for (int y = 0; y < bufferedImage.getHeight(); y++) {
-                                    pw.setArgb(x, y, bufferedImage.getRGB(x, y));
-                                }
+                    WritableImage wr = null;
+                    if (bufferedImage != null) {
+                        System.out.println("BUFDREA not null");
+                        wr = new WritableImage(bufferedImage.getWidth(), bufferedImage.getHeight());
+                        System.out.println("WR in display image complete:::" + wr);
+                        PixelWriter pw = wr.getPixelWriter();
+                        for (int x1 = 0; x1 < bufferedImage.getWidth(); x1++) {
+                            for (int y1 = 0; y1 < bufferedImage.getHeight(); y1++) {
+                                pw.setArgb(x1, y1, bufferedImage.getRGB(x1, y1));
                             }
                         }
-
-                        ImageView imView = new ImageView(wr);
-                        System.out.println("IMAGEEEE-displayimagecomplete" + imView.getImage().toString());
-                        jLabel.setImage(wr);
-
-
-                        // righticon.setImage(wr);
-
-                        //Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-                        //lefticon.setImage(image);
-                        //jLabel.setIcon(icon);
-                        //jLabel.repaint();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        LOGGER.log(Level.SEVERE, "IRIS Device, Error while Displaying image ");
                     }
+
+                    ImageView imView = new ImageView(wr);
+                    System.out.println("IMAGEEEE-displayimagecomplete" + imView.getImage().toString());
+                    jLabel.setImage(wr);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LOGGER.log(Level.SEVERE, "IRIS Device, Error while Displaying image ");
                 }
             }).start();
             System.out.println("iris info :" + irisCaptureInfo.contains("RI"));
@@ -907,16 +517,13 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
 
             if (irisCaptureInfo.contains("RI") && irisCaptureInfo.contains("LI")) {
                 if (irisCapturedRight == false) {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            InputStream inputStream = IrisController.class.getResourceAsStream("/img/redcross.png");
-                            Image image = new Image(inputStream);
-                            camera.setDisable(true);
-                            showFinger.setDisable(false);
-                            captureIris.setDisable(false);
-                            statusImage.setImage(image);
-                        }
+                    Platform.runLater(() -> {
+                        InputStream inputStream = IrisController.class.getResourceAsStream("/img/redcross.png");
+                        Image image = new Image(inputStream);
+                        camera.setDisable(true);
+                        showFinger.setDisable(false);
+                        captureIris.setDisable(false);
+                        statusImage.setImage(image);
                     });
                     return;
                 } else if (irisCapturedLeft == false) {
@@ -938,7 +545,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                         public void run() {
                             InputStream inputStream = IrisController.class.getResourceAsStream("/img/tickgreen.jpg");
                             Image image = new Image(inputStream);
-//                            Image image = new Image("@img/img/tickgreen.jpg");
                             camera.setDisable(false);
                             showFinger.setDisable(true);
                             captureIris.setDisable(true);
@@ -949,57 +555,45 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
 
             } else if (irisCaptureInfo.contains("RI")) {
                 if (irisCapturedRight == false) {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            InputStream inputStream = IrisController.class.getResourceAsStream("/img/redcross.png");
-                            Image image = new Image(inputStream);
-                            captureIris.setDisable(false);
-                            showFinger.setDisable(false);
-                            camera.setDisable(true);
-                            statusImage.setImage(image);
-                        }
+                    Platform.runLater(() -> {
+                        InputStream inputStream = IrisController.class.getResourceAsStream("/img/redcross.png");
+                        Image image = new Image(inputStream);
+                        captureIris.setDisable(false);
+                        showFinger.setDisable(false);
+                        camera.setDisable(true);
+                        statusImage.setImage(image);
                     });
                     return;
                 } else {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            InputStream inputStream = IrisController.class.getResourceAsStream("/img/tickgreen.jpg");
-                            Image image = new Image(inputStream);
-                            camera.setDisable(false);
-                            showFinger.setDisable(true);
-                            captureIris.setDisable(true);
-                            statusImage.setImage(image);
-                        }
+                    Platform.runLater(() -> {
+                        InputStream inputStream = IrisController.class.getResourceAsStream("/img/tickgreen.jpg");
+                        Image image = new Image(inputStream);
+                        camera.setDisable(false);
+                        showFinger.setDisable(true);
+                        captureIris.setDisable(true);
+                        statusImage.setImage(image);
                     });
                 }
             } else if (irisCaptureInfo.contains("LI")) {
                 if (irisCapturedLeft == false) {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            InputStream inputStream = IrisController.class.getResourceAsStream("/img/redcross.png");
-                            Image image = new Image(inputStream);
-                            camera.setDisable(true);
-                            captureIris.setDisable(false);
-                            showFinger.setDisable(false);
-                            statusImage.setImage(image);
-                        }
+                    Platform.runLater(() -> {
+                        InputStream inputStream = IrisController.class.getResourceAsStream("/img/redcross.png");
+                        Image image = new Image(inputStream);
+                        camera.setDisable(true);
+                        captureIris.setDisable(false);
+                        showFinger.setDisable(false);
+                        statusImage.setImage(image);
                     });
 
                     return;
                 } else {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            InputStream inputStream = IrisController.class.getResourceAsStream("/img/tickgreen.jpg");
-                            Image image = new Image(inputStream);
-                            camera.setDisable(false);
-                            showFinger.setDisable(true);
-                            captureIris.setDisable(true);
-                            statusImage.setImage(image);
-                        }
+                    Platform.runLater(() -> {
+                        InputStream inputStream = IrisController.class.getResourceAsStream("/img/tickgreen.jpg");
+                        Image image = new Image(inputStream);
+                        camera.setDisable(false);
+                        showFinger.setDisable(true);
+                        captureIris.setDisable(true);
+                        statusImage.setImage(image);
                     });
                 }
             }
@@ -1008,57 +602,39 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
             ImagePara imagePara = new ImagePara();
             int ret = mIDIrisEnroll.GetImage(imagePara, compressionRatio, format);
             if (ret != 0) {
-                //showLogs(mIDIrisEnroll.GetErrorMessage(ret));
             } else {
                 if (imagePara.LeftImageBufferLen > 0) {
                     byte[] finalLeftBuffer = new byte[imagePara.LeftImageBufferLen];
                     System.arraycopy(imagePara.LeftImageBuffer, 0, finalLeftBuffer, 0, imagePara.LeftImageBufferLen);
                     leftIrisImage = finalLeftBuffer;
-                /*
-                 OutputStream os2 = new FileOutputStream("/home/boss/leftIrisImage");
-                       // Starts writing the bytes in it
-                 os2.write(leftIrisImage);   
-                  System.out.println("leftIrisTemplate:::"+leftIrisImage); */
                 }
 
                 if (imagePara.RightImageBufferLen > 0) {
                     byte[] finalRightBuffer = new byte[imagePara.RightImageBufferLen];
                     System.arraycopy(imagePara.RightImageBuffer, 0, finalRightBuffer, 0, imagePara.RightImageBufferLen);
                     rightIrisImage = finalRightBuffer;
-                /*OutputStream os3 = new FileOutputStream("/home/boss/rightIrisImage");
-                       // Starts writing the bytes in it
-                 os3.write(rightIrisImage);  
-                  System.out.println("leftIrisTemplate:::"+rightIrisImage);*/
                 }
-                // showLogs("Image Save");
             }
             ImageFormat formatIso = ImageFormat.valueOf("IIR_K7_2011");//Image Format IIR_K7_2011 for Image Template
             int compressionRatioIso = 1;
             ImagePara imageParaIso = new ImagePara();
             int retIso = mIDIrisEnroll.GetImage(imageParaIso, compressionRatioIso, formatIso);
             if (retIso != 0) {
-                //showLogs(mIDIrisEnroll.GetErrorMessage(ret));
             } else {
                 if (imageParaIso.LeftImageBufferLen > 0) {
                     byte[] finalLeftBuffer = new byte[imageParaIso.LeftImageBufferLen];
                     System.arraycopy(imageParaIso.LeftImageBuffer, 0, finalLeftBuffer, 0, imageParaIso.LeftImageBufferLen);
                     leftIrisTemplate = finalLeftBuffer;
-                /*OutputStream os = new FileOutputStream("/home/boss/irisTemplateleft");
-                       // Starts writing the bytes in it
-                 os.write(leftIrisTemplate);    
-                 System.out.println("leftIrisTemplate:::"+leftIrisTemplate);*/
+
                 }
 
                 if (imageParaIso.RightImageBufferLen > 0) {
                     byte[] finalRightBuffer = new byte[imageParaIso.RightImageBufferLen];
                     System.arraycopy(imageParaIso.RightImageBuffer, 0, finalRightBuffer, 0, imageParaIso.RightImageBufferLen);
                     rightIrisTemplate = finalRightBuffer;
-                /*OutputStream os1 = new FileOutputStream("/home/boss/irisTemplateright");
-                       // Starts writing the bytes in it
-                 os1.write(rightIrisTemplate);    
-                 System.out.println("rightIrisTemplate::::"+rightIrisTemplate);*/
+
                 }
-                // showLogs("Image Save");
+
             }
         } catch (Exception e) {
             LOGGER.log(Level.INFO, "Exception:" + e + ":Try Again");
@@ -1069,7 +645,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
 
     private void jbtnSaveImageActionPerformed(java.awt.event.ActionEvent evt) {
         if (deviceInfo == null) {
-            //showLogs("Device is not initialized.");
             return;
         }
         ImageFormat format = ImageFormat.valueOf("BMP");
@@ -1077,88 +652,21 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
         ImagePara imagePara = new ImagePara();
         int ret = mIDIrisEnroll.GetImage(imagePara, compressionRatio, format);
         if (ret != 0) {
-            // showLogs(mIDIrisEnroll.GetErrorMessage(ret));
         } else {
             if (imagePara.LeftImageBufferLen > 0) {
                 byte[] finalLeftBuffer = new byte[imagePara.LeftImageBufferLen];
                 System.arraycopy(imagePara.LeftImageBuffer, 0, finalLeftBuffer, 0, imagePara.LeftImageBufferLen);
-
-//                switch (format) {
-//                    case RAW:
-//                        WriteImageFile("Left_Raw.raw", finalLeftBuffer);
-//                        break;
-//                    case BMP:
-//                        WriteImageFile("Left_Bitmap.bmp", finalLeftBuffer);
-//                        break;
-//                    case JPEG2000:
-//                        WriteImageFile("Left_JPEG2000.jp2", finalLeftBuffer);
-//                        break;
-//                    case K7:
-//                        WriteImageFile("Left_K7.bmp", finalLeftBuffer);
-//                        break;
-//                    case IIR_K7_2011:
-//                        WriteImageFile("Left_k7_IIR.iso", finalLeftBuffer);
-//                        break;
-//                }
-                String strIrisLeft = Base64.getEncoder().encodeToString(finalLeftBuffer);
-                //WriteImageFile("Left_k7_IIR.iso",strIrisLeft.getBytes());
             }
 
             if (imagePara.RightImageBufferLen > 0) {
                 byte[] finalRightBuffer = new byte[imagePara.RightImageBufferLen];
                 System.arraycopy(imagePara.RightImageBuffer, 0, finalRightBuffer, 0, imagePara.RightImageBufferLen);
-
-//                switch (format) {
-//                    case RAW:
-//                        WriteImageFile("Right_Raw.raw", finalRightBuffer);
-//                        break;
-//                    case BMP:
-//                        WriteImageFile("Right_Bitmap.bmp", finalRightBuffer);
-//                        break;
-//                    case JPEG2000:
-//                        WriteImageFile("Right_JPEG2000.jp2", finalRightBuffer);
-//                        break;
-//                    case K7:
-//                        WriteImageFile("Right_K7.bmp", finalRightBuffer);
-//                        break;
-//                    case IIR_K7_2011:
-//                        WriteImageFile("Right_k7_IIR.iso", finalRightBuffer);
-//                        break;
-//                }
-                String strIrisRight = Base64.getEncoder().encodeToString(finalRightBuffer);
             }
-            //showLogs("Image Save");
         }
-    }    
-    
-    /*
-    private void WriteImageFile(String filename, byte[] bytes) {
-        
-        try {
-            String path = System.getProperty("user.dir") + "//IrisData";
-            System.out.println("user dir :"+path);
-            File file = new File(path);
-
-            if (!file.exists()) {
-                file.mkdirs();
-            }
-            path = path + "//" + filename;
-            file = new File(path);
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            FileOutputStream stream = new FileOutputStream(path);
-            stream.write(bytes);
-            stream.close();
-        } catch (Exception e1) {
-        }
-    } */
+    }
 
     @FXML
     private void switchToSlap() throws IOException {
-        //App.setRoot("secondary");
-        // mIDIrisEnroll.Uninit();
-        //App.setRoot("slapscanner");
         showFinger.setDisable(true);
         captureIris.setDisable(true);
         camera.setDisable(true);
@@ -1169,10 +677,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
 
     @FXML
     private void cameraCapture() throws IOException {
-        //App.setRoot("secondary");
-
-
-        //commented for Capture IRIS
         if (rightIrisImage == null && leftIrisImage != null) {
             System.out.println("In Left Iris Image" + leftIrisImage);
             IRIS irisLeft = new IRIS();
@@ -1210,7 +714,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
         SaveEnrollmentDetails saveEnrollment = holder.getSaveEnrollmentDetails();
         System.out.println("details : " + saveEnrollment.getArcNo());
         saveEnrollment.setIris(irisSet);
-        //saveEnrollment.setEnrollmentStatus("IRIS Capture Completed");
         saveEnrollment.setEnrollmentStatus("IrisCompleted");
         holder.setSaveEnrollmentDetails(saveEnrollment);
 
@@ -1222,7 +725,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
             SaveEnrollmentDetailsUtil.writeToFile(saveEnrollment);
         } catch (GenericException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-//            Platform.runLater(()->);
         }
 
         // Added For Biometric Options
@@ -1231,7 +733,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                 mIDIrisEnroll.Uninit();
                 App.setRoot("biometric_capture_complete");
             } catch (IOException ex) {
-                //Logger.getLogger(ARCNoController.class.getName()).log(Level.SEVERE, null, ex);
                 LOGGER.log(Level.INFO, "IOException At Get Biometric Options:" + ex);
             }
         } else {
@@ -1239,7 +740,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
                 mIDIrisEnroll.Uninit();
                 App.setRoot("camera");
             } catch (IOException ex) {
-                //Logger.getLogger(ARCNoController.class.getName()).log(Level.SEVERE, null, ex);
                 LOGGER.log(Level.INFO, "IOException At Get Biometric Options:" + ex);
             }
         }
@@ -1249,9 +749,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
     @FXML
     private void goBack() {
         System.out.println("inside go back");
-        //backBtn.setDisable(false);
-        //scan.setDisable(false);
-        //statusField.setText("");
 
         try {
 
@@ -1267,7 +764,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
         try {
             App.setRoot("slapscanner");
         } catch (IOException ex) {
-            //Logger.getLogger(IrisController.class.getName()).log(Level.SEVERE, null, ex);
             LOGGER.log(Level.SEVERE, "Error: " + ex.getMessage());
         }
 
@@ -1276,7 +772,6 @@ public class IrisController implements MIDIrisEnrollCallback, Initializable {
     @FXML
     private void stayBack() {
         System.out.println("inside stay back");
-        //backBtn.setDisable(false);
         confirmPane.setVisible(false);
 
         captureIris.setDisable(false);

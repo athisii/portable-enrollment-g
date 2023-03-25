@@ -6,7 +6,6 @@ import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ARCDetailsHolder;
 import com.cdac.enrollmentstation.util.PropertyFile;
-import com.cdac.enrollmentstation.util.OpenCvUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,6 +17,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -38,6 +38,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.cdac.enrollmentstation.model.ARCDetailsHolder.getArcDetailsHolder;
 
 /**
  * @author athisii, CDAC
@@ -147,7 +149,9 @@ public class CameraController {
         backBtn.setOnAction(this::back);
         confirmNoBtn.setOnAction(this::confirmNo);
         confirmYesBtn.setOnAction(this::confirmYes);
-        arcLbl.setText("ARC: " + ARCDetailsHolder.getArcDetailsHolder().getArcDetails().getArcNo());
+        if (getArcDetailsHolder().getArcDetails() != null && getArcDetailsHolder().getArcDetails().getArcNo() != null) {
+            arcLbl.setText("ARC: " + getArcDetailsHolder().getArcDetails().getArcNo());
+        }
         //TODO - not working for now
         //camSlider.setVisible(false);
         //brightness.setVisible(false);
@@ -158,7 +162,7 @@ public class CameraController {
         savePhotoBtn.setDisable(!validImage);
         enableControls(startStopCameraBtn, backBtn);
         try {
-            ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
+            ARCDetailsHolder holder = getArcDetailsHolder();
             if (holder.getArcDetails().getBiometricOptions().contains("Photo")) {
                 App.setRoot("enrollment_arc");
             } else {
@@ -179,7 +183,7 @@ public class CameraController {
     // action for back button
     private void back(ActionEvent actionEvent) {
         confirmPane.setVisible(true);
-        ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
+        ARCDetailsHolder holder = getArcDetailsHolder();
         // Added For Biometric Options
         if (holder.getArcDetails().getBiometricOptions().contains("Photo")) {
             confirmPaneLbl.setText("Click 'Yes' to FetchArc or Click 'No' to Capture photo");
@@ -281,12 +285,19 @@ public class CameraController {
                 );
                 Platform.runLater(() -> message.setText("Move your face to fit in REDBOX"));
             }
-            updateImageView(liveImageView, OpenCvUtils.mat2Image(matrix));
+
+            updateImageView(liveImageView, mat2Image(matrix));
         }
         if (videoCapture.isOpened()) {
             videoCapture.release();
         }
         stopLive = false;
+    }
+
+    public Image mat2Image(Mat mat) {
+        MatOfByte buffer = new MatOfByte();
+        Imgcodecs.imencode(".jpg", mat, buffer);
+        return new Image(new ByteArrayInputStream(buffer.toArray()));
     }
 
 

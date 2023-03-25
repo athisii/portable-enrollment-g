@@ -38,7 +38,7 @@
                     <ImageView fitHeight="75.0" fitWidth="109.0" layoutX="110.0" layoutY="104.0" pickOnBounds="true"
                                preserveRatio="true">
 
-                        <Image url="@../img/loginn.jpg"/>
+                        <Image url="@../img/login.jpg"/>
 
                     </ImageView>
                     <Button fx:id="onlinelogin" layoutX="69.0" layoutY="192.0" maxHeight="44.0" maxWidth="275.0"

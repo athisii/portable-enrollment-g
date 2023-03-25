@@ -31,7 +31,6 @@ public class App extends Application implements EventHandler<WindowEvent> {
             Platform.exit();  //Comment this line in production/deployment (Alt+f4 and close button)
         });
         scene = new Scene(loadFXML("login"), 1366, 768);
-//        scene.getStylesheets().add("/css/enrollmentcss.css")
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             LOGGER.log(Level.INFO, () -> "Caught by default Uncaught Exception Handler. Will exit now");
             throwable.printStackTrace();

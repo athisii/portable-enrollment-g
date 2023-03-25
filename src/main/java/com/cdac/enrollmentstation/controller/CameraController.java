@@ -24,13 +24,9 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.awt.image.RescaleOp;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
@@ -90,8 +86,6 @@ public class CameraController {
         }
     }
 
-    @FXML
-    private ImageView brightness;
 
     @FXML
     private ImageView sunGlassIcon;
@@ -134,8 +128,7 @@ public class CameraController {
 
     private final AtomicInteger imageCaptureCount = new AtomicInteger(0);
     private volatile boolean validImage = false;
-    @FXML
-    private Slider camSlider;
+
 
     private ScheduledExecutorService scheduledExecutorService;
 
@@ -152,9 +145,8 @@ public class CameraController {
         if (getArcDetailsHolder().getArcDetails() != null && getArcDetailsHolder().getArcDetails().getArcNo() != null) {
             arcLbl.setText("ARC: " + getArcDetailsHolder().getArcDetails().getArcNo());
         }
-        //TODO - not working for now
-        //camSlider.setVisible(false);
-        //brightness.setVisible(false);
+//        camSlider.setVisible(true);
+//        brightness.setVisible(true);
     }
 
     private void confirmYes(ActionEvent actionEvent) {
@@ -456,26 +448,26 @@ public class CameraController {
         isCameraActive = false;
     }
 
-    @FXML
-    private void camSlider() {
-        System.out.println("inside Cam Slider");
-        System.out.println("CAm Slider Value:" + (int) camSlider.getValue());
-        String sliderdec = new DecimalFormat("##.#").format((float) camSlider.getValue());
-        System.out.println("CAm Slider Value2:" + sliderdec);
-        try {
-            System.out.println("905");
-            File file = new File(SUB_FILE);
-            RescaleOp rescaleOp = new RescaleOp(Float.valueOf(sliderdec), 15 * Float.valueOf(sliderdec), null);
-            BufferedImage bimag = ImageIO.read(file);
-            rescaleOp.filter(bimag, bimag);
-            ImageIO.write(bimag, SUB_FILE, file);
-            Image image = new Image(file.toURI().toString());
-            resultImageView.setImage(image);
-            System.out.println("914");
-        } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, ex::getMessage);
-        }
-    }
+//    @FXML
+//    private void camSlider() {
+//        System.out.println("inside Cam Slider");
+//        System.out.println("CAm Slider Value:" + (int) camSlider.getValue());
+//        String sliderdec = new DecimalFormat("##.#").format((float) camSlider.getValue());
+//        System.out.println("CAm Slider Value2:" + sliderdec);
+//        try {
+//            System.out.println("905");
+//            File file = new File(SUB_FILE);
+//            RescaleOp rescaleOp = new RescaleOp(Float.valueOf(sliderdec), 15 * Float.valueOf(sliderdec), null);
+//            BufferedImage bimag = ImageIO.read(file);
+//            rescaleOp.filter(bimag, bimag);
+//            ImageIO.write(bimag, SUB_FILE, file);
+//            Image image = new Image(file.toURI().toString());
+//            resultImageView.setImage(image);
+//            System.out.println("914");
+//        } catch (Exception ex) {
+//            LOGGER.log(Level.SEVERE, ex::getMessage);
+//        }
+//    }
 
     private void disableControls(Node... nodes) {
         for (Node node : nodes) {

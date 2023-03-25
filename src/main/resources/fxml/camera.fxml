@@ -158,13 +158,13 @@
                         <Insets top="-10.0"/>
                     </opaqueInsets>
                 </AnchorPane>
-                <Slider fx:id="camSlider" blockIncrement="0.1" layoutX="292.0" layoutY="483.0" max="2.0"
-                        onDragDetected="#camSlider" prefHeight="16.0" prefWidth="126.0" visible="false"/>
-                <ImageView fx:id="brightness" fitHeight="20.0" fitWidth="28.0" layoutX="267.0" layoutY="482.0"
-                           pickOnBounds="true" preserveRatio="true" visible="false">
-                    <Image url="@../img/brightness.png"/>
+<!--                <Slider fx:id="camSlider" blockIncrement="0.1" layoutX="292.0" layoutY="483.0" max="2.0"-->
+<!--                        onDragDetected="#camSlider" prefHeight="16.0" prefWidth="126.0" visible="false"/>-->
+<!--                <ImageView fx:id="brightness" fitHeight="20.0" fitWidth="28.0" layoutX="267.0" layoutY="482.0"-->
+<!--                           pickOnBounds="true" preserveRatio="true" visible="false">-->
+<!--                    <Image url="@../img/brightness.png"/>-->
 
-                </ImageView>
+<!--                </ImageView>-->
             </AnchorPane>
         </center>
     </BorderPane>

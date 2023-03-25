@@ -51,6 +51,8 @@ import java.util.stream.Stream;
  */
 public class ImportExportController {
     private static final Logger LOGGER = ApplicationLog.getLogger(ImportExportController.class);
+    private static final String TIMEOUT_ERR_MSG = "Connection timeout. Please try again.";
+
     private static final String IMPORTED_TEXT = "IMPORTED: ";
     private static final String CAPTURED_BIOMETRIC_TEXT = "CAPTURED BIOMETRIC: ";
     @FXML
@@ -200,13 +202,13 @@ public class ImportExportController {
             }
             // timeout connection
             if (saveEnrollmentResponse == null) {
-                updateUI("Connection timeout. Please try again.");
+                updateUI(TIMEOUT_ERR_MSG);
                 enableControls(exportBtn);
                 enableControls(homeBtn, backBtn);
                 return false;
             }
             if (!"0".equals(saveEnrollmentResponse.getErrorCode())) {
-                LOGGER.log(Level.SEVERE, "Server desc: " + saveEnrollmentResponse.getDesc());
+                LOGGER.log(Level.SEVERE, () -> "Server desc: " + saveEnrollmentResponse.getDesc());
                 //TODO: check if already submitted/given
                 if (!saveEnrollmentResponse.getDesc().toLowerCase().contains("already") && !saveEnrollmentResponse.getDesc().toLowerCase().contains("submitted") && !saveEnrollmentResponse.getDesc().toLowerCase().contains("given")) {
                     updateUI(saveEnrollmentResponse.getDesc());
@@ -266,7 +268,7 @@ public class ImportExportController {
             disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportBtn);
             Platform.runLater(() -> {
                 unitListView.getItems().clear();
-                messageLabel.setText("Connection timeout. Please try again.");
+                messageLabel.setText(TIMEOUT_ERR_MSG);
             });
             return;
         }
@@ -344,7 +346,7 @@ public class ImportExportController {
             Platform.runLater(() -> {
                 unitListView.getItems().clear();
                 disableControls(importUnitBtn);
-                messageLabel.setText("Connection timeout. Please try again.");
+                messageLabel.setText(TIMEOUT_ERR_MSG);
             });
             return;
         }

@@ -144,6 +144,10 @@ public class ImportExportController {
             enableControls(homeBtn, backBtn);
             return;
         }
+        if (encryptedArcPaths.isEmpty()) {
+            updateUI("No Arc to be exported.");
+            return;
+        }
 
         // now decrypt the data and calls the save API
         // run in multiple threads if size is greater than 3
@@ -209,8 +213,8 @@ public class ImportExportController {
             }
             if (!"0".equals(saveEnrollmentResponse.getErrorCode())) {
                 LOGGER.log(Level.SEVERE, () -> "Server desc: " + saveEnrollmentResponse.getDesc());
-                //TODO: check if already submitted/given
-                if (!saveEnrollmentResponse.getDesc().toLowerCase().contains("already") && !saveEnrollmentResponse.getDesc().toLowerCase().contains("submitted") && !saveEnrollmentResponse.getDesc().toLowerCase().contains("given")) {
+                String errorMessageSmallCase = saveEnrollmentResponse.getErrorCode().toLowerCase();
+                if (!errorMessageSmallCase.contains("already") && !errorMessageSmallCase.contains("submitted") && !errorMessageSmallCase.contains("given") && !errorMessageSmallCase.contains("provided")) {
                     updateUI(saveEnrollmentResponse.getDesc());
                     enableControls(homeBtn, backBtn);
                     return false;
@@ -380,7 +384,7 @@ public class ImportExportController {
             updateImportedListView();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
-            updateUI("Something went wrong. Please try again.");
+            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
         }
 
     }
@@ -437,7 +441,7 @@ public class ImportExportController {
             updateImportedListView();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error deleting selected unit.");
-            updateUI("Error deleting selected unit");
+            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
         }
 
     }

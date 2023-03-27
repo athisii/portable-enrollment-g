@@ -14,7 +14,8 @@
             <AnchorPane prefHeight="618.0" prefWidth="1024.0" style="-fx-background-color: #fff;"
                         BorderPane.alignment="CENTER">
 
-                <Button fx:id="camera" disable="true" layoutX="804.0" layoutY="666.0" maxHeight="36.0" maxWidth="163.0"
+                <Button fx:id="capturePhotoBtn" disable="true" layoutX="804.0" layoutY="666.0" maxHeight="36.0"
+                        maxWidth="163.0"
                         minHeight="36.0" minWidth="150.0" mnemonicParsing="false" onAction="#cameraCapture"
                         onTouchPressed="#cameraCapture" prefHeight="36.0" prefWidth="163.0"
                         style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="CAPTURE PHOTO"
@@ -23,9 +24,9 @@
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <Button fx:id="captureIris" layoutX="630.0" layoutY="666.0" maxHeight="36.0" maxWidth="150.0"
-                        minHeight="36.0" minWidth="150.0" mnemonicParsing="false" onAction="#captureIris"
-                        onTouchPressed="#captureIris" prefHeight="36.0" prefWidth="150.0"
+                <Button fx:id="captureIrisBtn" layoutX="630.0" layoutY="666.0" maxHeight="36.0" maxWidth="150.0"
+                        minHeight="36.0" minWidth="150.0" mnemonicParsing="false" onAction="#captureIrisBtnAction"
+                        onTouchPressed="#captureIrisBtnAction" prefHeight="36.0" prefWidth="150.0"
                         style="-fx-background-color: #3eb650; -fx-background-radius: 20 20 20 20;" text="SCAN"
                         textFill="WHITE">
                     <font>
@@ -35,7 +36,7 @@
                 <Pane layoutX="744.0" layoutY="367.0" prefHeight="184.0" prefWidth="200.0"
                       style="-fx-border-color: #000000; -fx-border-width: 2px;">
 
-                    <ImageView fx:id="righticon" fitHeight="179.0" fitWidth="184.0" layoutX="2.0" layoutY="2.0"
+                    <ImageView fx:id="rightIrisImageView" fitHeight="179.0" fitWidth="184.0" layoutX="2.0" layoutY="2.0"
                                pickOnBounds="true" preserveRatio="true">
 
                         <Image url="@../img/iris.jpg"/>
@@ -45,35 +46,35 @@
                 <Pane layoutX="466.0" layoutY="368.0" prefHeight="183.0" prefWidth="200.0"
                       style="-fx-border-width: 2px; -fx-border-color: #000000;">
 
-                    <ImageView fx:id="lefticon" fitHeight="178.0" fitWidth="185.0" layoutX="2.0" layoutY="2.0"
+                    <ImageView fx:id="leftIrisImageView" fitHeight="178.0" fitWidth="185.0" layoutX="2.0" layoutY="2.0"
                                pickOnBounds="true" preserveRatio="true">
 
                         <Image url="@../img/iris.jpg"/>
                     </ImageView>
 
                 </Pane>
-                <Label fx:id="lblerror" alignment="CENTER" layoutX="348.0" layoutY="567.0" prefHeight="23.0"
+                <Label fx:id="messageLabel" alignment="CENTER" layoutX="320.0" layoutY="567.0" prefHeight="23.0"
                        prefWidth="724.0">
                     <font>
                         <Font name="System Bold" size="16.0"/>
                     </font>
                 </Label>
-                <Button fx:id="showFinger" layoutX="457.0" layoutY="666.0" maxHeight="36.0" maxWidth="150.0"
-                        minHeight="36.0" minWidth="150.0" mnemonicParsing="false" onAction="#switchToSlap"
-                        onTouchPressed="#switchToSlap" prefHeight="36.0" prefWidth="150.0"
+                <Button fx:id="backBtn" layoutX="457.0" layoutY="666.0" maxHeight="36.0" maxWidth="150.0"
+                        minHeight="36.0" minWidth="150.0" mnemonicParsing="false" onAction="#backBtnAction"
+                        prefHeight="36.0" prefWidth="150.0"
                         style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;" text="BACK"
                         textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <ImageView fx:id="statusImage" fitHeight="116.0" fitWidth="118.0" layoutX="990.0" layoutY="422.0"
+                <ImageView fx:id="statusImageView" fitHeight="116.0" fitWidth="118.0" layoutX="990.0" layoutY="422.0"
                            pickOnBounds="true" preserveRatio="true"/>
                 <AnchorPane layoutY="711.0" prefHeight="60.0" prefWidth="1353.0"
                             style="-fx-background-color: #1990ea;"/>
                 <AnchorPane layoutY="151.0" prefHeight="60.0" prefWidth="1366.0" style="-fx-background-color: #04127b;">
 
-                    <Label fx:id="labelarc" layoutX="21.0" layoutY="19.0" text="ARCNo : aabbcc" textFill="WHITE">
+                    <Label fx:id="arcLabel" layoutX="21.0" layoutY="19.0" text="ARCNo : aabbcc" textFill="WHITE">
                         <font>
                             <Font size="16.0"/>
                         </font>

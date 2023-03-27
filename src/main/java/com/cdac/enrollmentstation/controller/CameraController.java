@@ -12,7 +12,6 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -155,7 +154,7 @@ public class CameraController {
         enableControls(startStopCameraBtn, backBtn);
         try {
             ARCDetailsHolder holder = getArcDetailsHolder();
-            if (holder.getArcDetails().getBiometricOptions().contains("Photo")) {
+            if (holder.getArcDetails().getBiometricOptions().trim().equalsIgnoreCase("Photo")) {
                 App.setRoot("enrollment_arc");
             } else {
                 App.setRoot("iris");
@@ -177,7 +176,7 @@ public class CameraController {
         confirmPane.setVisible(true);
         ARCDetailsHolder holder = getArcDetailsHolder();
         // Added For Biometric Options
-        if (holder.getArcDetails().getBiometricOptions().contains("Photo")) {
+        if (holder.getArcDetails().getBiometricOptions().trim().equalsIgnoreCase("Photo")) {
             confirmPaneLbl.setText("Click 'Yes' to FetchArc or Click 'No' to Capture photo");
         } else {
             confirmPaneLbl.setText("Click 'Yes' to Scan Iris or Click 'No' to Capture photo");

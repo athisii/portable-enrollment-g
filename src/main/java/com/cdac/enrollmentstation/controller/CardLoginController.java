@@ -7,7 +7,6 @@ package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.api.CardReaderAPI;
-import com.cdac.enrollmentstation.api.CardReaderAPIURLs;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.*;
@@ -60,10 +59,10 @@ public class CardLoginController implements MIDFingerAuth_Callback {
 
 
     @FXML
-    private Label statusMsg;
+    private Label messageLabel;
 
     @FXML
-    private PasswordField userTxt;
+    private PasswordField pinNoPasswordField;
 
     @FXML
     private ImageView m_FingerPrintImage;
@@ -72,7 +71,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     CardReaderAPI cardReaderAPI = new CardReaderAPI();
     //For Application Log
     private static final Logger LOGGER = ApplicationLog.getLogger(CardLoginController.class);
-    private MIDFingerAuth midFingerAuth = null; // For MID finger jar
+    private MIDFingerAuth midFingerAuth; // For MID finger jar
     private DeviceInfo deviceInfo = null;
     private byte[] lastCaptureTemplat;
     int fingerprintinit;
@@ -141,7 +140,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
 
     public void initialize() {
         /* add ChangeListner to TextField to restrict the TextField Length*/
-        userTxt.textProperty().addListener((observable, oldValue, newValue) -> limitCharacters(userTxt, oldValue, newValue));
+        pinNoPasswordField.textProperty().addListener((observable, oldValue, newValue) -> limitCharacters(pinNoPasswordField, oldValue, newValue));
         // TODO - need to implement
         /*
         usertxt.setOnKeyPressed(event -> {
@@ -154,22 +153,22 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     }
 
     @FXML
-    private void showHome() throws IOException {
+    private void backBtnAction() throws IOException {
         App.setRoot("login");
 
     }
 
     public void messageStatus(String message) {
-        statusMsg.setText(message);
+        messageLabel.setText(message);
     }
 
     public void responseStatus(String message) {
-        Platform.runLater(() -> statusMsg.setText(message));
+        Platform.runLater(() -> messageLabel.setText(message));
     }
 
 
     @FXML
-    public void readCardDetails() throws IllegalStateException {
+    public void loginBtnAction() throws IllegalStateException {
         String response = "";
     /* 
     if(usertxt.getText().isEmpty()){
@@ -196,11 +195,11 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     @FXML
     public void CaptureActionPerformed() {
         String response = "";
-     
+
    /* if(usertxt.getText().isEmpty()){
         response="Kindly Enter the Card Pin";
         System.out.println("Inside User Text");
-        messageStatus(response);         
+        messageStatus(response);
         return;
      }*/
 
@@ -512,13 +511,13 @@ public class CardLoginController implements MIDFingerAuth_Callback {
                         if (contractorID != null && !contractorID.isEmpty()) {
                             //App.setRoot("list_contract");
                             System.out.println("Inside Card read Details");
-                            if (userTxt.getText().isEmpty()) {
+                            if (pinNoPasswordField.getText().isEmpty()) {
                                 response = "Kindly Enter the Card PNo";
                                 LOGGER.log(Level.INFO, "Inside User Text");
                                 messageStatus(response);
                                 return response;
                             }
-                            if (contractorID.equals(userTxt.getText())) {
+                            if (contractorID.equals(pinNoPasswordField.getText())) {
                                 try {
                                     System.out.println("Equals ContractID");
                                     response = "success";

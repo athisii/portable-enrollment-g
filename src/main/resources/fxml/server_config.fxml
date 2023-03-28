@@ -5,7 +5,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.1"
+<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.ServerConfigController">
 
     <BorderPane prefHeight="778.0" prefWidth="1024.0">
@@ -41,22 +41,22 @@
                 <AnchorPane layoutX="430.0" layoutY="260.0" prefHeight="230.0" prefWidth="549.0"
                             style="-fx-border-color: #04127b;"/>
                 <Text fill="#04127b" layoutX="456.0" layoutY="340.0" strokeType="OUTSIDE" strokeWidth="0.0"
-                      text="Mafis API Server URL :" />
-                <TextField fx:id="mafisUrlTextField" layoutX="647.0" layoutY="322.0" prefHeight="26.0"
-                           prefWidth="205.0" disable="true"/>
+                      text="Mafis API Server URL :"/>
+                <TextField fx:id="mafisUrlTextField" disable="true" layoutX="647.0" layoutY="322.0" prefHeight="26.0"
+                           prefWidth="205.0"/>
 
                 <Text fill="#04127b" layoutX="456.0" layoutY="390.0" strokeType="OUTSIDE" strokeWidth="0.0"
                       text="Enrollment Station ID :"/>
-                <TextField fx:id="enrollmentStationIdTextField" layoutX="647.0" layoutY="372.0" prefHeight="26.0"
-                           prefWidth="203.0"  disable="true"/>
+                <TextField fx:id="enrollmentStationIdTextField" disable="true" layoutX="647.0" layoutY="372.0"
+                           prefHeight="26.0" prefWidth="203.0"/>
 
                 <Text fill="#04127b" layoutX="456.0" layoutY="437.0" strokeType="OUTSIDE" strokeWidth="0.0"
                       text="Enrollment Station Unit ID :"/>
-                <ComboBox fx:id="enrollmentStationUnitIdsComboBox" layoutX="648.0" layoutY="419.0" prefHeight="26.0"
-                          prefWidth="201.0" disable="true"/>
-                <Button fx:id="fetchUnitsBtn" layoutX="873.0" layoutY="415.0" maxHeight="35.0" maxWidth="150.0"
-                        minHeight="35.0" minWidth="86.0" mnemonicParsing="false" onAction="#fetchBtnAction"
-                        prefHeight="35.0" prefWidth="86.0" disable="true"
+                <ComboBox fx:id="enrollmentStationUnitIdsComboBox" disable="true" layoutX="648.0" layoutY="419.0"
+                          prefHeight="26.0" prefWidth="201.0"/>
+                <Button fx:id="fetchUnitsBtn" disable="true" layoutX="873.0" layoutY="415.0" maxHeight="35.0"
+                        maxWidth="150.0" minHeight="35.0" minWidth="86.0" mnemonicParsing="false"
+                        onAction="#fetchBtnAction" prefHeight="35.0" prefWidth="86.0"
                         style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="FETCH"
                         textFill="WHITE">
                     <font>
@@ -65,7 +65,7 @@
                 </Button>
 
 
-                <Label fx:id="labelStatus" alignment="CENTER" contentDisplay="CENTER" layoutX="428.0" layoutY="487.0"
+                <Label fx:id="messageLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="428.0" layoutY="487.0"
                        prefHeight="25.0" prefWidth="553.0">
                     <font>
                         <Font name="System Bold" size="17.0"/>
@@ -73,16 +73,16 @@
                 </Label>
 
 
-                <Button fx:id="backBtn" layoutX="412.0" layoutY="529.0" maxHeight="35.0" maxWidth="150.0"
+                <Button fx:id="backBtn" layoutX="480.0" layoutY="522.0" maxHeight="35.0" maxWidth="150.0"
                         minHeight="35.0" minWidth="142.0" mnemonicParsing="false" onAction="#backBtnAction"
-                        prefHeight="35.0"
-                        prefWidth="142.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
-                        text="BACK" textFill="WHITE">
+                        prefHeight="35.0" prefWidth="142.0"
+                        style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="BACK"
+                        textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <Button fx:id="editBtn" layoutX="568.0" layoutY="530.0" maxHeight="35.0" maxWidth="150.0"
+                <Button fx:id="editBtn" layoutX="657.0" layoutY="522.0" maxHeight="35.0" maxWidth="150.0"
                         minHeight="35.0" minWidth="86.0" mnemonicParsing="false" onAction="#editBtnAction"
                         prefHeight="35.0" prefWidth="125.0"
                         style="-fx-background-color: #3eb650; -fx-background-radius: 20 20 20 20;" text="EDIT"
@@ -91,19 +91,12 @@
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <Button fx:id="updateUnitBtn" layoutX="703.0" layoutY="530.0" maxHeight="35.0" maxWidth="150.0"
-                        minHeight="35.0" minWidth="126.0" mnemonicParsing="false" onAction="#updateBtnAction"
-                        prefHeight="35.0" prefWidth="134.0"
-                        style="-fx-background-color: #800080#800080; -fx-background-radius: 20 20 20 20;" text="UPDATE"
+
+                <Button fx:id="homeBtn" layoutX="810.0" layoutY="522.0" maxHeight="35.0" maxWidth="150.0"
+                        minHeight="35.0" minWidth="140.0" mnemonicParsing="false" onAction="#homeBtnAction"
+                        prefHeight="35.0" prefWidth="140.0"
+                        style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;" text="HOME"
                         textFill="WHITE">
-                    <font>
-                        <Font name="System Bold" size="14.0"/>
-                    </font>
-                </Button>
-                <Button fx:id="homeBtn" layoutX="852.0" layoutY="529.0" maxHeight="35.0" maxWidth="150.0"
-                        minHeight="35.0" minWidth="140.0" mnemonicParsing="false" onAction="#homeBtnAction" prefHeight="35.0"
-                        prefWidth="140.0" style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;"
-                        text="HOME" textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0"/>
                     </font>

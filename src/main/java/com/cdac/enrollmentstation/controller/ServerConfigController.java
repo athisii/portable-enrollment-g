@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 
 public class ServerConfigController {
     private static final Logger LOGGER = ApplicationLog.getLogger(ServerConfigController.class);
-    private Unit unit;
     private List<Unit> units;
 
     @FXML
@@ -42,7 +41,7 @@ public class ServerConfigController {
 
 
     @FXML
-    private Label labelStatus;
+    private Label messageLabel;
 
     @FXML
     private Button fetchUnitsBtn;
@@ -55,8 +54,6 @@ public class ServerConfigController {
 
     @FXML
     private Button editBtn;
-    @FXML
-    private Button updateUnitBtn;
     @FXML
     private Button homeBtn;
 
@@ -78,28 +75,21 @@ public class ServerConfigController {
         enableControls(mafisUrlTextField, enrollmentStationIdTextField, enrollmentStationUnitIdsComboBox, fetchUnitsBtn);
     }
 
-    @FXML
-    private void updateBtnAction() {
+
+    private void saveToFile(Unit unit) {
         if (mafisUrlTextField.getText().isBlank() || isMalformedUrl(mafisUrlTextField.getText())) {
-            labelStatus.setText("Invalid mafis url.");
+            messageLabel.setText("Invalid mafis url.");
             return;
         }
         if (enrollmentStationIdTextField.getText().isBlank()) {
-            labelStatus.setText("Enrollment station id is empty.");
-            return;
-        }
-
-        if (unit == null) {
-            labelStatus.setText("Kindly select a unit.");
+            messageLabel.setText("Enrollment station id is empty.");
             return;
         }
 
         PropertyFile.changePropertyValue(PropertyName.MAFIS_API_URL, mafisUrlTextField.getText());
         PropertyFile.changePropertyValue(PropertyName.ENROLLMENT_STATION_ID, enrollmentStationIdTextField.getText());
         PropertyFile.changePropertyValue(PropertyName.ENROLLMENT_STATION_UNIT_ID, unit.getValue());
-        labelStatus.setText("Updated successfully.");
-
-        disableControls(updateUnitBtn);
+        messageLabel.setText("Updated successfully.");
 
     }
 
@@ -107,11 +97,11 @@ public class ServerConfigController {
     @FXML
     private void fetchBtnAction() {
         if (isMalformedUrl(mafisUrlTextField.getText())) {
-            labelStatus.setText(("Not a valid url."));
+            messageLabel.setText(("Not a valid url."));
             return;
         }
-        labelStatus.setText("Fetching units...");
-        disableControls(backBtn, homeBtn, editBtn, updateUnitBtn, fetchUnitsBtn);
+        messageLabel.setText("Fetching units...");
+        disableControls(backBtn, homeBtn, editBtn, fetchUnitsBtn);
         ForkJoinPool.commonPool().execute(this::fetchUnits);
 
     }
@@ -121,25 +111,28 @@ public class ServerConfigController {
             units = ServerAPI.fetchAllUnits();
         } catch (GenericException ex) {
             updateUI(ex.getMessage());
-            enableControls(backBtn, homeBtn, editBtn, updateUnitBtn, fetchUnitsBtn);
+            enableControls(backBtn, homeBtn, editBtn, fetchUnitsBtn);
             return;
         }
 
         if (units == null) {
-            updateUI("Connection timeout. Please try again.");
-            enableControls(backBtn, homeBtn, editBtn, updateUnitBtn, fetchUnitsBtn);
+            Platform.runLater(() -> {
+                messageLabel.setText("Connection timeout. Please try again.");
+                enrollmentStationUnitIdsComboBox.getItems().clear();
+                enableControls(backBtn, homeBtn, editBtn, fetchUnitsBtn);
+            });
             return;
         }
 
         if (units.isEmpty()) {
             updateUI("No units for selected mafis url.");
-            enableControls(backBtn, homeBtn, editBtn, updateUnitBtn, fetchUnitsBtn);
+            enableControls(backBtn, homeBtn, editBtn, fetchUnitsBtn);
             return;
         }
         List<String> captions = units.stream().map(Unit::getCaption).collect(Collectors.toList());
         Platform.runLater(() -> enrollmentStationUnitIdsComboBox.setItems(FXCollections.observableArrayList(captions)));
         updateUI("Units fetched successfully.");
-        enableControls(backBtn, homeBtn, editBtn, updateUnitBtn, fetchUnitsBtn);
+        enableControls(backBtn, homeBtn, editBtn, fetchUnitsBtn);
 
     }
 
@@ -169,8 +162,13 @@ public class ServerConfigController {
             // sometimes old and new value will be null.
             if (newValue != null) {
                 Optional<Unit> unitOptional = units.stream().filter(u -> u.getCaption().equals(newValue)).findFirst();
-                unitOptional.ifPresent(u -> unit = u);
-                updateUnitBtn.setDisable(false);
+                unitOptional.ifPresent(this::saveToFile);
+            }
+        });
+        mafisUrlTextField.setOnKeyReleased(event -> {
+            String url = mafisUrlTextField.getText();
+            if (!url.isBlank() && !isMalformedUrl(url)) {
+                PropertyFile.changePropertyValue(PropertyName.MAFIS_API_URL, url);
             }
         });
 
@@ -187,7 +185,7 @@ public class ServerConfigController {
     }
 
     private void updateUI(String message) {
-        Platform.runLater((() -> labelStatus.setText(message)));
+        Platform.runLater((() -> messageLabel.setText(message)));
     }
 
 

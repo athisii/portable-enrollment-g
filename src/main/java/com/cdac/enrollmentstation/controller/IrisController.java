@@ -32,6 +32,8 @@ import javafx.scene.layout.AnchorPane;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,14 +48,15 @@ import static com.cdac.enrollmentstation.model.ARCDetailsHolder.getArcDetailsHol
  */
 public class IrisController implements MIDIrisEnrollCallback {
     private static final Logger LOGGER = ApplicationLog.getLogger(IrisController.class);
-    private static final int IMAGE_COMPRESSION_RATIO = 1;
-    private static final int TEMPLATE_COMPRESSION_RATIO = 1;
+    private static final int IMAGE_COMPRESSION_RATIO = 0;
+    private static final int TEMPLATE_COMPRESSION_RATIO = 0;
     private static final ImageFormat IMAGE_FORMAT = ImageFormat.K7;
     private static final ImageFormat TEMPLATE_FORMAT = ImageFormat.IIR_K7_2011;
 
     private static final int MIN_QUALITY = 30;
     private static final int CAPTURE_TIMEOUT = 10000;
     private static final String CAPTURE_SUCCESS_MESSAGE = "Iris captured successfully.";
+    private static final String QUALITY_TOO_POOR_MSG = "Quality too poor. Please try again.";
 
     private static final String DEVICE_NOT_CONNECTED = "Iris scanner not connected. Kindly connect it and try again.";
     private Image failureImage;
@@ -214,7 +217,6 @@ public class IrisController implements MIDIrisEnrollCallback {
         }
     }
 
-
     @FXML
     private void captureIrisBtnAction() {
         captureIrisBtn.setDisable(true);
@@ -293,9 +295,18 @@ public class IrisController implements MIDIrisEnrollCallback {
     public void OnComplete(int errorCode, ImageQuality imageQuality, ImagePara imagePara) {
         if (errorCode != 0 || imagePara == null) {
             LOGGER.log(Level.SEVERE, () -> midIrisEnroll.GetErrorMessage(errorCode));
-            updateUIOnFailureOrSuccess(false, "Quality too poor. Please try again.");
+            updateUIOnFailureOrSuccess(false, QUALITY_TOO_POOR_MSG);
             return;
         }
+        Platform.runLater(() -> {
+            if (displayLeftIris && imagePara.LeftImageBufferLen > 0) {
+                updateUiImage(imagePara.LeftImageBuffer, leftIrisImageView);
+            }
+            if (displayRightIris && imagePara.RightImageBufferLen > 0) {
+                updateUiImage(imagePara.RightImageBuffer, rightIrisImageView);
+            }
+        });
+
         // empties previously added items.
         irisSet.clear();
         // TODO: need to check this
@@ -303,19 +314,18 @@ public class IrisController implements MIDIrisEnrollCallback {
         jniErrorCode = midIrisEnroll.GetImage(imageData, IMAGE_COMPRESSION_RATIO, IMAGE_FORMAT);
         if (jniErrorCode != 0) {
             LOGGER.log(Level.SEVERE, () -> midIrisEnroll.GetErrorMessage(jniErrorCode));
-            updateUIOnFailureOrSuccess(false, "Quality too poor. Please try again.");
+            updateUIOnFailureOrSuccess(false, QUALITY_TOO_POOR_MSG);
             return;
         }
         // validates received iris exceptions in ArcDetails and captured iris.
         boolean leftImageResult = displayLeftIris && imageData.LeftImageBufferLen > 0;
         boolean rightImageResult = displayRightIris && imageData.RightImageBufferLen > 0;
 
-        // TODO: need to check this
         ImagePara templateData = new ImagePara();
         jniErrorCode = midIrisEnroll.GetImage(templateData, TEMPLATE_COMPRESSION_RATIO, TEMPLATE_FORMAT);
         if (jniErrorCode != 0) {
             LOGGER.log(Level.SEVERE, () -> midIrisEnroll.GetErrorMessage(jniErrorCode));
-            updateUIOnFailureOrSuccess(false, "Quality too poor. Please try again.");
+            updateUIOnFailureOrSuccess(false, QUALITY_TOO_POOR_MSG);
             return;
         }
 
@@ -344,7 +354,7 @@ public class IrisController implements MIDIrisEnrollCallback {
             return;
         }
         // if control reaches here, something went wrong.
-        updateUIOnFailureOrSuccess(false, "Quality too poor. Please try again.");
+        updateUIOnFailureOrSuccess(false, QUALITY_TOO_POOR_MSG);
         captureIrisBtn.setDisable(false);
         backBtn.setDisable(false);
         isIrisCompleted = true;
@@ -382,9 +392,12 @@ public class IrisController implements MIDIrisEnrollCallback {
             updateUIOnFailureOrSuccess(false, ex.getMessage());
             return;
         }
-        jniErrorCode = midIrisEnroll.Uninit();
-        if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> midIrisEnroll.GetErrorMessage(jniErrorCode));
+        if (isDeviceInitialized) {
+            jniErrorCode = midIrisEnroll.Uninit();
+            if (jniErrorCode != 0) {
+                LOGGER.log(Level.SEVERE, () -> midIrisEnroll.GetErrorMessage(jniErrorCode));
+            }
+            isDeviceInitialized = false;
         }
 
         // Added For Biometric Options
@@ -407,9 +420,12 @@ public class IrisController implements MIDIrisEnrollCallback {
 
     @FXML
     private void goBack() {
-        jniErrorCode = midIrisEnroll.Uninit();
-        if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> midIrisEnroll.GetErrorMessage(jniErrorCode));
+        if (isDeviceInitialized) {
+            jniErrorCode = midIrisEnroll.Uninit();
+            if (jniErrorCode != 0) {
+                LOGGER.log(Level.SEVERE, () -> midIrisEnroll.GetErrorMessage(jniErrorCode));
+            }
+            isDeviceInitialized = false;
         }
         try {
             App.setRoot("slapscanner");

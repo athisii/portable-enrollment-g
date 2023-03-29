@@ -1,88 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.CardLoginController">
+
+<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.CardLoginController">
 
     <BorderPane prefHeight="778.0" prefWidth="1024.0">
         <center>
-            <AnchorPane prefHeight="607.0" prefWidth="1024.0" style="-fx-background-color: #fff;"
-                        BorderPane.alignment="CENTER">
+            <AnchorPane prefHeight="607.0" prefWidth="1024.0" style="-fx-background-color: #fff;" BorderPane.alignment="CENTER">
 
                 <AnchorPane prefHeight="100.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
 
-                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="17.0" layoutY="3.0" pickOnBounds="true"
-                               preserveRatio="true">
+                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="17.0" layoutY="3.0" pickOnBounds="true" preserveRatio="true">
 
-                        <Image url="@../img/navylogo.png"/>
+                        <Image url="@../img/navylogo.png" />
 
                     </ImageView>
-                    <Label alignment="CENTER" layoutX="876.0" layoutY="42.0" prefHeight="31.0" prefWidth="108.0"
-                           style="-fx-background-color: #fff; -fx-background-radius: 0 20 20 0; -fx-border-width: 1; -fx-border-color: #00aaff; -fx-border-radius: 0 20 20 0;"
-                           text="INS INDIA" textAlignment="CENTER" visible="false"/>
+                    <Label alignment="CENTER" layoutX="876.0" layoutY="42.0" prefHeight="31.0" prefWidth="108.0" style="-fx-background-color: #fff; -fx-background-radius: 0 20 20 0; -fx-border-width: 1; -fx-border-color: #00aaff; -fx-border-radius: 0 20 20 0;" text="INS INDIA" textAlignment="CENTER" visible="false" />
 
                 </AnchorPane>
-                <AnchorPane layoutY="100.0" prefHeight="60.0" prefWidth="1366.0"
-                            style="-fx-background-color: #04127b;"/>
-                <Label alignment="CENTER" layoutX="482.0" layoutY="117.0" prefHeight="33.0" prefWidth="373.0"
-                       text="Kindly Place the Card in Card Reader"
-                       textFill="#fffefe">
+                <AnchorPane layoutY="100.0" prefHeight="60.0" prefWidth="1366.0" style="-fx-background-color: #04127b;" />
+                <Label alignment="CENTER" layoutX="482.0" layoutY="117.0" prefHeight="33.0" prefWidth="373.0" text="Kindly Place the Card in Card Reader" textFill="#fffefe">
                     <font>
-                        <Font name="System Bold" size="15.0"/>
+                        <Font name="System Bold" size="15.0" />
                     </font>
                 </Label>
-                <AnchorPane layoutX="474.0" layoutY="219.0" prefHeight="216.0" prefWidth="399.0"
-                            style="-fx-border-color: #04127b;">
+                <AnchorPane layoutX="474.0" layoutY="219.0" prefHeight="216.0" prefWidth="399.0" style="-fx-border-color: #04127b;">
 
-                    <ImageView fitHeight="105.0" fitWidth="111.0" layoutX="143.0" layoutY="6.0" pickOnBounds="true"
-                               preserveRatio="true">
+                    <ImageView fitHeight="105.0" fitWidth="111.0" layoutX="143.0" layoutY="6.0" pickOnBounds="true" preserveRatio="true">
 
-                        <Image url="@../img/showtoken.jpeg"/>
+                        <Image url="@../img/showtoken.jpeg" />
 
                     </ImageView>
-                    <Text layoutX="44.0" layoutY="170.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Card PNo :"
-                          wrappingWidth="101.326171875">
+                    <Text layoutX="67.0" layoutY="168.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Card Pin:" wrappingWidth="101">
                         <font>
-                            <Font size="14.0"/>
+                            <Font size="14.0" />
                         </font>
                     </Text>
 
-                    <PasswordField fx:id="pinNoPasswordField" layoutX="144.0" layoutY="150.0" prefHeight="26.0" prefWidth="189.0"
-                                   promptText="Card PNo"/>
+                    <PasswordField fx:id="pinNoPasswordField" layoutX="144.0" layoutY="150.0" prefHeight="26.0" prefWidth="189.0" promptText="Card PNo" />
 
                 </AnchorPane>
 
-                <Label fx:id="messageLabel" alignment="CENTER" layoutX="409.0" layoutY="463.0"
-                       prefHeight="23.0" prefWidth="522.0">
+                <Label fx:id="messageLabel" alignment="CENTER" layoutX="409.0" layoutY="463.0" prefHeight="23.0" prefWidth="522.0">
                     <font>
-                        <Font name="System Bold" size="15.0"/>
+                        <Font name="System Bold" size="15.0" />
                     </font>
                 </Label>
-                <Button focusTraversable="false" layoutX="512.0" layoutY="496.0" maxHeight="35.0"
-                        maxWidth="150.0" minHeight="35.0" minWidth="150.0" mnemonicParsing="false"
-                        onAction="#backBtnAction"
-                        prefHeight="35.0" prefWidth="150.0"
-                        style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;" text="BACK"
-                        textFill="WHITE">
+                <Button focusTraversable="false" layoutX="512.0" layoutY="496.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#backBtnAction" prefHeight="35.0" prefWidth="150.0" style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;" text="BACK" textFill="WHITE">
                     <font>
-                        <Font name="System Bold" size="14.0"/>
+                        <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
-                <Button focusTraversable="false" layoutX="696.0" layoutY="496.0"
-                        maxHeight="35.0" maxWidth="150.0" minHeight="35.0" minWidth="150.0" mnemonicParsing="false"
-                        onAction="#loginBtnAction" prefHeight="35.0" prefWidth="150.0"
-                        style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="LOGIN"
-                        textFill="WHITE">
+                <Button focusTraversable="false" layoutX="696.0" layoutY="496.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#loginBtnAction" prefHeight="35.0" prefWidth="150.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="LOGIN" textFill="WHITE">
                     <font>
-                        <Font name="System Bold" size="14.0"/>
+                        <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
-                <AnchorPane layoutY="711.0" prefHeight="59.0" prefWidth="1366.0"
-                            style="-fx-background-color: #1990ea;"/>
+                <AnchorPane layoutY="711.0" prefHeight="59.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;" />
             </AnchorPane>
         </center>
     </BorderPane>

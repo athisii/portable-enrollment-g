@@ -13,6 +13,7 @@ import com.cdac.enrollmentstation.dto.WaitForConnectReqDto;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.*;
 import com.cdac.enrollmentstation.security.HextoASNFormat;
+import com.cdac.enrollmentstation.util.LocalCardReaderErrMsgUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -45,7 +46,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
-import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_SERVER_ERR_MSG;
 
 
 /**
@@ -54,7 +54,7 @@ import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_SE
  * @author padmanabhanj
  */
 public class CardLoginController implements MIDFingerAuth_Callback {
-    private static final String MANTRA_CARD_READER = "Mantra Reader (1.00) 00 00";
+    private static final String MANTRA_CARD_READER_NAME = "Mantra Reader (1.00) 00 00";
     private static final String CONNECTION_TIMEOUT_MSG = "Connection timeout. Please try again.";
     private static final int MAX_LENGTH = 15;
     private int jniErrorCode;
@@ -101,8 +101,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         pinNoPasswordField.textProperty().addListener((observable, oldValue, newValue) -> limitCharacters(pinNoPasswordField, oldValue, newValue));
         pinNoPasswordField.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
-                // TODO - should call 'login button' action here too
-                // loginBtnAction()
+                loginBtnAction();
             }
         });
 
@@ -138,6 +137,11 @@ public class CardLoginController implements MIDFingerAuth_Callback {
 
     @FXML
     public void loginBtnAction() throws IllegalStateException {
+        if (pinNoPasswordField.getText().isBlank() || pinNoPasswordField.getText().length() < 4) {
+            messageLabel.setText("Please enter valid card pin.");
+            return;
+        }
+
         readCard();
         // TODO: old code
         /*
@@ -161,8 +165,9 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             return;
         }
         jniErrorCode = cardReaderDeInitialize.getRetVal();
+        // -1409286131 -> prerequisites failed error
         if (jniErrorCode != 0 && jniErrorCode != -1409286131) {
-            LOGGER.log(Level.SEVERE, () -> GENERIC_SERVER_ERR_MSG + ": " + jniErrorCode);
+            LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
             updateUI(GENERIC_ERR_MSG);
             return;
         }
@@ -173,13 +178,13 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         }
         jniErrorCode = cardReaderInitialize.getRetVal();
         if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> GENERIC_SERVER_ERR_MSG + ": " + jniErrorCode);
-            updateUI("Card initialization failed. Please try again.");
+            LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
+            updateUI(GENERIC_ERR_MSG);
             return;
         }
         String reqData;
         try {
-            reqData = Singleton.getObjectMapper().writeValueAsString(new WaitForConnectReqDto(MANTRA_CARD_READER));
+            reqData = Singleton.getObjectMapper().writeValueAsString(new WaitForConnectReqDto(MANTRA_CARD_READER_NAME));
         } catch (JsonProcessingException ex) {
             LOGGER.log(Level.SEVERE, ex::getMessage);
             updateUI(GENERIC_ERR_MSG);
@@ -193,10 +198,16 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         }
         jniErrorCode = cardReaderWaitForConnect.getRetVal();
         if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> GENERIC_SERVER_ERR_MSG + ": " + jniErrorCode);
+            LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
             updateUI(GENERIC_ERR_MSG);
             return;
         }
+        //Get CSN and handle Value
+        //base 64 encoded bytes
+//        String csnValue = cardReaderWaitForConnect.getCsn();
+//        int handleValue = cardReaderWaitForConnect.getHandle();
+
+
 
 
     }
@@ -231,13 +242,13 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         }
         System.out.println("card init" + cardReaderInitialize.toString());
         if (cardReaderInitialize.getRetVal() == 0) {
-            String waitConnStatus = cardReaderAPI.getWaitConnectStatus(MANTRA_CARD_READER);
+            String waitConnStatus = cardReaderAPI.getWaitConnectStatus(MANTRA_CARD_READER_NAME);
             System.out.println("connection status :" + waitConnStatus);
             if (!waitConnStatus.contentEquals("connected")) {
                 response = "Kindly Check the CardReader Api Service";
                 return response;
             } else {
-                String responseWaitConnect = cardReaderAPI.getWaitConnect(MANTRA_CARD_READER);
+                String responseWaitConnect = cardReaderAPI.getWaitConnect(MANTRA_CARD_READER_NAME);
                 System.out.println("response Wait For Connect " + responseWaitConnect);
 
                 ObjectMapper objMapperWaitConn = new ObjectMapper();

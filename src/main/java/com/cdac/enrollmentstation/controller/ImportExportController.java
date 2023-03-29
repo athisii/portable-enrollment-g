@@ -7,10 +7,10 @@ package com.cdac.enrollmentstation.controller;
 
 
 import com.cdac.enrollmentstation.App;
-import com.cdac.enrollmentstation.api.ServerAPI;
+import com.cdac.enrollmentstation.api.MafisServerApi;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
-import com.cdac.enrollmentstation.dto.SaveEnrollmentResponse;
+import com.cdac.enrollmentstation.dto.SaveEnrollmentResDto;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ARCDetails;
@@ -196,26 +196,26 @@ public class ImportExportController {
                 return false;
             }
 
-            SaveEnrollmentResponse saveEnrollmentResponse;
+            SaveEnrollmentResDto saveEnrollmentResDto;
             try {
-                saveEnrollmentResponse = ServerAPI.postEnrollment(decryptedJsonData);
+                saveEnrollmentResDto = MafisServerApi.postEnrollment(decryptedJsonData);
             } catch (GenericException ignored) {
                 updateUI(ApplicationConstant.GENERIC_ERR_MSG);
                 enableControls(homeBtn, backBtn);
                 return false;
             }
             // timeout connection
-            if (saveEnrollmentResponse == null) {
+            if (saveEnrollmentResDto == null) {
                 updateUI(TIMEOUT_ERR_MSG);
                 enableControls(exportBtn);
                 enableControls(homeBtn, backBtn);
                 return false;
             }
-            if (!"0".equals(saveEnrollmentResponse.getErrorCode())) {
-                LOGGER.log(Level.SEVERE, () -> "Server desc: " + saveEnrollmentResponse.getDesc());
-                String errorMessageSmallCase = saveEnrollmentResponse.getErrorCode().toLowerCase();
+            if (!"0".equals(saveEnrollmentResDto.getErrorCode())) {
+                LOGGER.log(Level.SEVERE, () -> "Server desc: " + saveEnrollmentResDto.getDesc());
+                String errorMessageSmallCase = saveEnrollmentResDto.getErrorCode().toLowerCase();
                 if (!errorMessageSmallCase.contains("already") && !errorMessageSmallCase.contains("submitted") && !errorMessageSmallCase.contains("given") && !errorMessageSmallCase.contains("provided")) {
-                    updateUI(saveEnrollmentResponse.getDesc());
+                    updateUI(saveEnrollmentResDto.getDesc());
                     enableControls(homeBtn, backBtn);
                     return false;
                 }
@@ -258,7 +258,7 @@ public class ImportExportController {
 
         try {
             // returns null on connection timeout
-            units = ServerAPI.fetchAllUnits();
+            units = MafisServerApi.fetchAllUnits();
         } catch (GenericException ex) {
             allUnits.clear();
             disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportBtn);
@@ -339,7 +339,7 @@ public class ImportExportController {
         List<ARCDetails> arcDetailsList;
         try {
             // returns null on connection timeout
-            arcDetailsList = ServerAPI.fetchArcListByUnitCode(unitCode);
+            arcDetailsList = MafisServerApi.fetchArcListByUnitCode(unitCode);
         } catch (GenericException ex) {
             enableControls(importUnitBtn);
             updateUI(ex.getMessage());

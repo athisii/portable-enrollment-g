@@ -6,7 +6,7 @@
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
-import com.cdac.enrollmentstation.api.ServerAPI;
+import com.cdac.enrollmentstation.api.MafisServerApi;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
@@ -237,8 +237,8 @@ public class ARCNoController {
 
         //throws exception -- /etc/data.txt
         try {
-            saveEnrollmentDetails.setEnrollmentStationUnitID(ServerAPI.getEnrollmentStationUnitId());
-            saveEnrollmentDetails.setEnrollmentStationID(ServerAPI.getEnrollmentStationId());
+            saveEnrollmentDetails.setEnrollmentStationUnitID(MafisServerApi.getEnrollmentStationUnitId());
+            saveEnrollmentDetails.setEnrollmentStationID(MafisServerApi.getEnrollmentStationId());
         } catch (GenericException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);

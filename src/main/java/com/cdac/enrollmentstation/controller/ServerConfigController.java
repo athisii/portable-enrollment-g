@@ -1,7 +1,7 @@
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
-import com.cdac.enrollmentstation.api.ServerAPI;
+import com.cdac.enrollmentstation.api.MafisServerApi;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
@@ -108,7 +108,7 @@ public class ServerConfigController {
 
     private void fetchUnits() {
         try {
-            units = ServerAPI.fetchAllUnits();
+            units = MafisServerApi.fetchAllUnits();
         } catch (GenericException ex) {
             updateUI(ex.getMessage());
             enableControls(backBtn, homeBtn, editBtn, fetchUnitsBtn);
@@ -165,6 +165,7 @@ public class ServerConfigController {
                 unitOptional.ifPresent(this::saveToFile);
             }
         });
+        // very important, fetchApi returns data based on previously saved url.
         mafisUrlTextField.setOnKeyReleased(event -> {
             String url = mafisUrlTextField.getText();
             if (!url.isBlank() && !isMalformedUrl(url)) {

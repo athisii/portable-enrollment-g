@@ -2,7 +2,7 @@ package com.cdac.enrollmentstation.controller;
 
 
 import com.cdac.enrollmentstation.App;
-import com.cdac.enrollmentstation.api.ServerAPI;
+import com.cdac.enrollmentstation.api.MafisServerApi;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
@@ -133,7 +133,7 @@ public class DeviceStatusController {
 
     private void checkMafisApi() {
         try {
-            ARCDetails arcDetails = ServerAPI.fetchARCDetails(ServerAPI.getArcUrl(), "123abc");
+            ARCDetails arcDetails = MafisServerApi.fetchARCDetails(MafisServerApi.getArcUrl(), "123abc");
             if (arcDetails == null) {
                 mafisUrlImage.setImage(RED_CROSS_IMAGE);
                 return;

@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
  */
 public class CardReaderAPI {
 
-    private CardReaderAPIURLs cardReaderAPIURLs = new CardReaderAPIURLs();
     private static final Logger LOGGER = ApplicationLog.getLogger(CardReaderAPI.class);
 
     public String initialize() {
@@ -34,7 +33,7 @@ public class CardReaderAPI {
         int noOfRetries = 3;
         String status = "";
         try {
-            URL siteURL = new URL(cardReaderAPIURLs.getInitializeURL());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getInitialize());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -50,7 +49,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
 
         }
-        System.out.println(cardReaderAPIURLs.getInitializeURL() + "Response :" + response.toString());
+        System.out.println(LocalCardReaderApiUrl.getInitialize() + "Response :" + response.toString());
         return response.toString();
     }
 
@@ -66,7 +65,7 @@ public class CardReaderAPI {
         String[] processed = null;
 
         try {
-            URL siteURL = new URL(cardReaderAPIURLs.getListOfReaders());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getListOfReaders());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -136,7 +135,7 @@ public class CardReaderAPI {
         String status = "";
         String response = null;
         try {
-            URL siteURL = new URL(cardReaderAPIURLs.getWaitConnect());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getWaitForConnect());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -159,7 +158,7 @@ public class CardReaderAPI {
         } catch (Exception e) {
             result = "Exception: " + e.getMessage();
         }
-        System.out.println(cardReaderAPIURLs.getWaitConnect() + "Response :" + response.toString());
+        System.out.println(LocalCardReaderApiUrl.getWaitForConnect() + "Response :" + response.toString());
         return response.toString();
     }
 
@@ -170,7 +169,7 @@ public class CardReaderAPI {
         int noOfRetries = 3;
         String status = "";
         try {
-            URL siteURL = new URL(cardReaderAPIURLs.getSelectApp());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getSelectApp());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -200,7 +199,7 @@ public class CardReaderAPI {
         } catch (Exception e) {
             result = "Exception: " + e.getMessage();
         }
-        System.out.println(cardReaderAPIURLs.getSelectApp() + "Response :" + response.toString());
+        System.out.println(LocalCardReaderApiUrl.getSelectApp() + "Response :" + response.toString());
         return response;
     }
 
@@ -211,7 +210,7 @@ public class CardReaderAPI {
         int noOfRetries = 3;
         String status = "";
         try {
-            URL siteURL = new URL(cardReaderAPIURLs.readDataFromNaval());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getReadDataFromNaval());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -242,7 +241,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
 
         }
-        System.out.println(cardReaderAPIURLs.readDataFromNaval() + "Response :" + response.toString() + "" + "handle :" + handle + "" + "whichdata :" + whichdata[0] + "" + "offset :" + offset + "" + "reqlen :" + reqlen);
+        System.out.println(LocalCardReaderApiUrl.getReadDataFromNaval() + "Response :" + response.toString() + "" + "handle :" + handle + "" + "whichdata :" + whichdata[0] + "" + "offset :" + offset + "" + "reqlen :" + reqlen);
 
         return response.toString();
     }
@@ -255,7 +254,7 @@ public class CardReaderAPI {
         String status = "";
         try {
             // base64Data = Base64.getEncoder().encodeToString(whichdata);
-            URL siteURL = new URL(cardReaderAPIURLs.storeDataOnNaval());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getStoreDataOnNaval());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -291,7 +290,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
 
         }
-        System.out.println(cardReaderAPIURLs.storeDataOnNaval() + "Response :" + response.toString());
+        System.out.println(LocalCardReaderApiUrl.getStoreDataOnNaval() + "Response :" + response.toString());
         return response.toString();
     }
 
@@ -303,7 +302,7 @@ public class CardReaderAPI {
         String status = "";
         try {
 
-            URL siteURL = new URL(cardReaderAPIURLs.verifyCertificate());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getVerifyCertificate());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -335,7 +334,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
 
         }
-        System.out.println(cardReaderAPIURLs.verifyCertificate() + "Response :" + response.toString());
+        System.out.println(LocalCardReaderApiUrl.getVerifyCertificate() + "Response :" + response.toString());
         return response.toString();
     }
 
@@ -347,7 +346,7 @@ public class CardReaderAPI {
         int noOfRetries = 3;
         String status = "";
         try {
-            URL siteURL = new URL(cardReaderAPIURLs.pkiAuth());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getPkiAuth());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -375,7 +374,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
 
         }
-        System.out.println(cardReaderAPIURLs.pkiAuth() + "Response :" + response.toString());
+        System.out.println(LocalCardReaderApiUrl.getPkiAuth() + "Response :" + response.toString());
         return response;
     }
 
@@ -386,7 +385,7 @@ public class CardReaderAPI {
         String response = null;
         String status = "";
         try {
-            URL siteURL = new URL(cardReaderAPIURLs.cardRemoval());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getCardRemoval());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -412,7 +411,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
         }
 
-        System.out.println(cardReaderAPIURLs.cardRemoval() + "Response :" + response.toString());
+        System.out.println(LocalCardReaderApiUrl.getCardRemoval() + "Response :" + response.toString());
         return response.toString();
     }
 
@@ -423,7 +422,7 @@ public class CardReaderAPI {
         int noOfRetries = 3;
         String status = "";
         try {
-            URL siteURL = new URL(cardReaderAPIURLs.deInitialize());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getDeInitialize());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -441,7 +440,7 @@ public class CardReaderAPI {
 
         }
         //System.out.println(cardReaderAPIURLs.deInitialize() + "Response :" + response.toString());
-        LOGGER.log(Level.INFO, cardReaderAPIURLs.deInitialize() + "Response :" + response.toString());
+        LOGGER.log(Level.INFO, LocalCardReaderApiUrl.getDeInitialize() + "Response :" + response.toString());
         return response.toString();
 
     }
@@ -457,7 +456,7 @@ public class CardReaderAPI {
         int noOfRetries = 3;
         String status = "";
         try {
-            URL siteURL = new URL(cardReaderAPIURLs.getInitializeURL());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getInitialize());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -484,7 +483,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
 
         }
-        System.out.println(cardReaderAPIURLs.getInitializeURL() + "\t\tStatus:" + result);
+        System.out.println(LocalCardReaderApiUrl.getInitialize() + "\t\tStatus:" + result);
         return result;
     }
 
@@ -494,7 +493,7 @@ public class CardReaderAPI {
         int noOfRetries = 3;
         String status = "";
         try {
-            URL siteURL = new URL(cardReaderAPIURLs.getWaitConnect());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getWaitForConnect());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -530,7 +529,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
 
         }
-        System.out.println(cardReaderAPIURLs.getWaitConnect() + "\t\tStatus:" + result);
+        System.out.println(LocalCardReaderApiUrl.getWaitForConnect() + "\t\tStatus:" + result);
         return result;
     }
 
@@ -542,7 +541,7 @@ public class CardReaderAPI {
         String status = "";
         try {
             //Getting URL from cardReaderAPIURLs class
-            URL siteURL = new URL(cardReaderAPIURLs.getSelectApp());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getSelectApp());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -594,7 +593,7 @@ public class CardReaderAPI {
         }
 
 
-        System.out.println(cardReaderAPIURLs.getSelectApp() + "\t\tStatus:" + result);
+        System.out.println(LocalCardReaderApiUrl.getSelectApp() + "\t\tStatus:" + result);
         return result;
     }
 
@@ -605,7 +604,7 @@ public class CardReaderAPI {
         int noOfRetries = 3;
         String status = "";
         try {
-            URL siteURL = new URL(cardReaderAPIURLs.readDataFromNaval());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getReadDataFromNaval());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -649,7 +648,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
 
         }
-        System.out.println(cardReaderAPIURLs.readDataFromNaval() + "\t\tStatus:" + result);
+        System.out.println(LocalCardReaderApiUrl.getReadDataFromNaval() + "\t\tStatus:" + result);
         return result;
     }
 
@@ -660,7 +659,7 @@ public class CardReaderAPI {
         String status = "";
         try {
             base64Data = Base64.getEncoder().encodeToString(whichdata);
-            URL siteURL = new URL(cardReaderAPIURLs.storeDataOnNaval());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getStoreDataOnNaval());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -694,7 +693,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
 
         }
-        System.out.println(cardReaderAPIURLs.storeDataOnNaval() + "\t\tStatus:" + result);
+        System.out.println(LocalCardReaderApiUrl.getStoreDataOnNaval() + "\t\tStatus:" + result);
         return result;
     }
 
@@ -705,7 +704,7 @@ public class CardReaderAPI {
         String status = "";
         try {
 
-            URL siteURL = new URL(cardReaderAPIURLs.verifyCertificate());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getVerifyCertificate());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -739,7 +738,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
 
         }
-        System.out.println(cardReaderAPIURLs.verifyCertificate() + "\t\tStatus:" + result);
+        System.out.println(LocalCardReaderApiUrl.getVerifyCertificate() + "\t\tStatus:" + result);
         return result;
     }
 
@@ -751,7 +750,7 @@ public class CardReaderAPI {
         String status = "";
         try {
 
-            URL siteURL = new URL(cardReaderAPIURLs.pkiAuth());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getPkiAuth());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -785,7 +784,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
 
         }
-        System.out.println(cardReaderAPIURLs.pkiAuth() + "\t\tStatus:" + result);
+        System.out.println(LocalCardReaderApiUrl.getPkiAuth() + "\t\tStatus:" + result);
         return result;
     }
 
@@ -796,7 +795,7 @@ public class CardReaderAPI {
         String status = "";
         try {
 
-            URL siteURL = new URL(cardReaderAPIURLs.cardRemoval());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getCardRemoval());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -830,7 +829,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
 
         }
-        System.out.println(cardReaderAPIURLs.cardRemoval() + "\t\tStatus:" + result);
+        System.out.println(LocalCardReaderApiUrl.getCardRemoval() + "\t\tStatus:" + result);
         return result;
     }
 
@@ -841,7 +840,7 @@ public class CardReaderAPI {
         String status = "";
         try {
 
-            URL siteURL = new URL(cardReaderAPIURLs.deInitialize());
+            URL siteURL = new URL(LocalCardReaderApiUrl.getDeInitialize());
             HttpURLConnection con = (HttpURLConnection) siteURL.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -868,7 +867,7 @@ public class CardReaderAPI {
             result = "Exception: " + e.getMessage();
 
         }
-        System.out.println(cardReaderAPIURLs.deInitialize() + "\t\tStatus:" + result);
+        System.out.println(LocalCardReaderApiUrl.getDeInitialize() + "\t\tStatus:" + result);
         return result;
     }
 

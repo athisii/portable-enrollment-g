@@ -2,10 +2,9 @@ package com.cdac.enrollmentstation.api;
 
 
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
-import com.cdac.enrollmentstation.constant.HttpHeader;
 import com.cdac.enrollmentstation.constant.PropertyName;
-import com.cdac.enrollmentstation.dto.ARCNoReqDto;
-import com.cdac.enrollmentstation.dto.SaveEnrollmentResponse;
+import com.cdac.enrollmentstation.dto.ArcNoReqDto;
+import com.cdac.enrollmentstation.dto.SaveEnrollmentResDto;
 import com.cdac.enrollmentstation.dto.UnitCodeReqDto;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
@@ -20,39 +19,22 @@ import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.net.http.HttpRequest.BodyPublishers;
-import static java.net.http.HttpResponse.BodyHandlers;
-
-public class ServerAPI {
-    private static final int NO_OF_RETRIES = 1;
-    private static final int CONNECTION_TIMEOUT_IN_SEC = 5;
-    private static final int WRITE_TIMEOUT_IN_SEC = 30;
+public class MafisServerApi {
     private static final String UNIQUE_KEY_HEADER = "UniqueKey";
     private static final String HASH_KEY_HEADER = "HashKey";
 
-
-    private static final Logger LOGGER = ApplicationLog.getLogger(ServerAPI.class);
-    private static final HttpClient httpClient;
-
-    static {
-        httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(CONNECTION_TIMEOUT_IN_SEC)).build();
-    }
+    private static final Logger LOGGER = ApplicationLog.getLogger(MafisServerApi.class);
 
     //Suppress default constructor for noninstantiability
-    private ServerAPI() {
-        throw new AssertionError("The ServerAPI methods should be accessed statically.");
+    private MafisServerApi() {
+        throw new AssertionError("The MafisServerApi methods should be accessed statically.");
     }
 
     /**
@@ -68,12 +50,12 @@ public class ServerAPI {
     public static ARCDetails fetchARCDetails(String url, String arcNo) {
         String jsonRequestData;
         try {
-            jsonRequestData = Singleton.getObjectMapper().writeValueAsString(new ARCNoReqDto(arcNo));
+            jsonRequestData = Singleton.getObjectMapper().writeValueAsString(new ArcNoReqDto(arcNo));
         } catch (JsonProcessingException e) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
-        HttpResponse<String> response = sendHttpRequest(createPostHttpRequest(url, jsonRequestData, null));
+        HttpResponse<String> response = HttpUtil.sendHttpRequest(HttpUtil.createPostHttpRequest(url, jsonRequestData));
         if (response == null) {
             return null;
         }
@@ -95,7 +77,7 @@ public class ServerAPI {
      * @return SaveEnrollmentResponse or null on connection timeout
      * @throws GenericException exception on error, json parsing exception etc.
      */
-    public static SaveEnrollmentResponse postEnrollment(String data) {
+    public static SaveEnrollmentResDto postEnrollment(String data) {
         // to avoid encrypt/decrypt problems
         data = data.replace("\n", "");
         // assigns random secret key at each call
@@ -118,8 +100,8 @@ public class ServerAPI {
         headersMap.put(UNIQUE_KEY_HEADER, base64EncodedPkiEncryptedUniqueKey);
         headersMap.put(HASH_KEY_HEADER, messageDigest);
 
-        HttpRequest postHttpRequest = createPostHttpRequest(getSaveEnrollmentUrl(), base64EncodedEncryptedData, headersMap);
-        HttpResponse<String> httpResponse = sendHttpRequest(postHttpRequest);
+        HttpRequest postHttpRequest = HttpUtil.createPostHttpRequest(getSaveEnrollmentUrl(), base64EncodedEncryptedData, headersMap);
+        HttpResponse<String> httpResponse = HttpUtil.sendHttpRequest(postHttpRequest);
         // connection timeout
         if (httpResponse == null) {
             return null;
@@ -140,46 +122,14 @@ public class ServerAPI {
         String receivedData = Aes256Util.decrypt(encryptedResponseBody, key);
 
         // response data from server
-        SaveEnrollmentResponse saveEnrollmentResponse;
+        SaveEnrollmentResDto saveEnrollmentResDto;
         try {
-            saveEnrollmentResponse = Singleton.getObjectMapper().readValue(receivedData, SaveEnrollmentResponse.class);
+            saveEnrollmentResDto = Singleton.getObjectMapper().readValue(receivedData, SaveEnrollmentResDto.class);
         } catch (JsonProcessingException ignored) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
-        return saveEnrollmentResponse;
-    }
-
-    /**
-     * Sends Http request.
-     * Caller must handle the exception.
-     *
-     * @param httpRequest request payload
-     * @return HttpResponse<String>  or null if timeout exception occurred
-     */
-
-    private static HttpResponse<String> sendHttpRequest(HttpRequest httpRequest) {
-        int noOfRetries = NO_OF_RETRIES;
-        HttpResponse<String> response = null;
-        while (noOfRetries > 0) {
-            try {
-                response = httpClient.send(httpRequest, BodyHandlers.ofString(StandardCharsets.UTF_8));
-                if (response.statusCode() == 200) {
-                    break;
-                }
-            } catch (IOException ignored) {
-                LOGGER.log(Level.INFO, String.format("%s", (NO_OF_RETRIES + 1 - noOfRetries) + " Retrying connection."));
-                noOfRetries--;
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-            }
-        }
-        // connection timeout
-        if (response == null || noOfRetries == 0) {
-            LOGGER.log(Level.INFO, "Connection timeout");
-            return null;
-        }
-        return response;
+        return saveEnrollmentResDto;
     }
 
     /**
@@ -190,7 +140,7 @@ public class ServerAPI {
      * @throws GenericException exception on error, json parsing exception etc.
      */
     public static List<Unit> fetchAllUnits() {
-        HttpResponse<String> response = sendHttpRequest(createGetHttpRequest(getUnitListURL()));
+        HttpResponse<String> response = HttpUtil.sendHttpRequest(HttpUtil.createGetHttpRequest(getUnitListURL()));
         if (response == null) {
             return null;
         }
@@ -203,7 +153,7 @@ public class ServerAPI {
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
         if (unitListDetails.getErrorCode() != 0) {
-            LOGGER.log(Level.SEVERE, ApplicationConstant.GENERIC_SERVER_ERR_MSG + unitListDetails.getDesc());
+            LOGGER.log(Level.SEVERE, () -> ApplicationConstant.GENERIC_SERVER_ERR_MSG + unitListDetails.getDesc());
             throw new GenericException(unitListDetails.getDesc());
         }
         return unitListDetails.getUnits();
@@ -226,8 +176,8 @@ public class ServerAPI {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
-        HttpRequest postHttpRequest = createPostHttpRequest(getDemographicURL(), jsonRequestData, null);
-        HttpResponse<String> httpResponse = sendHttpRequest(postHttpRequest);
+        HttpRequest postHttpRequest = HttpUtil.createPostHttpRequest(getDemographicURL(), jsonRequestData);
+        HttpResponse<String> httpResponse = HttpUtil.sendHttpRequest(postHttpRequest);
         if (httpResponse == null) {
             return null;
         }
@@ -239,33 +189,10 @@ public class ServerAPI {
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
         if (arcDetailsList.getErrorCode() != 0) {
-            LOGGER.log(Level.INFO, ApplicationConstant.GENERIC_SERVER_ERR_MSG + arcDetailsList.getDesc());
+            LOGGER.log(Level.INFO, () -> ApplicationConstant.GENERIC_SERVER_ERR_MSG + arcDetailsList.getDesc());
             throw new GenericException(arcDetailsList.getDesc());
         }
         return arcDetailsList.getArcDetails();
-    }
-
-    private static HttpRequest createGetHttpRequest(String url) {
-        return HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header(HttpHeader.CONTENT_TYPE, "application/json; utf-8")
-                .header(HttpHeader.ACCEPT, "application/json")
-                .timeout(Duration.ofSeconds(WRITE_TIMEOUT_IN_SEC))
-                .build();
-    }
-
-    private static HttpRequest createPostHttpRequest(String url, String data, Map<String, String> extraHeaders) {
-        HttpRequest.Builder builder = HttpRequest.newBuilder();
-        if (extraHeaders != null) {
-            extraHeaders.forEach(builder::header);
-        }
-        return builder.uri(URI.create(url))
-                .POST(BodyPublishers.ofString(data))
-                .header(HttpHeader.CONTENT_TYPE, "application/json; utf-8")
-                .header(HttpHeader.ACCEPT, "application/json")
-                .timeout(Duration.ofSeconds(WRITE_TIMEOUT_IN_SEC))
-                .build();
-
     }
 
 

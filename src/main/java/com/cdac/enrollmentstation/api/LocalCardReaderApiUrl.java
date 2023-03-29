@@ -17,63 +17,68 @@ import java.util.logging.Logger;
 /**
  * @author root
  */
-public class CardReaderAPIURLs {
-    public static final Logger LOGGER = ApplicationLog.getLogger(CardReaderAPIURLs.class);
+public class LocalCardReaderApiUrl {
+    public static final Logger LOGGER = ApplicationLog.getLogger(LocalCardReaderApiUrl.class);
 
-    public String getInitializeURL() {
+    //Suppress default constructor for noninstantiability
+    private LocalCardReaderApiUrl() {
+        throw new AssertionError("The LocalCardReaderApiUrl methods should be accessed statically.");
+    }
+
+    public static String getInitialize() {
         // return "http://localhost:8088/N_Initialize"
         return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_INITIALIZE));
     }
 
-    public String getWaitConnect() {
+    public static String getWaitForConnect() {
         // return "http://localhost:8088/N_Wait_for_Connect"
         return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_WAIT_FOR_CONNECT));
     }
 
-    public String getSelectApp() {
+    public static String getSelectApp() {
         //  return "http://localhost:8088/N_SelectApp"
         return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_SELECT_APP));
     }
 
-    public String readDataFromNaval() {
+    public static String getReadDataFromNaval() {
         // return "http://localhost:8088/N_readDatafromNaval"
         return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_READ_DATA));
     }
 
-    public String storeDataOnNaval() {
+    public static String getStoreDataOnNaval() {
         // return "http://localhost:8088/N_storeDataonNaval"
         return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_STORE_DATA));
     }
 
-    public String verifyCertificate() {
+    public static String getVerifyCertificate() {
         //  return "http://localhost:8088/N_verifyCertificate"
         return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_VERIFY_CERT));
     }
 
-    public String pkiAuth() {
+    public static String getPkiAuth() {
         //  return "http://localhost:8088/N_PKIAuth"
         return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_PKI_AUTH));
     }
 
-    public String cardRemoval() {
+    public static String getCardRemoval() {
         //  return "http://localhost:8088/N_Wait_for_Removal"
         return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_WAIT_FOR_REMOVAL));
     }
 
-    public String deInitialize() {
+    public static String getDeInitialize() {
         //   return "http://localhost:8088/N_DeInitialize"
         return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_DE_INITIALIZE));
     }
 
-    public String getListOfReaders() {
+    public static String getListOfReaders() {
         //   return "http://localhost:8088/listOfReaders"
         return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_LIST_OF_READERS));
     }
 
-    public String requireNonBlank(String value) {
+    public static String requireNonBlank(String value) {
         if (value == null || value.isBlank()) {
-            LOGGER.log(Level.SEVERE, () -> "Property '" + value + "' is empty or not found in " + ApplicationConstant.DEFAULT_PROPERTY_FILE + ". Please add it");
-            throw new GenericException("Property '" + value + "' is empty or not found in "+ ApplicationConstant.DEFAULT_PROPERTY_FILE + ". Please add it");
+            LOGGER.log(Level.SEVERE, () -> "Property '" + value + "' is empty or not found in " + ApplicationConstant.DEFAULT_PROPERTY_FILE + ". Please add it.");
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
         return value;
     }

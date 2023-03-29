@@ -6,10 +6,10 @@
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
-import com.cdac.enrollmentstation.api.ServerAPI;
+import com.cdac.enrollmentstation.api.MafisServerApi;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
-import com.cdac.enrollmentstation.dto.SaveEnrollmentResponse;
+import com.cdac.enrollmentstation.dto.SaveEnrollmentResDto;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.*;
@@ -141,8 +141,8 @@ public class BiometricCaptureCompleteController {
         }
 
         // common properties
-        saveEnrollmentDetails.setEnrollmentStationID(ServerAPI.getEnrollmentStationId());
-        saveEnrollmentDetails.setEnrollmentStationUnitID(ServerAPI.getEnrollmentStationUnitId());
+        saveEnrollmentDetails.setEnrollmentStationID(MafisServerApi.getEnrollmentStationId());
+        saveEnrollmentDetails.setEnrollmentStationUnitID(MafisServerApi.getEnrollmentStationUnitId());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date(System.currentTimeMillis());
         saveEnrollmentDetails.setEnrollmentDate(formatter.format(date));
@@ -171,10 +171,10 @@ public class BiometricCaptureCompleteController {
         // but this encrypted data file must be DELETED if API call succeeds
         ForkJoinTask<Boolean> encryptionProcessFuture = ForkJoinPool.commonPool().submit(() -> startEncryptionProcess(arcDetails.getArcNo(), jsonData));
 
-        SaveEnrollmentResponse saveEnrollmentResponse;
+        SaveEnrollmentResDto saveEnrollmentResDto;
         // try submitting to the server.
         try {
-            saveEnrollmentResponse = ServerAPI.postEnrollment(jsonData);
+            saveEnrollmentResDto = MafisServerApi.postEnrollment(jsonData);
         } catch (GenericException ignored) {
             onErrorUpdateUiControls();
             return;
@@ -182,7 +182,7 @@ public class BiometricCaptureCompleteController {
 
         // connection timeout error
         // saves the data locally
-        if (saveEnrollmentResponse == null) {
+        if (saveEnrollmentResDto == null) {
             try {
                 boolean result = encryptionProcessFuture.get();
                 // encrypted successfully
@@ -212,10 +212,10 @@ public class BiometricCaptureCompleteController {
         }
 
         // checks for error response
-        if (!"0".equals(saveEnrollmentResponse.getErrorCode())) {
-            LOGGER.log(Level.SEVERE, "Server desc: " + saveEnrollmentResponse.getDesc());
+        if (!"0".equals(saveEnrollmentResDto.getErrorCode())) {
+            LOGGER.log(Level.SEVERE, "Server desc: " + saveEnrollmentResDto.getDesc());
             // runs on main thread
-            updateUiIconOnServerResponse(false, saveEnrollmentResponse.getDesc());
+            updateUiIconOnServerResponse(false, saveEnrollmentResDto.getDesc());
             return;
         }
         // else saved successfully on the server

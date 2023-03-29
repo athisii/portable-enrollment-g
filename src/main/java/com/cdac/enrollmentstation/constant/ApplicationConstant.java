@@ -18,7 +18,7 @@ public class ApplicationConstant {
     public static final String JSON_WRITE_ER_MSG = "Error occurred while writing as JSON string.";
     public static final String INVALID_CREDENTIALS = "Invalid credentials.";
     public static final String GENERIC_TEMPLATE_CONVERSION_ERR_MSG = "Something went wrong while processing the fingerprints. Kindly click the SCAN button to rescan.";
-    public static final String GENERIC_RS_ERR_MSG = "Something went wrong. Make sure fingerprint scanners are properly connected and try again.";
+    public static final String GENERIC_RS_ERR_MSG = "Something went wrong. Make sure fingerprint scanner(s) are properly connected and try again.";
     public static final String GENERIC_IRIS_ERR_MSG = "Make sure iris scanner is properly connected and try again.";
 
 }

@@ -95,7 +95,6 @@ public class IrisController implements MIDIrisEnrollCallback {
     private Button backBtn;
 
     private boolean isDeviceInitialized;
-    private boolean isDeviceConnected;
     private boolean isIrisCompleted;
     private final Set<IRIS> irisSet = new HashSet<>();
 
@@ -207,11 +206,9 @@ public class IrisController implements MIDIrisEnrollCallback {
     public void OnDeviceDetection(String deviceName, IrisSide irisSide, DeviceDetection detection) {
         if (DeviceDetection.CONNECTED == detection) {
             LOGGER.log(Level.INFO, () -> "Connected device name: " + deviceName);
-            isDeviceConnected = true;
         } else {
             LOGGER.log(Level.INFO, () -> "Disconnected device name: " + deviceName);
             midIrisEnroll.Uninit();
-            isDeviceConnected = false;
             isDeviceInitialized = false;
             Platform.runLater(() -> messageLabel.setText("Iris scanner disconnected."));
         }

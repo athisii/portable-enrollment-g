@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.cdac.enrollmentstation.model;
+package com.cdac.enrollmentstation.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
@@ -19,13 +19,17 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CardReaderReadData {
+public class CRWaitForConnectResDto {
     @JsonProperty("retval")
     int retVal;
-    @JsonProperty("response")
-    String response;
 
-    @JsonProperty("responseLen")
-    int responseLen;
+    @JsonProperty("handle")
+    int handle;
+
+    @JsonProperty("csn")
+    String csn;
+
+    @JsonProperty("csnLength")
+    int csnLength;
 
 }

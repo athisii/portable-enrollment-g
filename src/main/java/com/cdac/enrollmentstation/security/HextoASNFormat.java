@@ -165,7 +165,7 @@ public class HextoASNFormat {
 
     }
 
-    public String getDecodedCSN(String csnValue){
+    public static String getDecodedCSN(String csnValue){
        byte[] decodedcsn = Base64.getDecoder().decode(csnValue);
        System.out.println("DECODEDCSN::"+decodedcsn);
        String decodedCsnValue = DatatypeConverter.printHexBinary(decodedcsn);
@@ -173,7 +173,7 @@ public class HextoASNFormat {
        return decodedCsnValue;
     }
 
-     public String getContractorIdfromASN(String decodedResponseValue ){      
+     public static String getContractorIdfromASN(String decodedResponseValue ){
       
          System.out.println("DECODED STRING AT HEXTOASN "+decodedResponseValue);         
          //String decodedStringFromNaval1 = "3081A60462434337373333384130313030303330303033303030303030304330323035413541343030313930303230303034423633363336363336333346463337373137373031373132323737303531363037303030303733323630354537353532313032313116023831160830313031313939311608303131303230323102016F160B496E6469616E204E6176791605546563684D02010102012B1305536168696C16046D61726B";
@@ -204,7 +204,7 @@ public class HextoASNFormat {
         return asnsequencearr[6];
     }
 
-       public String getContractorNamefromASN(String decodedResponseValue ){
+       public static String getContractorNamefromASN(String decodedResponseValue ){
       
       
          System.out.println("DECODED STRING AT HEXTOASN "+decodedResponseValue);
@@ -237,7 +237,7 @@ public class HextoASNFormat {
         return asnsequencearr[9];
     }
        
-       public String getFingerprintfromASN(String decodedResponseValue ){
+       public static String getFingerprintfromASN(String decodedResponseValue ){
       
       
          System.out.println("DECODED STRING AT HEXTOASN "+decodedResponseValue);
@@ -282,7 +282,7 @@ public class HextoASNFormat {
     }
 
        
-     public String getContractorId(String responseValue1,String responseValue2 ){
+     public static String getContractorId(String responseValue1,String responseValue2 ){
       
          //System.out.println("RESPONE AT HEXTOASN "+responseValue);
          byte[] decodedDatafromNaval1 = Base64.getDecoder().decode(responseValue1);
@@ -321,7 +321,7 @@ public class HextoASNFormat {
         return asnsequencearr[8];
     }
      
-     public String getEncodedCert(String decodedCert){
+     public static String getEncodedCert(String decodedCert){
           //Encode the values to base64
           byte[] resultcert = DatatypeConverter.parseHexBinary(decodedCert);
           String encodedbase64CertResult = Base64.getEncoder().encodeToString(resultcert);

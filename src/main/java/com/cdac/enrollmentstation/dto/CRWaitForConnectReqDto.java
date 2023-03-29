@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class WaitForConnectReqDto {
+public class CRWaitForConnectReqDto {
     @JsonProperty("readername")
     String readerName;
 

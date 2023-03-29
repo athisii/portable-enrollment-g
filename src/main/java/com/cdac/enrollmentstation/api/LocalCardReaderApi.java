@@ -1,10 +1,8 @@
 package com.cdac.enrollmentstation.api;
 
+import com.cdac.enrollmentstation.dto.*;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.CardReaderDeInitialize;
-import com.cdac.enrollmentstation.model.CardReaderInitialize;
-import com.cdac.enrollmentstation.model.CardReaderWaitForConnect;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -30,7 +28,7 @@ public class LocalCardReaderApi {
 
     // throws GenericException
     // Caller must handle the exception
-    public static CardReaderDeInitialize getDeInitialize() {
+    public static CRDeInitializeResDto getDeInitialize() {
         HttpRequest httpRequest = HttpUtil.createGetHttpRequest(LocalCardReaderApiUrl.getDeInitialize());
         HttpResponse<String> response = HttpUtil.sendHttpRequest(httpRequest);
         // connection timeout
@@ -38,7 +36,7 @@ public class LocalCardReaderApi {
             return null;
         }
         try {
-            return Singleton.getObjectMapper().readValue(response.body(), CardReaderDeInitialize.class);
+            return Singleton.getObjectMapper().readValue(response.body(), CRDeInitializeResDto.class);
         } catch (JsonProcessingException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(GENERIC_ERR_MSG);
@@ -47,7 +45,7 @@ public class LocalCardReaderApi {
 
     // throws GenericException
     // Caller must handle the exception
-    public static CardReaderInitialize getInitialize() {
+    public static CRInitializeResDto getInitialize() {
         HttpRequest httpRequest = HttpUtil.createGetHttpRequest(LocalCardReaderApiUrl.getInitialize());
         HttpResponse<String> response = HttpUtil.sendHttpRequest(httpRequest);
         // connection timeout
@@ -55,7 +53,7 @@ public class LocalCardReaderApi {
             return null;
         }
         try {
-            return Singleton.getObjectMapper().readValue(response.body(), CardReaderInitialize.class);
+            return Singleton.getObjectMapper().readValue(response.body(), CRInitializeResDto.class);
         } catch (JsonProcessingException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(GENERIC_ERR_MSG);
@@ -64,7 +62,7 @@ public class LocalCardReaderApi {
 
     // throws GenericException
     // Caller must handle the exception
-    public static CardReaderWaitForConnect postWaitForConnect(String data) {
+    public static CRWaitForConnectResDto postWaitForConnect(String data) {
         HttpRequest httpRequest = HttpUtil.createPostHttpRequest(LocalCardReaderApiUrl.getWaitForConnect(), data);
         HttpResponse<String> response = HttpUtil.sendHttpRequest(httpRequest);
         // connection timeout
@@ -72,7 +70,41 @@ public class LocalCardReaderApi {
             return null;
         }
         try {
-            return Singleton.getObjectMapper().readValue(response.body(), CardReaderWaitForConnect.class);
+            return Singleton.getObjectMapper().readValue(response.body(), CRWaitForConnectResDto.class);
+        } catch (JsonProcessingException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            throw new GenericException(GENERIC_ERR_MSG);
+        }
+    }
+
+    // throws GenericException
+    // Caller must handle the exception
+    public static CRSelectAppResDto postSelectApp(String data) {
+        HttpRequest httpRequest = HttpUtil.createPostHttpRequest(LocalCardReaderApiUrl.getSelectApp(), data);
+        HttpResponse<String> response = HttpUtil.sendHttpRequest(httpRequest);
+        // connection timeout
+        if (response == null) {
+            return null;
+        }
+        try {
+            return Singleton.getObjectMapper().readValue(response.body(), CRSelectAppResDto.class);
+        } catch (JsonProcessingException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            throw new GenericException(GENERIC_ERR_MSG);
+        }
+    }
+
+    // throws GenericException
+    // Caller must handle the exception
+    public static CRReadDataResDto postReadData(String data) {
+        HttpRequest httpRequest = HttpUtil.createPostHttpRequest(LocalCardReaderApiUrl.getReadDataFromNaval(), data);
+        HttpResponse<String> response = HttpUtil.sendHttpRequest(httpRequest);
+        // connection timeout
+        if (response == null) {
+            return null;
+        }
+        try {
+            return Singleton.getObjectMapper().readValue(response.body(), CRReadDataResDto.class);
         } catch (JsonProcessingException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(GENERIC_ERR_MSG);

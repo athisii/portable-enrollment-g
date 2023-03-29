@@ -15,7 +15,7 @@ import java.util.logging.*;
 public class ApplicationLog {
     //Suppress default constructor for noninstantiability
     private ApplicationLog() {
-        throw new AssertionError("The ApplicationLogNew methods should be accessed statically");
+        throw new AssertionError("The ApplicationLog methods should be accessed statically");
     }
 
     private static Handler handler;

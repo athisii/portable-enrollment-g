@@ -172,12 +172,6 @@ public class ServerConfigController {
                 PropertyFile.changePropertyValue(PropertyName.MAFIS_API_URL, url);
             }
         });
-        mafisUrlTextField.setOnKeyReleased(event -> {
-            String url = mafisUrlTextField.getText();
-            if (!url.isBlank() && !isMalformedUrl(url)) {
-                PropertyFile.changePropertyValue(PropertyName.MAFIS_API_URL, url);
-            }
-        });
 
     }
 

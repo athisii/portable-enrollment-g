@@ -141,20 +141,18 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             messageLabel.setText("Please enter valid card pin.");
             return;
         }
+//        readCard();
 
-        readCard();
-        // TODO: old code
-        /*
         String response;
         response = readCardOld();
         if (response.equals("success")) {
         } else {
             updateUI(response);
         }
-         */
 
     }
 
+    // TODO: incomplete code
     // throws GenericException due to ObjectMapper.
     private void readCard() {
         // required to follow the procedure calls
@@ -206,8 +204,6 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         //base 64 encoded bytes
 //        String csnValue = cardReaderWaitForConnect.getCsn();
 //        int handleValue = cardReaderWaitForConnect.getHandle();
-
-
 
 
     }

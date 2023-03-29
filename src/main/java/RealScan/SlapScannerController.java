@@ -40,6 +40,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static RealScan.RealScan_JNI.*;
+import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
+import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_RS_ERR_MSG;
 import static com.cdac.enrollmentstation.model.ARCDetailsHolder.getArcDetailsHolder;
 
 public class SlapScannerController {
@@ -195,7 +197,7 @@ public class SlapScannerController {
         jniReturnedCode = RS_GetLastError();
         if (jniReturnedCode != RS_SUCCESS && jniReturnedCode != RS_ERR_SDK_ALREADY_INITIALIZED) {
             LOGGER.log(Level.SEVERE, () -> RS_GetErrString(jniReturnedCode));
-            throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
+            throw new GenericException(GENERIC_RS_ERR_MSG);
         }
 
         if (numOfScanners <= 0) {
@@ -224,7 +226,7 @@ public class SlapScannerController {
 
         if (jniReturnedCode != RS_SUCCESS && jniReturnedCode != RS_ERR_DEVICE_ALREADY_INITIALIZED) {
             LOGGER.log(Level.SEVERE, () -> RS_GetErrString(jniReturnedCode));
-            throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
+            throw new GenericException(GENERIC_RS_ERR_MSG);
         }
         /*
         RS_GetDeviceInfo Error Codes:
@@ -235,7 +237,7 @@ public class SlapScannerController {
         if (jniReturnedCode != RS_SUCCESS) {
             LOGGER.log(Level.SEVERE, "Could not get device info.");
             isDeviceInitialised = false;
-            throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
+            throw new GenericException(GENERIC_RS_ERR_MSG);
         }
         isDeviceInitialised = true;
     }
@@ -290,7 +292,7 @@ public class SlapScannerController {
         fingerSetTypeToScan = FingerSetType.LEFT;
         if (!isDeviceInitialised) {
             LOGGER.log(Level.SEVERE, "Device is not initialised. Status of isDeviceInitialised is 'false'.");
-            updateUI(ApplicationConstant.GENERIC_RS_ERR_MSG);
+            updateUI(GENERIC_RS_ERR_MSG);
             enableControls(backBtn, leftScanBtn);
             return;
         }
@@ -335,7 +337,7 @@ public class SlapScannerController {
 
         if (!isDeviceInitialised) {
             LOGGER.log(Level.SEVERE, "Device is not initialised. Status of isDeviceInitialised is 'false'. ");
-            updateUI(ApplicationConstant.GENERIC_RS_ERR_MSG);
+            updateUI(GENERIC_RS_ERR_MSG);
             enableControls(backBtn, rightScanBtn);
             return;
         }
@@ -379,7 +381,7 @@ public class SlapScannerController {
 
         if (!isDeviceInitialised) {
             LOGGER.log(Level.SEVERE, "Device is not initialised. Status of isDeviceInitialised is 'false'.");
-            updateUI(ApplicationConstant.GENERIC_RS_ERR_MSG);
+            updateUI(GENERIC_RS_ERR_MSG);
             enableControls(backBtn, thumbScanBtn);
             return;
         }
@@ -438,9 +440,9 @@ public class SlapScannerController {
             enableControls(backBtn, button);
             return;
         }
-
-        if (liveness < fingerprintLivenessValue) {
-            LOGGER.log(Level.INFO, "Quality standard not met. Please try again.");
+        try {
+            checkLFD();
+        } catch (GenericException ex) {
             updateUI("Quality standard not met. Please try again.");
             enableControls(backBtn, button);
             return;
@@ -494,8 +496,45 @@ public class SlapScannerController {
             ForkJoinPool.commonPool().execute(this::convertToTemplate);
         } else {
             LOGGER.log(Level.SEVERE, "Unsupported finger set type.");
-            updateUI(ApplicationConstant.GENERIC_RS_ERR_MSG);
+            updateUI(GENERIC_RS_ERR_MSG);
         }
+    }
+
+    private void checkLFD() {
+        RSLFDResult rsLfdResult = new RSLFDResult();
+        /*
+        RS_SetLFDLevel Error Codes:
+            RS_SUCCESS - The option is set successfully.
+            RS_ERR_UNSUPPORTED_COMMAND - Unsupported device.
+         */
+        jniReturnedCode = RS_GetLFDResult(deviceHandler, rsLfdResult);
+        if (jniReturnedCode != RS_SUCCESS) {
+            LOGGER.log(Level.SEVERE, () -> RS_GetErrString(jniReturnedCode));
+            throw new GenericException(GENERIC_RS_ERR_MSG);
+        }
+        Map<String, Integer> mFingersToScanSeqMap;
+        if (FingerSetType.LEFT == fingerSetTypeToScan) {
+            mFingersToScanSeqMap = leftFingerToFingerTypeLinkedHashMap;
+        } else if (FingerSetType.RIGHT == fingerSetTypeToScan) {
+            mFingersToScanSeqMap = rightFingerToFingerTypeLinkedHashMap;
+        } else if (FingerSetType.THUMB == fingerSetTypeToScan) {
+            mFingersToScanSeqMap = thumbToFingerTypeLinkedHashMap;
+        } else {
+            // for developers
+            throw new GenericException("Unsupported finger set type: ");
+        }
+        if (mFingersToScanSeqMap.size() != rsLfdResult.nNumofFinger) {
+            LOGGER.log(Level.SEVERE, () -> "Finger counts doesn't matched.");
+            throw new GenericException(GENERIC_ERR_MSG);
+        }
+        for (int i = 0; i < mFingersToScanSeqMap.size(); i++) {
+            // exit immediately if fake fingerprint captured.
+            if (rsLfdResult.nResult[i] == RS_LFD_FAKE) {
+                LOGGER.log(Level.SEVERE, "Fake fingerprint detected. Score: " + rsLfdResult.nScore[i]);
+                throw new GenericException("Captured fake fingerprint. Kindly place your real fingers on the sensor.");
+            }
+        }
+
     }
 
     // set capture mode, register a callback, start capture and return immediately
@@ -534,7 +573,7 @@ public class SlapScannerController {
 
         if (jniReturnedCode != RS_SUCCESS) {
             LOGGER.log(Level.SEVERE, () -> RS_GetErrString(jniReturnedCode));
-            throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
+            throw new GenericException(GENERIC_RS_ERR_MSG);
         }
 
         /* RS_RegisterAdvCaptureDataCallback Error Code
@@ -545,7 +584,7 @@ public class SlapScannerController {
         jniReturnedCode = RS_RegisterAdvCaptureDataCallback(deviceHandler, this, "captureCallback");
         if (jniReturnedCode != RS_SUCCESS) {
             LOGGER.log(Level.SEVERE, () -> RS_GetErrString(jniReturnedCode));
-            throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
+            throw new GenericException(GENERIC_RS_ERR_MSG);
         }
 
          /*
@@ -561,7 +600,21 @@ public class SlapScannerController {
         jniReturnedCode = RS_GetLastError();
         if (jniReturnedCode != RS_SUCCESS) {
             LOGGER.log(Level.SEVERE, () -> RS_GetErrString(jniReturnedCode));
-            throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
+            throw new GenericException(GENERIC_RS_ERR_MSG);
+        }
+
+        // RS_LFD_OFF = 0
+        // upto
+        // RS_LFD_LEVEL_6 = 6
+        /*
+        RS_SetLFDLevel Error Codes:
+            RS_SUCCESS - The option is set successfully.
+            RS_ERR_UNSUPPORTED_COMMAND - Unsupported device.
+         */
+        jniReturnedCode = RS_SetLFDLevel(deviceHandler, fingerprintLivenessValue);
+        if (jniReturnedCode != RS_SUCCESS) {
+            LOGGER.log(Level.SEVERE, () -> RS_GetErrString(jniReturnedCode));
+            throw new GenericException(GENERIC_RS_ERR_MSG);
         }
 
         /*
@@ -579,7 +632,7 @@ public class SlapScannerController {
         if (jniReturnedCode != RS_SUCCESS) {
             if (jniReturnedCode != RS_ERR_SENSOR_DIRTY && jniReturnedCode != RS_ERR_FINGER_EXIST) {
                 LOGGER.log(Level.SEVERE, () -> RS_GetErrString(jniReturnedCode));
-                throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
+                throw new GenericException(GENERIC_RS_ERR_MSG);
             } else {
                 LOGGER.log(Level.SEVERE, () -> RS_GetErrString(jniReturnedCode));
                 throw new GenericException("Sensor is too dirty or a finger exists on the sensor. Please try again.");
@@ -708,7 +761,7 @@ public class SlapScannerController {
         jniReturnedCode = RS_SaveBitmapMem(imageArray, imageWidth, imageHeight, imageData);
         if (jniReturnedCode != RS_SUCCESS) {
             LOGGER.log(Level.SEVERE, "Cannot save bitmap in memory");
-            throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
+            throw new GenericException(GENERIC_RS_ERR_MSG);
         }
         InputStream inputStream = new ByteArrayInputStream(imageData);
         imageView.setImage(new Image(inputStream, imageView.getFitWidth(), imageView.getFitHeight(), true, true));
@@ -725,7 +778,7 @@ public class SlapScannerController {
             mFingersToScanSeqMap = thumbToFingerTypeLinkedHashMap;
         } else {
             LOGGER.log(Level.SEVERE, "Unsupported finger set type");
-            throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
+            throw new GenericException(GENERIC_RS_ERR_MSG);
         }
 
         int numOfFingers = mFingersToScanSeqMap.size();
@@ -774,7 +827,7 @@ public class SlapScannerController {
             } else {
                 LOGGER.log(Level.SEVERE, jniErrorMsg);
                 LOGGER.log(Level.SEVERE, () -> "ERROR CODE:" + jniReturnedCode);
-                throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
+                throw new GenericException(GENERIC_RS_ERR_MSG);
             }
         }
 
@@ -796,7 +849,7 @@ public class SlapScannerController {
             RSImageInfo rsImageInfoTemp = imageInfoArray[counter.get()];
             if (rsImageInfoTemp.pbyImgBuf == null || rsImageInfoTemp.imageWidth == 0 || rsImageInfoTemp.imageHeight == 0) {
                 LOGGER.log(Level.SEVERE, "Received a null value for RsImageInfo buffer.");
-                throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
+                throw new GenericException(GENERIC_RS_ERR_MSG);
             }
             mFingerTypeRsImageInfoMap.put(slapInfoArray[counter.get()].fingerType, rsImageInfoTemp);
             counter.getAndIncrement();
@@ -931,6 +984,8 @@ public class SlapScannerController {
 
     // throws Generic Exception
     private synchronized void checkSequence(RSImageInfo[] fingerImageArray) {
+        // not very useful for now.
+        int seqCheckResult = -1;
         for (RSImageInfo finger : fingerImageArray)
             fingerSetTypeToRsImageInfoMap.forEach((fingerSetType, rsImageInfo) -> {
                 int mSlapType; // slap type is different for-each flow
@@ -952,14 +1007,14 @@ public class SlapScannerController {
                         RS_ERR_MEM_FULL - Cannot allocate memory.
                         RS_ERR_CANNOT_SEGMENT - Cannot segment the slap image.
                 */
-                jniReturnedCode = RS_SequenceCheck(1, finger, rsImageInfo.pbyImgBuf, rsImageInfo.imageWidth, rsImageInfo.imageHeight, mSlapType, SECURITY_LEVEL_FOR_SEQUENCE_CHECK);
+                jniReturnedCode = RS_SequenceCheck(1, finger, rsImageInfo.pbyImgBuf, rsImageInfo.imageWidth, rsImageInfo.imageHeight, mSlapType, seqCheckResult, SECURITY_LEVEL_FOR_SEQUENCE_CHECK);
                 if (jniReturnedCode > 0) {
                     LOGGER.log(Level.SEVERE, "Sequence check failed.");
                     throw new GenericException("Sequence check failed. Please try again..");
                 }
                 if (jniReturnedCode < 0) {
                     LOGGER.log(Level.SEVERE, RS_GetErrString(jniReturnedCode));
-                    throw new GenericException(ApplicationConstant.GENERIC_RS_ERR_MSG);
+                    throw new GenericException(GENERIC_RS_ERR_MSG);
                 }
             });
     }

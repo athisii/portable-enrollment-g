@@ -5,13 +5,11 @@ import com.cdac.enrollmentstation.logging.ApplicationLog;
 import javafx.application.Application;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
 import org.opencv.core.Core;
 
 import java.io.IOException;
@@ -19,7 +17,7 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class App extends Application implements EventHandler<WindowEvent> {
+public class App extends Application {
     private static final Logger LOGGER = ApplicationLog.getLogger(App.class);
     private static Scene scene;
 
@@ -55,11 +53,5 @@ public class App extends Application implements EventHandler<WindowEvent> {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         launch();
     }
-
-    @Override
-    public void handle(WindowEvent arg0) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
 
 }

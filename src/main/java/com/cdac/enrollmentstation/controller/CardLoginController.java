@@ -6,7 +6,6 @@
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
-import com.cdac.enrollmentstation.api.CardReaderAPI;
 import com.cdac.enrollmentstation.api.LocalCardReaderApi;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.*;
@@ -87,7 +86,6 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     private ImageView m_FingerPrintImage;
 
 
-    CardReaderAPI cardReaderAPI = new CardReaderAPI();
     //For Application Log
     private static final Logger LOGGER = ApplicationLog.getLogger(CardLoginController.class);
     private MIDFingerAuth midFingerAuth; // For MID finger jar
@@ -152,12 +150,12 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             messageLabel.setText("Please enter valid card pin.");
             return;
         }
-        EnumMap<DataType, byte[]> asn1HexByteArrayMap;
+        EnumMap<DataType, byte[]> asn1EncodedHexByteArrayMap;
 
         try {
             // required to follow the procedure calls
             // deInitialize -> initialize ->[waitForConnect -> selectApp] -> readData
-            asn1HexByteArrayMap = startProcedureCall();
+            asn1EncodedHexByteArrayMap = startProcedureCall();
         } catch (IllegalArgumentException | GenericException ex) {
             if (ex instanceof IllegalArgumentException) {
                 LOGGER.log(Level.SEVERE, ex.getMessage());
@@ -166,12 +164,12 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             return;
         }
         // connection timeout
-        if (asn1HexByteArrayMap == null) {
+        if (asn1EncodedHexByteArrayMap == null) {
             messageLabel.setText(CONNECTION_TIMEOUT_MSG);
             return;
         }
         // gets pin code from card
-        String cardPinNumber = Asn1EncodedHexUtil.extractFromAns1EncodedHex(asn1HexByteArrayMap.get(DataType.STATIC), CardDataIndex.PIN_NUMBER);
+        String cardPinNumber = Asn1EncodedHexUtil.extractFromAns1EncodedHex(asn1EncodedHexByteArrayMap.get(DataType.STATIC), CardDataIndex.PIN_NUMBER);
         if (cardPinNumber == null) {
             LOGGER.log(Level.SEVERE, "Received null value from card.");
             messageLabel.setText(GENERIC_ERR_MSG);
@@ -295,9 +293,9 @@ public class CardLoginController implements MIDFingerAuth_Callback {
                 offset += CARD_READER_MAX_BUFFER_SIZE;
                 byteArrayOutputStream.write(base64DecodedBytes);
             }
-            EnumMap<DataType, byte[]> asn1HexByteArrayMap = new EnumMap<>(DataType.class);
-            asn1HexByteArrayMap.put(dataType, byteArrayOutputStream.toByteArray());
-            return asn1HexByteArrayMap;
+            EnumMap<DataType, byte[]> asn1EncodedHexByteArrayMap = new EnumMap<>(DataType.class);
+            asn1EncodedHexByteArrayMap.put(dataType, byteArrayOutputStream.toByteArray());
+            return asn1EncodedHexByteArrayMap;
         } catch (IOException ex) {
             // throws if exception occurs while writing to byteOutputStream
             LOGGER.log(Level.SEVERE, ex.getMessage());

@@ -17,8 +17,9 @@ import java.util.logging.Logger;
 public class AuthUtil {
     private static final Logger LOGGER = ApplicationLog.getLogger(AuthUtil.class);
 
-    //Suppresses default constructor for noninstantiability
+    //Suppress default constructor for noninstantiability
     private AuthUtil() {
+        throw new AssertionError("The AuthUtil methods  must be accessed statically.");
     }
 
     public static boolean authenticate(String username, String password) {

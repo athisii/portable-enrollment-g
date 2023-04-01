@@ -22,11 +22,11 @@ import java.util.logging.Logger;
 
 public class HmacUtil {
 
-    private final static Logger LOGGER = ApplicationLog.getLogger(HmacUtil.class);
+    private static final Logger LOGGER = ApplicationLog.getLogger(HmacUtil.class);
 
     //Suppress default constructor for noninstantiability
     private HmacUtil() {
-        throw new AssertionError("The HmacUtil methods should be accessed statically");
+        throw new AssertionError("The HmacUtil methods  must be accessed statically.");
     }
 
     private final static String algorithm = "HmacSHA256";

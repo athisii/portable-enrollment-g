@@ -22,18 +22,18 @@ import java.util.logging.Logger;
  * Created on 21/03/23
  */
 public class PkiUtil {
-    private final static Logger LOGGER = ApplicationLog.getLogger(App.class);
+    private static final Logger LOGGER = ApplicationLog.getLogger(App.class);
 
     //Suppress default constructor for noninstantiability
     private PkiUtil() {
         throw new AssertionError("The PkiUtil methods must be accessed statically.");
     }
 
-    private final static KeyStore keyStore;
-    private final static InputStream inputStream;
-    private final static String password;
-    private final static String alias;
-    private final static Cipher cipher;
+    private static final KeyStore keyStore;
+    private static final InputStream inputStream;
+    private static final String password;
+    private static final String alias;
+    private static final Cipher cipher;
     private final static KeyPair keyPair;
 
     static {

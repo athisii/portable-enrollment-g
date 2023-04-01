@@ -23,15 +23,15 @@ import java.util.logging.Logger;
  * Created on 21/03/23
  */
 public class Aes256Util {
-    private final static Logger LOGGER = ApplicationLog.getLogger(Aes256Util.class);
+    private static final Logger LOGGER = ApplicationLog.getLogger(Aes256Util.class);
 
     //Suppress default constructor for noninstantiability
     private Aes256Util() {
-        throw new AssertionError("The AES256Util methods should be accessed statically");
+        throw new AssertionError("The AES256Util methods must be accessed statically.");
     }
 
     private static final Cipher cipher;
-    private final static SecureRandom random = new SecureRandom();
+    private static final SecureRandom random = new SecureRandom();
     private static byte[] ivBytes = new byte[16];
 
 

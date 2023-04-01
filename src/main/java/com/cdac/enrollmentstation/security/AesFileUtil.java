@@ -27,16 +27,16 @@ import java.util.logging.Logger;
  * Created on 21/03/23
  */
 public class AesFileUtil {
-    private final static Logger LOGGER = ApplicationLog.getLogger(AesFileUtil.class);
+    private static final Logger LOGGER = ApplicationLog.getLogger(AesFileUtil.class);
 
     //Suppress default constructor for noninstantiability
     private AesFileUtil() {
-        throw new AssertionError("The AesFileUtil methods should be accessed statically");
+        throw new AssertionError("The AesFileUtil methods must be accessed statically.");
     }
 
     private static final Cipher cipher;
-    private final static String password = "P0rt@b1eEnr011ment";
-    private final static SecureRandom secureRandom = new SecureRandom();
+    private static final String password = "P0rt@b1eEnr011ment";
+    private static final SecureRandom secureRandom = new SecureRandom();
     private static byte[] saltBytes = new byte[8];
     private static byte[] ivBytes = new byte[16];
 

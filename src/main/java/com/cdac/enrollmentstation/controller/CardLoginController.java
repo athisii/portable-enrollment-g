@@ -12,6 +12,7 @@ import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.*;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
+import com.cdac.enrollmentstation.security.Asn1EncodedHexUtil;
 import com.cdac.enrollmentstation.util.LocalCardReaderErrMsgUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
@@ -24,7 +25,6 @@ import com.mantra.midfingerauth.enums.DeviceModel;
 import com.mantra.midfingerauth.enums.TemplateFormat;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -34,7 +34,6 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 
 import javax.imageio.ImageIO;
-import javax.xml.bind.DatatypeConverter;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Base64;
@@ -44,6 +43,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
+import static com.cdac.enrollmentstation.security.Asn1EncodedHexUtil.CardDataIndex;
 
 
 /**
@@ -61,6 +61,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     private static final int MAX_LENGTH = 15;
     private int jniErrorCode;
 
+
     private enum DataType {
         STATIC(STATIC_TYPE),
         FINGERPRINT(FINGERPRINT_TYPE);
@@ -74,12 +75,6 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             return value;
         }
     }
-
-    @FXML
-    public Button showContractDetails;
-
-    @FXML
-    public Button show_home_token;
 
 
     @FXML
@@ -157,11 +152,12 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             messageLabel.setText("Please enter valid card pin.");
             return;
         }
-        EnumMap<DataType, String> hexadecimalDataMap;
+        EnumMap<DataType, byte[]> asn1HexByteArrayMap;
+
         try {
             // required to follow the procedure calls
             // deInitialize -> initialize ->[waitForConnect -> selectApp] -> readData
-            hexadecimalDataMap = startProcedureCall();
+            asn1HexByteArrayMap = startProcedureCall();
         } catch (IllegalArgumentException | GenericException ex) {
             if (ex instanceof IllegalArgumentException) {
                 LOGGER.log(Level.SEVERE, ex.getMessage());
@@ -170,11 +166,12 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             return;
         }
         // connection timeout
-        if (hexadecimalDataMap == null) {
+        if (asn1HexByteArrayMap == null) {
             messageLabel.setText(CONNECTION_TIMEOUT_MSG);
             return;
         }
-        String cardPinNumber = extractCardPinNumberFromAsn(hexadecimalDataMap.get(DataType.STATIC));
+        // gets pin code from card
+        String cardPinNumber = Asn1EncodedHexUtil.extractFromAns1EncodedHex(asn1HexByteArrayMap.get(DataType.STATIC), CardDataIndex.PIN_NUMBER);
         if (cardPinNumber == null) {
             LOGGER.log(Level.SEVERE, "Received null value from card.");
             messageLabel.setText(GENERIC_ERR_MSG);
@@ -189,12 +186,14 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             App.setRoot("main_screen");
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
+            throw new GenericException(GENERIC_ERR_MSG);
         }
 
     }
 
-    // throws GenericException due to ObjectMapper.
-    private EnumMap<DataType, String> startProcedureCall() {
+    // throws GenericException
+    // Caller must handle the exception
+    private EnumMap<DataType, byte[]> startProcedureCall() {
         // required to follow the procedure calls
         // deInitialize -> initialize ->[waitForConnect -> selectApp] -> readData
         CRDeInitializeResDto crDeInitializeResDto = LocalCardReaderApi.getDeInitialize();
@@ -253,34 +252,62 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
             throw new GenericException(GENERIC_ERR_MSG);
         }
-        return readDataFromCard(crWaitForConnectResDto.getHandle());
+        return readDataFromCard(crWaitForConnectResDto.getHandle(), DataType.STATIC);
     }
 
-    private EnumMap<DataType, String> readDataFromCard(int handle) {
-        StringBuilder hexadecimalStaticData = new StringBuilder();
-        /* ** Will use when 2-factor authentication is enabled. *** */
-        // StringBuilder hexadecimalFingerprintData = new StringBuilder()
+    // throws GenericException
+    // Caller must handle the exception
+    private EnumMap<DataType, byte[]> readDataFromCard(int handle, DataType dataType) {
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+            // for reading multiple times
+            boolean repeat = true;
+            int offset = 0;
+            while (repeat) {
+                CRReadDataResDto crReadDataResDto = readBufferedDataFromCard(handle, dataType, offset, CARD_READER_MAX_BUFFER_SIZE);
+                // connection timeout
+                if (crReadDataResDto == null) {
+                    return null;
+                }
+                jniErrorCode = crReadDataResDto.getRetVal();
+                // if first request failed throw exception
+                if (offset == 0 && jniErrorCode != 0) {
+                    LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
+                    throw new GenericException(GENERIC_ERR_MSG);
+                }
+                // consider 1st request responseLen  = 1024 bytes
+                // therefore, we assumed more data is left to be read,
+                // so we make a 2nd request, but all data are already read.
+                // in that case we get non-zero return value.
+                if (offset != 0 && jniErrorCode != 0) {
+                    break;
+                }
 
-        // (read data 1024 bytes) * 3 times
-        // TODO: need to know how many bytes are written while writing data to card.
-        for (int i = 0; i < 3; i++) {
-            hexadecimalStaticData.append(readBufferedDataFromCard(handle, DataType.STATIC, i * CARD_READER_MAX_BUFFER_SIZE, CARD_READER_MAX_BUFFER_SIZE));
-            //hexadecimalFingerprintData.append(readBufferedDataFromCard(handle, DataType.FINGERPRINT, i * CARD_READER_MAX_BUFFER_SIZE, CARD_READER_MAX_BUFFER_SIZE))
+                byte[] base64DecodedBytes = Base64.getDecoder().decode(crReadDataResDto.getResponse());
+                // responseLen(in bytes)
+                if (base64DecodedBytes.length != crReadDataResDto.getResponseLen()) {
+                    LOGGER.log(Level.SEVERE, "Number of decoded bytes and response length not equal.");
+                    throw new GenericException(GENERIC_ERR_MSG);
+                }
+                // end the read request
+                if (crReadDataResDto.getResponseLen() < CARD_READER_MAX_BUFFER_SIZE) {
+                    repeat = false;
+                }
+                offset += CARD_READER_MAX_BUFFER_SIZE;
+                byteArrayOutputStream.write(base64DecodedBytes);
+            }
+            EnumMap<DataType, byte[]> asn1HexByteArrayMap = new EnumMap<>(DataType.class);
+            asn1HexByteArrayMap.put(dataType, byteArrayOutputStream.toByteArray());
+            return asn1HexByteArrayMap;
+        } catch (IOException ex) {
+            // throws if exception occurs while writing to byteOutputStream
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            throw new GenericException(GENERIC_ERR_MSG);
         }
-        EnumMap<DataType, String> hexadecimalDataMap = new EnumMap<>(DataType.class);
-        hexadecimalDataMap.put(DataType.STATIC, hexadecimalStaticData.toString());
-        //hexadecimalDataMap.put(DataType.FINGERPRINT, hexadecimalFingerprintData.toString())
-        return hexadecimalDataMap;
     }
 
-    private String extractCardPinNumberFromAsn(String hexadecimalData) {
-        // contractorId = hextoasn.getContractorIdfromASN(hexadecimalData);
-        // contractorName = hextoasn.getContractorNamefromASN(hexadecimalData);
-        // can return null
-        throw new AssertionError("Not implemented.");
-    }
-
-    private String readBufferedDataFromCard(int handle, DataType whichData, int offset, int requestLength) {
+    // throws GenericException
+    // Caller must handle the exception
+    private CRReadDataResDto readBufferedDataFromCard(int handle, DataType whichData, int offset, int requestLength) {
         String reqData;
         try {
             reqData = Singleton.getObjectMapper().writeValueAsString(new CRReadDataReqDto(handle, whichData.getValue(), offset, requestLength));
@@ -288,19 +315,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             LOGGER.log(Level.SEVERE, ex::getMessage);
             throw new GenericException(GENERIC_ERR_MSG);
         }
-        CRReadDataResDto crReadDataResDto = LocalCardReaderApi.postReadData(reqData);
-        // connection timeout
-        if (crReadDataResDto == null) {
-            return null;
-        }
-        jniErrorCode = crReadDataResDto.getRetVal();
-        if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
-            throw new GenericException(GENERIC_ERR_MSG);
-        }
-        byte[] decodedBytes = Base64.getDecoder().decode(crReadDataResDto.getResponse());
-        // TODO: must find antother way to do it.
-        return DatatypeConverter.printHexBinary(decodedBytes);
+        return LocalCardReaderApi.postReadData(reqData);
     }
 
     public void updateUI(String message) {
@@ -327,10 +342,9 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         return response;
     }
 
-
     @Override
-    public void OnDeviceDetection(String arg0, DeviceDetection arg1) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void OnDeviceDetection(String s, DeviceDetection deviceDetection) {
+        LOGGER.log(Level.INFO, "Not implemented.");
     }
 
     @Override
@@ -381,8 +395,6 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             LOGGER.log(Level.INFO, "Quality: " + Quality + ", NFIQ: " + NFIQ);
             int[] dataLen = new int[]{2500};
             byte[] data = new byte[dataLen[0]];
-
-            int ret = midFingerAuth.GetTemplate(data, dataLen, TemplateFormat.FMR_V2011);
             lastCaptureTemplat = new byte[dataLen[0]];
             System.arraycopy(data, 0, lastCaptureTemplat, 0, dataLen[0]);
             System.out.println("Last Capture Template::::" + lastCaptureTemplat.toString());
@@ -398,47 +410,37 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         try {
             String fpqpath = PropertyFile.getProperty(PropertyName.FP_QUALITY);
             if (fpqpath.isBlank() || fpqpath.isEmpty() || fpqpath == null) {
-                //System.out.println("The property 'fpquality' is empty, Please add it in properties");
                 LOGGER.log(Level.INFO, "The property 'fpquality' is empty, Please add it in properties");
                 return;
             }
             try (BufferedReader file = new BufferedReader(new FileReader(fpqpath))) {
-                String input = " ";
                 String fpq = file.lines().collect(Collectors.joining());
                 fpQuality = Integer.parseInt(fpq);
                 System.out.println("FP Quality is :: " + fpQuality);
                 LOGGER.log(Level.INFO, "FP Quality is :: " + fpQuality);
-                file.close();
             } catch (Exception e) {
                 e.printStackTrace();
-                //System.out.println("Problem reading file./usr/share/enrollment/quality/fpquality");
                 LOGGER.log(Level.INFO, "Problem reading file./usr/share/enrollment/quality/fpquality");
             }
-            //fpQuality=50;
             LOGGER.log(Level.INFO, "FP Quality is : " + fpQuality);
             int[] matchScore = new int[1];
-            //byte[] fmrTemplate = Base64.getDecoder().decode("Rk1SADAzMAAAAADrAAEAAAAA3P///////////wAAAAAAAAAAAMUAxQABIQGZYB9AkQDepmSAXgDdHmSAygD/s2RAlAE30ElA2AEO1WRAuACW/2RA7AEeY0RAlQFmZ0FA2QCJ+GSAXQFrAx5AqgAtikxAdwDToGRAcQEhsGRAdQCynGSA0QDXiGRAlAFERy9AygCiiGRAgAFifjGAngB1k2RAkgFyeBRAVQB1GGRAXgECpl9AfAEoxGSASADnpGSAcQE7vGRANADkH2RA7wDTbWRAXAFZF0WAPgCPmWSAtAFvZBFASABxmlsAAA==");
             byte[] fmrTemplate = Base64.getDecoder().decode("Rk1SADAzMAAAAAHhAAEAAAAB0v///////////wAAAAAAAAAAAMUAxQABRQHdYEiApAED7WSAoADG0GRAcQDx0GJA4ADll2SAbQEOTGSA5gEHjWSA8ADnoWRAhACjtGRAnQFIeWSBBwDotGSA1ACOYmSBFADuumSAkgCAlWSAuAB9eWSAVgCSq2SBAgFGh2SAJgDHsmRAGwELtWSAyABg5GRADQD5oVdA2AGIAFpA6wGRfkKAqgA8fGRA2gG192SAiQEEUWSAqwDG3WRA2wDyIWRAxQEjBmSAuwEqdWSAbQDFv2SA2gC3VmSAqACem2RA+AEaIGSA4gCjzGRAeAFRcmRA/ACqzGSA6AFLB2SARQE");
 
-            //int ret = FingerprintTemplateMatching(fingerData, Base64.getDecoder().decode(fmrTemplate), matchScore, TemplateFormat.FMR_V2011);
             int ret = fingerprintTemplateMatching(fingerData, fmrTemplate, matchScore, TemplateFormat.FMR_V2011);
             if (ret < 0) {
                 LOGGER.log(Level.INFO, "midFingerAuth.GetErrorMessage::" + midFingerAuth.GetErrorMessage(ret));
                 response = "Fingerprint Template Matching Issue";
                 updateUI(response);
-                return;
             } else {
                 int minThresold = 60;
                 if (matchScore[0] >= minThresold) {
                     LOGGER.log(Level.INFO, "Finger matched with score: " + matchScore[0]);
                     response = "Fingerprint Matched";
                     updateUI(response);
-                    return;
                 } else {
                     LOGGER.log(Level.INFO, "Finger not matched with score: " + matchScore[0]);
                     response = "Fingerprint Not Matched";
                     updateUI(response);
-                    return;
                 }
             }
         } catch (Exception e) {

@@ -3,19 +3,16 @@ package com.cdac.enrollmentstation.controller;
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class LicenceInfoController implements Initializable {
+public class LicenceInfoController {
     //    @FXML
 //    private TextField UnitId;
     @FXML
@@ -32,19 +29,12 @@ public class LicenceInfoController implements Initializable {
     private Button gohome;
 
 
-
     //For Application Log
     private static final Logger LOGGER = ApplicationLog.getLogger(LicenceInfoController.class);
 
     public LicenceInfoController() {
         //this.handler = appLog.getLogger();
         //LOGGER.addHandler(handler); 
-    }
-
-
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // TODO
     }
 
     @FXML

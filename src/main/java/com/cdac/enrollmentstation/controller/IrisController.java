@@ -32,8 +32,6 @@ import javafx.scene.layout.AnchorPane;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -153,38 +151,13 @@ public class IrisController implements MIDIrisEnrollCallback {
             messageLabel.setText(GENERIC_IRIS_ERR_MSG);
             return;
         }
-        // TODO: uncomment this
-        /*
+
         arcLabel.setText("ARC: " + getArcDetailsHolder().getArcDetails().getArcNo());
-        irisTypeToScan = getIrisToScan(getArcDetailsHolder().getArcDetails().getIris());
-        if (IrisType.NONE == irisTypeToScan) {
-            capturePhotoBtn.setDisable(false);
-            captureIrisBtn.setDisable(true);
-            backBtn.setDisable(true);
-            messageLabel.setText("Iris capturing not required. Kindly proceed to capture photo.");
-            return;
-        }
-
-        if (IrisType.LEFT == irisTypeToScan) {
-            displayLeftIris = true;
-            irisSideToCapture = IrisSide.MIDIRIS_ENROLL_IRIS_SIDE_LEFT;
-        } else if (IrisType.RIGHT == irisTypeToScan) {
-            displayRightIris = true;
-            irisSideToCapture = IrisSide.MIDIRIS_ENROLL_IRIS_SIDE_RIGHT;
-        } else {
-            displayRightIris = true;
-            displayLeftIris = true;
-            irisSideToCapture = IrisSide.MIDIRIS_ENROLL_IRIS_SIDE_BOTH;
-        }
-        */
-
-
-        //TODO: remove this
-        irisTypeToCapture = getIrisToScan(List.of());
+        irisTypeToCapture = getIrisToScan(getArcDetailsHolder().getArcDetails().getIris());
         if (IrisType.NONE == irisTypeToCapture) {
             capturePhotoBtn.setDisable(false);
             captureIrisBtn.setDisable(true);
-            backBtn.setDisable(false);
+            backBtn.setDisable(true);
             messageLabel.setText("Iris capturing not required. Kindly proceed to capture photo.");
             return;
         }
@@ -286,8 +259,6 @@ public class IrisController implements MIDIrisEnrollCallback {
         });
     }
 
-    // TODO: need to check again
-    // TODO: parameters are not used.
     @Override
     public void OnComplete(int errorCode, ImageQuality imageQuality, ImagePara imagePara) {
         if (errorCode != 0 || imagePara == null) {

@@ -23,7 +23,7 @@ public class LocalCardReaderApi {
 
     //Suppress default constructor for noninstantiability
     private LocalCardReaderApi() {
-        throw new AssertionError("The LocalCardReaderApi methods should be accessed statically.");
+        throw new AssertionError("The LocalCardReaderApi methods must be accessed statically.");
     }
 
     // throws GenericException

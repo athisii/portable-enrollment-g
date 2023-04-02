@@ -67,16 +67,15 @@ public class Asn1EncodedHexUtil {
 
     // throws GenericException
     // Caller must handle the exception
-    public static String extractFromAns1EncodedHex(byte[] bytes, CardDataIndex cardDataIndex) {
-        ASN1InputStream asn1InputStream = new ASN1InputStream(new ByteArrayInputStream(bytes));
+    public static String extractFromStaticAns1EncodedHex(byte[] bytes, CardDataIndex cardDataIndex) {
         try {
+            ASN1InputStream asn1InputStream = new ASN1InputStream(new ByteArrayInputStream(bytes));
             ASN1Primitive asn1Primitive = asn1InputStream.readObject();
             ASN1Sequence asn1Sequence = ASN1Sequence.getInstance(asn1Primitive);
             return asn1Sequence.getObjectAt(cardDataIndex.getValue()).toString();
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
-
     }
 }

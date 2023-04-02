@@ -29,18 +29,18 @@
                 </Label>
                 <AnchorPane layoutX="474.0" layoutY="219.0" prefHeight="216.0" prefWidth="399.0" style="-fx-border-color: #04127b;">
 
-                    <ImageView fitHeight="105.0" fitWidth="111.0" layoutX="143.0" layoutY="6.0" pickOnBounds="true" preserveRatio="true">
+                    <ImageView fx:id="iconOrFpImageView" fitHeight="131.0" fitWidth="132.0" layoutX="143.0" layoutY="9.0" pickOnBounds="true" preserveRatio="true">
 
                         <Image url="@../img/showtoken.jpeg" />
 
                     </ImageView>
-                    <Text layoutX="67.0" layoutY="168.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Card Pin:" wrappingWidth="101">
+                    <Label fx:id="cardPinLabel" layoutX="67.0" layoutY="158.0" text="Card Pin:">
                         <font>
-                            <Font size="14.0" />
+                            <Font name="System Bold" size="14.0" />
                         </font>
-                    </Text>
+                    </Label>
 
-                    <PasswordField fx:id="pinNoPasswordField" layoutX="144.0" layoutY="150.0" prefHeight="26.0" prefWidth="189.0" promptText="Card PNo" />
+                    <PasswordField fx:id="pinNoPasswordField" layoutX="144.0" layoutY="155.0" prefHeight="26.0" prefWidth="189.0" promptText="Card PNo" />
 
                 </AnchorPane>
 
@@ -49,12 +49,12 @@
                         <Font name="System Bold" size="15.0" />
                     </font>
                 </Label>
-                <Button focusTraversable="false" layoutX="512.0" layoutY="496.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#backBtnAction" prefHeight="35.0" prefWidth="150.0" style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;" text="BACK" textFill="WHITE">
+                <Button fx:id="backBtn" focusTraversable="false" layoutX="512.0" layoutY="496.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#backBtnAction" prefHeight="35.0" prefWidth="150.0" style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;" text="BACK" textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
-                <Button focusTraversable="false" layoutX="696.0" layoutY="496.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#loginBtnAction" prefHeight="35.0" prefWidth="150.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="LOGIN" textFill="WHITE">
+                <Button fx:id="loginBtn" focusTraversable="false" layoutX="696.0" layoutY="496.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#loginBtnAction" prefHeight="35.0" prefWidth="150.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="LOGIN" textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>

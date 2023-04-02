@@ -32,7 +32,7 @@ public class HttpUtil {
 
     //Suppress default constructor for noninstantiability
     private HttpUtil() {
-        throw new AssertionError("The HttpUtil methods should be accessed statically.");
+        throw new AssertionError("The HttpUtil methods must be accessed statically.");
     }
 
     public static HttpRequest createGetHttpRequest(String url) {

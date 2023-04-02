@@ -21,7 +21,7 @@ module com.cdac.enrollmentstation {
 
     // transitively import ans1.runtime
     requires asn1.converter;
-    // security
+    // for ans1 encoded hex decoding
     requires org.bouncycastle.provider;
 
     // python
@@ -34,11 +34,9 @@ module com.cdac.enrollmentstation {
 
     // xml
     requires java.xml.bind;
-//    requires jakarta.activation; imported transitively from xml.bind
 
     requires org.apache.commons.io;
     requires json.io;
-//    requires org.apache.commons.codec;
 
     opens com.cdac.enrollmentstation to javafx.fxml;
     opens RealScan to javafx.fxml;
@@ -61,7 +59,6 @@ module com.cdac.enrollmentstation {
 
 
     requires json;
-//    requires gson;
 
     requires static lombok;
     requires MFS;

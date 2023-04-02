@@ -28,7 +28,7 @@ public class App extends Application {
             event.consume();
             Platform.exit();  //Comment this line in production/deployment (Alt+f4 and close button)
         });
-        scene = new Scene(loadFXML("card_login"), 1366, 768);
+        scene = new Scene(loadFXML("login"), 1366, 768);
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             LOGGER.log(Level.INFO, () -> "Caught by default Uncaught Exception Handler. Will exit now");
             throwable.printStackTrace();

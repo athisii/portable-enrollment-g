@@ -22,7 +22,7 @@ public class LocalCardReaderApiUrl {
 
     //Suppress default constructor for noninstantiability
     private LocalCardReaderApiUrl() {
-        throw new AssertionError("The LocalCardReaderApiUrl methods should be accessed statically.");
+        throw new AssertionError("The LocalCardReaderApiUrl methods must be accessed statically.");
     }
 
     public static String getInitialize() {

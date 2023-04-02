@@ -34,7 +34,7 @@ public class MafisServerApi {
 
     //Suppress default constructor for noninstantiability
     private MafisServerApi() {
-        throw new AssertionError("The MafisServerApi methods should be accessed statically.");
+        throw new AssertionError("The MafisServerApi methods must be accessed statically.");
     }
 
     /**

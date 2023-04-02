@@ -51,4 +51,10 @@ public class DirectoryLookup {
         }
     }
 
+    //Suppress default constructor for noninstantiability
+    private DirectoryLookup() {
+        throw new AssertionError("The DirectoryLookup methods must be accessed statically.");
+    }
+
+
 }

@@ -217,7 +217,7 @@ public class ImportExportController {
                 if (!errorMessageSmallCase.contains("already") && !errorMessageSmallCase.contains("submitted") && !errorMessageSmallCase.contains("given") && !errorMessageSmallCase.contains("provided")) {
                     updateUI(saveEnrollmentResDto.getDesc());
                     enableControls(homeBtn, backBtn);
-                    return false;
+                    continue; // don't delete it.'
                 }
             }
 

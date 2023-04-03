@@ -36,6 +36,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_IRIS_ERR_MSG;
 import static com.cdac.enrollmentstation.model.ARCDetailsHolder.getArcDetailsHolder;
 
@@ -120,6 +121,28 @@ public class IrisController implements MIDIrisEnrollCallback {
 
     }
 
+    private void initDevice() {
+        List<String> devices = new ArrayList<>();
+        jniErrorCode = midIrisEnroll.GetConnectedDevices(devices);
+        if (jniErrorCode != 0 || devices.isEmpty()) {
+            LOGGER.log(Level.SEVERE, () -> midIrisEnroll.GetErrorMessage(jniErrorCode));
+            throw new GenericException(DEVICE_NOT_CONNECTED);
+        }
+        String model = devices.get(0);
+        deviceInfo = new DeviceInfo();
+        IrisSide[] irisSide = new IrisSide[1];
+        if (!isDeviceInitialized) {
+            jniErrorCode = midIrisEnroll.Init(DeviceModel.valueFor(model), deviceInfo, irisSide);
+            if (jniErrorCode != 0) {
+                LOGGER.log(Level.SEVERE, () -> midIrisEnroll.GetErrorMessage(jniErrorCode));
+                deviceInfo = null;
+                isDeviceInitialized = false;
+                throw new GenericException(GENERIC_ERR_MSG);
+            }
+        }
+        isDeviceInitialized = true;
+    }
+
     public void initialize() {
         // loads failure and success images from FS.
         InputStream inputStream = IrisController.class.getResourceAsStream("/img/redcross.png");
@@ -139,17 +162,13 @@ public class IrisController implements MIDIrisEnrollCallback {
 
         // registers callbacks
         midIrisEnroll = new MIDIrisEnroll(this);
-        List<String> devices = new ArrayList<>();
-        jniErrorCode = midIrisEnroll.GetSupportedDevices(devices);
-        if (jniErrorCode != 0) {
-            LOGGER.log(Level.INFO, () -> midIrisEnroll.GetErrorMessage(jniErrorCode));
-            messageLabel.setText(GENERIC_IRIS_ERR_MSG);
-            return;
-        }
-        if (devices.isEmpty()) {
-            LOGGER.log(Level.INFO, "Number of supported devices is 0.");
-            messageLabel.setText(GENERIC_IRIS_ERR_MSG);
-            return;
+
+        try {
+            initDevice();
+        } catch (GenericException ex) {
+            messageLabel.setText(ex.getMessage());
+            captureIrisBtn.setDisable(false);
+            backBtn.setDisable(false);
         }
 
         arcLabel.setText("ARC: " + getArcDetailsHolder().getArcDetails().getArcNo());
@@ -189,40 +208,18 @@ public class IrisController implements MIDIrisEnrollCallback {
     @FXML
     private void captureIrisBtnAction() {
         captureIrisBtn.setDisable(true);
+        backBtn.setDisable(true);
         captureIrisBtn.setText("RESCAN");
         messageLabel.setText("");
-        IrisSide[] irisSide = new IrisSide[1];
-
-        if (!midIrisEnroll.IsDeviceConnected(DeviceModel.MATISX, irisSide)) {
-            LOGGER.log(Level.SEVERE, () -> "Iris scanner not connected.");
-            messageLabel.setText(GENERIC_IRIS_ERR_MSG);
-            captureIrisBtn.setDisable(false);
-            return;
-        }
-        List<String> devices = new ArrayList<>();
-        jniErrorCode = midIrisEnroll.GetConnectedDevices(devices);
-        if (jniErrorCode != 0 || devices.isEmpty()) {
-            LOGGER.log(Level.SEVERE, () -> midIrisEnroll.GetErrorMessage(jniErrorCode));
-            messageLabel.setText(DEVICE_NOT_CONNECTED);
-            captureIrisBtn.setDisable(false);
-            return;
-        }
-        String model = devices.get(0);
-        deviceInfo = new DeviceInfo();
-
         if (!isDeviceInitialized) {
-            jniErrorCode = midIrisEnroll.Init(DeviceModel.valueFor(model), deviceInfo, irisSide);
-            if (jniErrorCode != 0) {
-                LOGGER.log(Level.SEVERE, () -> midIrisEnroll.GetErrorMessage(jniErrorCode));
-                deviceInfo = null;
-                isDeviceInitialized = false;
-                messageLabel.setText(GENERIC_IRIS_ERR_MSG);
+            try {
+                initDevice();
+            } catch (GenericException ex) {
+                messageLabel.setText(ex.getMessage());
                 captureIrisBtn.setDisable(false);
-                return;
+                backBtn.setDisable(false);
             }
-            isDeviceInitialized = true;
         }
-
         jniErrorCode = midIrisEnroll.StartCapture(irisSideToCapture, MIN_QUALITY, CAPTURE_TIMEOUT);
         if (jniErrorCode != 0) {
             LOGGER.log(Level.SEVERE, () -> midIrisEnroll.GetErrorMessage(jniErrorCode));
@@ -351,12 +348,10 @@ public class IrisController implements MIDIrisEnrollCallback {
         if (IrisType.NONE == irisTypeToCapture) {
             String notAvailable = "Not Available";
             saveEnrollmentDetails.setIris(new HashSet<>(Set.of(new IRIS(notAvailable, notAvailable, notAvailable))));
-            saveEnrollmentDetails.setIRISScannerSerailNo(notAvailable);
         } else {
             saveEnrollmentDetails.setIris(irisSet);
-            saveEnrollmentDetails.setIRISScannerSerailNo(deviceInfo.SerialNo);
-
         }
+        saveEnrollmentDetails.setIRISScannerSerailNo(deviceInfo.SerialNo);
         saveEnrollmentDetails.setEnrollmentStatus("IrisCompleted");
         holder.setSaveEnrollmentDetails(saveEnrollmentDetails);
 

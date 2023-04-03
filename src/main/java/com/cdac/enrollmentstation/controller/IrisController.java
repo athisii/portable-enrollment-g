@@ -348,6 +348,7 @@ public class IrisController implements MIDIrisEnrollCallback {
         if (IrisType.NONE == irisTypeToCapture) {
             String notAvailable = "Not Available";
             saveEnrollmentDetails.setIris(new HashSet<>(Set.of(new IRIS(notAvailable, notAvailable, notAvailable))));
+            //saveEnrollmentDetails.setIRISScannerSerailNo(notAvailable)
         } else {
             saveEnrollmentDetails.setIris(irisSet);
         }
@@ -397,7 +398,7 @@ public class IrisController implements MIDIrisEnrollCallback {
             isDeviceInitialized = false;
         }
         try {
-            App.setRoot("slapscanner");
+            App.setRoot("slap_scanner");
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, ex::getMessage);
         }

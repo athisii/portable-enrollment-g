@@ -120,7 +120,7 @@ public class ARCNoController {
         // different arc number is entered.
         if (saveEnrollmentDetails.getArcNo() == null || !ARCDetailsHolder.getArcDetailsHolder().getArcDetails().getArcNo().equals(saveEnrollmentDetails.getArcNo())) {
             try {
-                App.setRoot("slapscanner");
+                App.setRoot("slap_scanner");
             } catch (IOException ex) {
                 LOGGER.log(Level.SEVERE, ex.getMessage());
             }
@@ -161,7 +161,7 @@ public class ARCNoController {
                 break;
             default:
                 try {
-                    App.setRoot("slapscanner");
+                    App.setRoot("slap_scanner");
                 } catch (IOException ex) {
                     LOGGER.log(Level.SEVERE, ex.getMessage());
                 }

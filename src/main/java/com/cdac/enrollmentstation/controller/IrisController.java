@@ -157,7 +157,6 @@ public class IrisController implements MIDIrisEnrollCallback {
         if (IrisType.NONE == irisTypeToCapture) {
             capturePhotoBtn.setDisable(false);
             captureIrisBtn.setDisable(true);
-            backBtn.setDisable(true);
             messageLabel.setText("Iris capturing not required. Kindly proceed to capture photo.");
             return;
         }
@@ -349,8 +348,15 @@ public class IrisController implements MIDIrisEnrollCallback {
     private void cameraCapture() {
         ARCDetailsHolder holder = getArcDetailsHolder();
         SaveEnrollmentDetails saveEnrollmentDetails = holder.getSaveEnrollmentDetails();
-        saveEnrollmentDetails.setIRISScannerSerailNo(deviceInfo.SerialNo);
-        saveEnrollmentDetails.setIris(irisSet);
+        if (IrisType.NONE == irisTypeToCapture) {
+            String notAvailable = "Not Available";
+            saveEnrollmentDetails.setIris(new HashSet<>(Set.of(new IRIS(notAvailable, notAvailable, notAvailable))));
+            saveEnrollmentDetails.setIRISScannerSerailNo(notAvailable);
+        } else {
+            saveEnrollmentDetails.setIris(irisSet);
+            saveEnrollmentDetails.setIRISScannerSerailNo(deviceInfo.SerialNo);
+
+        }
         saveEnrollmentDetails.setEnrollmentStatus("IrisCompleted");
         holder.setSaveEnrollmentDetails(saveEnrollmentDetails);
 

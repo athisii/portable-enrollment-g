@@ -2,8 +2,6 @@ package RealScan;
 
 public class RealScan_JNI {
 
-    public boolean WINDOW = true;
-
     public static class RSDeviceInfo {
         //  int deviceType;
         public int deviceType;
@@ -593,9 +591,9 @@ public class RealScan_JNI {
     //
     //JNI APIs
     //
-    public native static int RS_GetLastError(); // get error code
+    public static native int RS_GetLastError(); // get error code
 
-    public native static int RS_JNI_Init(RealScan_JNI jni); // JNI Init
+    public static native int RS_JNI_Init(RealScan_JNI jni); // JNI Init
 
     //
     // Device APIs
@@ -655,7 +653,6 @@ public class RealScan_JNI {
 
     public static native int[] RS_TakeCurrentImageDataSegmentWithSize(int deviceHandle, int timeout, RSImageInfo imageData, int captureResult, int slapType, int numOfFinger, RSSlapInfo[] slapInfo, RSImageInfo[] fingerImageInfo, int nCropWidth, int nCropHeight); // return captureResult, numOfFinger
 
-
     public static native int RS_Segment(RSImageInfo imageInfo, int slapType, int numOfFinger, RSSlapInfo[] slapInfo, RSImageInfo[] segmentImageInfo); // return numOfFinger
 
     public static native int RS_SegmentMask(RSImageInfo imageInfo, int fingerMask, int numOfFinger, RSSlapInfo[] slapInfo, RSImageInfo[] segmentImageInfo); // return numOfFinger
@@ -680,9 +677,9 @@ public class RealScan_JNI {
 
     public static native boolean RS_GetAutomaticContrast(int deviceHandle); // return automatic
 
-    public static native int RS_GetManualContrast(int deviceHandle); // return contrastLevel
-
     public static native int RS_SetManualContrast(int deviceHandle, int contrastLevel);
+
+    public static native int RS_GetManualContrast(int deviceHandle); // return contrastLevel
 
     public static native int RS_SetAdvancedContrastEnhancement(int deviceHandle, boolean enabled);
 
@@ -696,15 +693,15 @@ public class RealScan_JNI {
 
     public static native int[] RS_GetPostProcessingEx(int deviceHandle); // return contrastEnhancement, noiseReduction, reductionLevel
 
-    native static int RS_SelfTest(int deviceHandle, int testType);
+    public static native int RS_SelfTest(int deviceHandle, int testType);
 
     public static native int RS_SetLFDLevel(int deviceHandle, int LFDLevel);
 
     public static native int RS_GetLFDLevel(int deviceHandle); // return LFDLevel
 
-    public static native int RS_GetLFDStatus(int deviceHandle, RSLFDInfo LFDInfo);
-
     public static native int RS_SetLFDStatus(int deviceHandle, boolean isActivated, float th1, float th2, float th3, float th4);
+
+    public static native int RS_GetLFDStatus(int deviceHandle, RSLFDInfo LFDInfo);
 
     public static native int RS_GetLFDResult(int deviceHandle, RSLFDResult sLFDResult);
 
@@ -750,7 +747,6 @@ public class RealScan_JNI {
     //
     // I/O
     //
-
     public static native int RS_SetActiveKey(int deviceHandle, int keyMask);
 
     public static native int RS_GetKeyStatus(int deviceHandle, int[] keyCode); // return keyMask
@@ -759,7 +755,6 @@ public class RealScan_JNI {
     public static native int RS_RegisterKeypadCallback(int deviceHandle, boolean setting);
 
     public static native int RS_RegisterKeypadCallbackEx(int deviceHandle, Object provider, String method);
-
 
     public static native int RS_Beep(int deviceHandle, int beepPattern);
 
@@ -812,8 +807,6 @@ public class RealScan_JNI {
             int numOfSingleFinger, RSISO19794ImageInfo[] singleFingerInfos,
             int numOfRollFinger, RSISO19794ImageInfo[] rollFingerInfos,
             int compressionMode);
-
-
     static {
         if (System.getProperty("os.name").contains("Windows")) {
             System.loadLibrary("RS_JNI");

@@ -153,7 +153,9 @@ public class ImportExportController {
         // run in multiple threads if size is greater than 3
         ForkJoinTask<Boolean> future = null;
         if (encryptedArcPaths.size() > 3) {
-            future = ForkJoinPool.commonPool().submit(() -> decryptAndSendToServer(encryptedArcPaths.subList(encryptedArcPaths.size() / 2, encryptedArcPaths.size())));
+            List<Path> subList2 = encryptedArcPaths.subList(encryptedArcPaths.size() / 2, encryptedArcPaths.size());
+            future = ForkJoinPool.commonPool().submit(() -> decryptAndSendToServer(subList2));
+            encryptedArcPaths = encryptedArcPaths.subList(0, encryptedArcPaths.size() / 2);
         }
         boolean result = decryptAndSendToServer(encryptedArcPaths);
         // size <= 3
@@ -210,15 +212,6 @@ public class ImportExportController {
                 enableControls(exportBtn);
                 enableControls(homeBtn, backBtn);
                 return false;
-            }
-            if (!"0".equals(saveEnrollmentResDto.getErrorCode())) {
-                LOGGER.log(Level.SEVERE, () -> "Server desc: " + saveEnrollmentResDto.getDesc());
-                String errorMessageSmallCase = saveEnrollmentResDto.getErrorCode().toLowerCase();
-                if (!errorMessageSmallCase.contains("already") && !errorMessageSmallCase.contains("submitted") && !errorMessageSmallCase.contains("given") && !errorMessageSmallCase.contains("provided")) {
-                    updateUI(saveEnrollmentResDto.getDesc());
-                    enableControls(homeBtn, backBtn);
-                    continue; // don't delete it.'
-                }
             }
 
             try {

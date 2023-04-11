@@ -50,6 +50,8 @@ import java.util.logging.Logger;
 public class BiometricCaptureCompleteController {
     //For Application Log
     private static final Logger LOGGER = ApplicationLog.getLogger(BiometricCaptureCompleteController.class);
+    private static final String NOT_AVAILABLE = "Not Available";
+
 
     @FXML
     private Label messageLabel;
@@ -109,9 +111,8 @@ public class BiometricCaptureCompleteController {
 
         // based on biometricOptions just do the necessary actions
         if (arcDetails.getBiometricOptions().toLowerCase().contains("biometric")) {
-            //set NA for photo. TODO:  Is it necessary???
-            saveEnrollmentDetails.setPhoto("Not Available");
-            saveEnrollmentDetails.setPhotoCompressed("Not Available");
+            saveEnrollmentDetails.setPhoto(NOT_AVAILABLE);
+            saveEnrollmentDetails.setPhotoCompressed(NOT_AVAILABLE);
             saveEnrollmentDetails.setEnrollmentStatus("Success");
         } else if (arcDetails.getBiometricOptions().toLowerCase().contains("photo")) {
             // only adds photo
@@ -122,12 +123,12 @@ public class BiometricCaptureCompleteController {
                 return;
             }
             // set NA for slapscanner, iris etc.
-            saveEnrollmentDetails.setIRISScannerSerailNo("Not Available");
-            saveEnrollmentDetails.setLeftFPScannerSerailNo("Not Available");
-            saveEnrollmentDetails.setRightFPScannerSerailNo("Not Available");
-            Set<FP> fingerprintset = new HashSet<>(Set.of(new FP("Not Available", "Not Available", "Not Available")));
+            saveEnrollmentDetails.setIRISScannerSerailNo(NOT_AVAILABLE);
+            saveEnrollmentDetails.setLeftFPScannerSerailNo(NOT_AVAILABLE);
+            saveEnrollmentDetails.setRightFPScannerSerailNo(NOT_AVAILABLE);
+            Set<FP> fingerprintset = new HashSet<>(Set.of(new FP(NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE)));
             saveEnrollmentDetails.setFp(fingerprintset);
-            Set<IRIS> irisSet = new HashSet<>(Set.of(new IRIS("Not Available", "Not Available", "Not Available")));
+            Set<IRIS> irisSet = new HashSet<>(Set.of(new IRIS(NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE)));
             saveEnrollmentDetails.setIris(irisSet);
         } else if (arcDetails.getBiometricOptions().toLowerCase().contains("both")) {
             // fingerprint and iris already added in their controllers
@@ -201,29 +202,28 @@ public class BiometricCaptureCompleteController {
                     }
                     return;
                 }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            } catch (ExecutionException ex) {
+            } catch (InterruptedException | ExecutionException ex) {
+                if (ex instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
                 LOGGER.log(Level.SEVERE, ex.getMessage());
             }
-            // if reached this line, encryption failed/exception thrown.
             onErrorUpdateUiControls();
             return;
         }
 
         // checks for error response
         if (!"0".equals(saveEnrollmentResDto.getErrorCode())) {
-            LOGGER.log(Level.SEVERE, "Server desc: " + saveEnrollmentResDto.getDesc());
+            LOGGER.log(Level.SEVERE, () -> "Server desc: " + saveEnrollmentResDto.getDesc());
             // runs on main thread
             updateUiIconOnServerResponse(false, saveEnrollmentResDto.getDesc());
-            return;
+        } else {
+            // else saved successfully on the server
+            // runs on main thread
+            updateUiIconOnServerResponse(true, "Data submitted to server successfully.");
         }
-        // else saved successfully on the server
-        // runs on main thread
-        updateUiIconOnServerResponse(true, "Data submitted to server successfully.");
 
-
-        // now that data is saved on server, lets do the cleanup
+        // time for cleanup
         try {
             SaveEnrollmentDetailsUtil.delete();
         } catch (GenericException ex) {
@@ -238,6 +238,9 @@ public class BiometricCaptureCompleteController {
                 Files.delete(Paths.get(PropertyFile.getProperty(PropertyName.ENC_EXPORT_FOLDER) + "/" + arcDetails.getArcNo() + ".json.enc"));
             }
         } catch (InterruptedException | ExecutionException | IOException ex) {
+            if (ex instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             LOGGER.log(Level.SEVERE, ex.getMessage());
             onErrorUpdateUiControls();
         }

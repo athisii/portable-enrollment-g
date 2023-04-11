@@ -323,6 +323,7 @@ public class BiometricCaptureCompleteController {
         }
         Path encOutputPath = Paths.get(encFolderString + "/" + arcNo + ".json.enc");
         AesFileUtil.encrypt(jsonData, encOutputPath);
+        AesFileUtil.removeCipherFromThreadLocal();
     }
 
     private void onErrorUpdateUiControls() {

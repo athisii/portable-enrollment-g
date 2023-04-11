@@ -29,25 +29,25 @@ public class HmacUtil {
         throw new AssertionError("The HmacUtil methods  must be accessed statically.");
     }
 
-    private static final String algorithm = "HmacSHA256";
-    private static final Mac mac;
+    private static final String ALGORITHM = "HmacSHA256";
 
-    static {
+    private static final ThreadLocal<Mac> MAC_THREAD_LOCAL = ThreadLocal.withInitial(() -> {
         try {
-            mac = Mac.getInstance(algorithm);
+            return Mac.getInstance(ALGORITHM);
         } catch (GeneralSecurityException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
-    }
+    });
 
 
     public static String genHmacSha256(String message, String key) {
         try {
-            mac.init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), algorithm));
-            byte[] bytes = mac.doFinal(message.getBytes(StandardCharsets.UTF_8));
+            MAC_THREAD_LOCAL.get().init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), ALGORITHM));
+            byte[] bytes = MAC_THREAD_LOCAL.get().doFinal(message.getBytes(StandardCharsets.UTF_8));
             return bytesToHex(bytes);
         } catch (GeneralSecurityException ex) {
+            removeCipherFromThreadLocal();
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
@@ -64,6 +64,10 @@ public class HmacUtil {
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
         }
         return new String(hexChars);
+    }
+
+    public static void removeCipherFromThreadLocal() {
+        MAC_THREAD_LOCAL.remove();
     }
 
 }

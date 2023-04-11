@@ -15,7 +15,10 @@ import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ARCDetails;
 import com.cdac.enrollmentstation.model.Unit;
+import com.cdac.enrollmentstation.security.Aes256Util;
 import com.cdac.enrollmentstation.security.AesFileUtil;
+import com.cdac.enrollmentstation.security.HmacUtil;
+import com.cdac.enrollmentstation.security.PkiUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -153,6 +156,8 @@ public class ImportExportController {
             updateCapturedBiometric();
             clearAllImportedUnits();
             enableControls(homeBtn, backBtn);
+            removeCipherFromThreadLocal();
+
         }
 
     }
@@ -166,6 +171,7 @@ public class ImportExportController {
             try {
                 decryptedJsonData = AesFileUtil.decrypt(path);
             } catch (GenericException ex) {
+                removeCipherFromThreadLocal();
                 updateUI(ApplicationConstant.GENERIC_ERR_MSG);
                 enableControls(homeBtn, backBtn);
                 return false;
@@ -175,12 +181,14 @@ public class ImportExportController {
             try {
                 saveEnrollmentResDto = MafisServerApi.postEnrollment(decryptedJsonData);
             } catch (GenericException ignored) {
+                removeCipherFromThreadLocal();
                 updateUI(ApplicationConstant.GENERIC_ERR_MSG);
                 enableControls(homeBtn, backBtn);
                 return false;
             }
             // timeout connection
             if (saveEnrollmentResDto == null) {
+                removeCipherFromThreadLocal();
                 updateUI(TIMEOUT_ERR_MSG);
                 enableControls(exportBtn);
                 enableControls(homeBtn, backBtn);
@@ -190,6 +198,7 @@ public class ImportExportController {
             try {
                 Files.delete(path);
             } catch (IOException ex) {
+                removeCipherFromThreadLocal();
                 LOGGER.log(Level.SEVERE, ex.getMessage());
                 updateUI(ApplicationConstant.GENERIC_ERR_MSG);
                 enableControls(homeBtn, backBtn);
@@ -458,6 +467,13 @@ public class ImportExportController {
             LOGGER.log(Level.SEVERE, "Error occurred while getting the count of captured biometric data");
             updateUI(ApplicationConstant.GENERIC_ERR_MSG);
         }
+    }
+
+    private void removeCipherFromThreadLocal() {
+        AesFileUtil.removeCipherFromThreadLocal();
+        Aes256Util.removeCipherFromThreadLocal();
+        PkiUtil.removeCipherFromThreadLocal();
+        HmacUtil.removeCipherFromThreadLocal();
     }
 
     private void updateUI(String message) {

@@ -34,30 +34,30 @@ public class AesFileUtil {
         throw new AssertionError("The AesFileUtil methods must be accessed statically.");
     }
 
-    private static final Cipher cipher;
     private static final String PASSWORD = "P0rt@b1eEnr011ment";
     private static final SecureRandom secureRandom = new SecureRandom();
-    private static byte[] saltBytes = new byte[8];
-    private static byte[] ivBytes = new byte[16];
+    private static final int SALT_SIZE = 8;
+    private static final int IV_SIZE = 16;
 
-
-    static {
+    private static final ThreadLocal<Cipher> CIPHER_THREAD_LOCAL = ThreadLocal.withInitial(() -> {
         try {
-            cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            return Cipher.getInstance("AES/CBC/PKCS5Padding");
         } catch (GeneralSecurityException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
-    }
+    });
 
     public static void encrypt(String jsonData, Path encOutputPath) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+            byte[] saltBytes = new byte[SALT_SIZE];
             secureRandom.nextBytes(saltBytes);
             SecretKey secretKey = getSecretKey(PASSWORD, saltBytes);
+            byte[] ivBytes = new byte[IV_SIZE];
             secureRandom.nextBytes(ivBytes);
             IvParameterSpec ivParameterSpec = new IvParameterSpec(ivBytes);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec);
-            byte[] encryptedData = cipher.doFinal(jsonData.getBytes(StandardCharsets.UTF_8));
+            CIPHER_THREAD_LOCAL.get().init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec);
+            byte[] encryptedData = CIPHER_THREAD_LOCAL.get().doFinal(jsonData.getBytes(StandardCharsets.UTF_8));
             // writes salt and iv to the file
             // must follow this order while decrypting
             byteArrayOutputStream.write(saltBytes);
@@ -66,6 +66,7 @@ public class AesFileUtil {
             //saves to file
             Files.write(encOutputPath, byteArrayOutputStream.toByteArray());
         } catch (GeneralSecurityException | IOException ex) {
+            removeCipherFromThreadLocal();
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
@@ -76,17 +77,18 @@ public class AesFileUtil {
         try {
             byte[] readBytes = Files.readAllBytes(path);
             // read order followed as when encrypting
-            saltBytes = Arrays.copyOfRange(readBytes, 0, saltBytes.length);
-            ivBytes = Arrays.copyOfRange(readBytes, saltBytes.length, saltBytes.length + ivBytes.length);
-            byte[] actualData = Arrays.copyOfRange(readBytes, saltBytes.length + ivBytes.length, readBytes.length);
+            byte[] saltBytes = Arrays.copyOfRange(readBytes, 0, SALT_SIZE);
+            byte[] ivBytes = Arrays.copyOfRange(readBytes, SALT_SIZE, SALT_SIZE + IV_SIZE);
+            byte[] actualData = Arrays.copyOfRange(readBytes, SALT_SIZE + IV_SIZE, readBytes.length);
 
             SecretKey secretKey = getSecretKey(PASSWORD, saltBytes);
             IvParameterSpec ivParameterSpec = new IvParameterSpec(ivBytes);
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
+            CIPHER_THREAD_LOCAL.get().init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
 
-            byte[] decryptedBytes = cipher.doFinal(actualData);
+            byte[] decryptedBytes = CIPHER_THREAD_LOCAL.get().doFinal(actualData);
             return new String(decryptedBytes, StandardCharsets.UTF_8);
         } catch (GeneralSecurityException | IOException ex) {
+            removeCipherFromThreadLocal();
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
@@ -103,6 +105,10 @@ public class AesFileUtil {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
+    }
+
+    public static void removeCipherFromThreadLocal() {
+        CIPHER_THREAD_LOCAL.remove();
     }
 
 

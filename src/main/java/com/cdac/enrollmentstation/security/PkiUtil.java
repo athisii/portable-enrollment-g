@@ -1,6 +1,5 @@
 package com.cdac.enrollmentstation.security;
 
-import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
@@ -31,27 +30,35 @@ public class PkiUtil {
 
     private static final KeyStore keyStore;
     private static final InputStream inputStream;
-    private static final String password;
-    private static final String alias;
-    private static final Cipher cipher;
+    private static final String PASSWORD;
+    private static final String ALIAS;
     private static final KeyPair keyPair;
+
+    private static final ThreadLocal<Cipher> CIPHER_THREAD_LOCAL = ThreadLocal.withInitial(() -> {
+        try {
+            return Cipher.getInstance("RSA");
+        } catch (GeneralSecurityException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+        }
+    });
 
     static {
         try {
-            password = PropertyFile.getProperty(PropertyName.JKS_PASSWORD);
-            alias = PropertyFile.getProperty(PropertyName.JKS_ALIAS);
+            PASSWORD = PropertyFile.getProperty(PropertyName.JKS_PASSWORD);
+            ALIAS = PropertyFile.getProperty(PropertyName.JKS_ALIAS);
             inputStream = new FileInputStream(PropertyFile.getProperty(PropertyName.JKS_CERT_FILE));
             keyStore = KeyStore.getInstance("PKCS12");
-            keyStore.load(inputStream, password.toCharArray());
-            if (!keyStore.containsAlias(alias)) {
-                throw new GenericException("Not found for key with alias: " + alias);
+            keyStore.load(inputStream, PASSWORD.toCharArray());
+            if (!keyStore.containsAlias(ALIAS)) {
+                throw new GenericException("Not found for key with alias: " + ALIAS);
             }
-            PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, password.toCharArray());
-            Certificate certificate = keyStore.getCertificate(alias);
+            PrivateKey privateKey = (PrivateKey) keyStore.getKey(ALIAS, PASSWORD.toCharArray());
+            Certificate certificate = keyStore.getCertificate(ALIAS);
             PublicKey publicKey = certificate.getPublicKey();
             keyPair = new KeyPair(publicKey, privateKey);
-            cipher = Cipher.getInstance("RSA");
         } catch (GeneralSecurityException | IOException ex) {
+            removeCipherFromThreadLocal();
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
@@ -59,11 +66,12 @@ public class PkiUtil {
 
 
     // return encrypted bytes
-    public static byte[] encrypt(String data) {
+    public static synchronized byte[] encrypt(String data) {
         try {
-            cipher.init(Cipher.ENCRYPT_MODE, keyPair.getPublic());
-            return cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            CIPHER_THREAD_LOCAL.get().init(Cipher.ENCRYPT_MODE, keyPair.getPublic());
+            return CIPHER_THREAD_LOCAL.get().doFinal(data.getBytes(StandardCharsets.UTF_8));
         } catch (GeneralSecurityException ex) {
+            removeCipherFromThreadLocal();
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
@@ -71,15 +79,20 @@ public class PkiUtil {
     }
 
     // return decrypted String
-    public static String decrypt(byte[] encryptedData) {
+    public static synchronized String decrypt(byte[] encryptedData) {
         try {
-            cipher.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
-            byte[] decryptedInput = cipher.doFinal(encryptedData);
+            CIPHER_THREAD_LOCAL.get().init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
+            byte[] decryptedInput = CIPHER_THREAD_LOCAL.get().doFinal(encryptedData);
             return new String(decryptedInput, StandardCharsets.UTF_8);
         } catch (GeneralSecurityException ex) {
+            removeCipherFromThreadLocal();
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
 
+    }
+
+    public static void removeCipherFromThreadLocal() {
+        CIPHER_THREAD_LOCAL.remove();
     }
 }

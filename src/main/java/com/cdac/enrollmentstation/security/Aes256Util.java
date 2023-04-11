@@ -29,20 +29,16 @@ public class Aes256Util {
     private Aes256Util() {
         throw new AssertionError("The AES256Util methods must be accessed statically.");
     }
-
-    private static final Cipher cipher;
     private static final SecureRandom random = new SecureRandom();
-    private static byte[] ivBytes = new byte[16];
-
-
-    static {
+    private static final int IV_SIZE = 16;
+    private static final ThreadLocal<Cipher> CIPHER_THREAD_LOCAL = ThreadLocal.withInitial(() -> {
         try {
-            cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            return Cipher.getInstance("AES/CBC/PKCS5Padding");
         } catch (GeneralSecurityException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
-    }
+    });
 
     public static String genUuid() {
         return UUID.randomUUID().toString().replace("-", "");
@@ -56,31 +52,37 @@ public class Aes256Util {
     // returns encrypted bytes
     public static byte[] encrypt(String data, Key key) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+            byte[] ivBytes = new byte[IV_SIZE];
             random.nextBytes(ivBytes);
             IvParameterSpec ivParameterSpec = new IvParameterSpec(ivBytes);
-            cipher.init(Cipher.ENCRYPT_MODE, key, ivParameterSpec);
-            byte[] encryptedData = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            CIPHER_THREAD_LOCAL.get().init(Cipher.ENCRYPT_MODE, key, ivParameterSpec);
+            byte[] encryptedData = CIPHER_THREAD_LOCAL.get().doFinal(data.getBytes(StandardCharsets.UTF_8));
             byteArrayOutputStream.write(ivBytes);
             byteArrayOutputStream.write(encryptedData);
             return byteArrayOutputStream.toByteArray();
         } catch (GeneralSecurityException | IOException ex) {
+            removeCipherFromThreadLocal();
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
-
         }
     }
 
     public static String decrypt(byte[] ivData, Key key) {
         try {
-            ivBytes = Arrays.copyOfRange(ivData, 0, ivBytes.length);
+            byte[] ivBytes = Arrays.copyOfRange(ivData, 0, IV_SIZE);
             IvParameterSpec ivParameterSpec = new IvParameterSpec(ivBytes);
-            cipher.init(Cipher.DECRYPT_MODE, key, ivParameterSpec);
-            byte[] actualData = Arrays.copyOfRange(ivData, ivBytes.length, ivData.length);
-            byte[] decryptedData = cipher.doFinal(actualData);
+            CIPHER_THREAD_LOCAL.get().init(Cipher.DECRYPT_MODE, key, ivParameterSpec);
+            byte[] actualData = Arrays.copyOfRange(ivData, IV_SIZE, ivData.length);
+            byte[] decryptedData = CIPHER_THREAD_LOCAL.get().doFinal(actualData);
             return new String(decryptedData, StandardCharsets.UTF_8);
         } catch (GeneralSecurityException ex) {
+            removeCipherFromThreadLocal();
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
+    }
+
+    public static void removeCipherFromThreadLocal() {
+        CIPHER_THREAD_LOCAL.remove();
     }
 }

@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  * Created on 21/03/23
  */
 public class PkiUtil {
-    private static final Logger LOGGER = ApplicationLog.getLogger(App.class);
+    private static final Logger LOGGER = ApplicationLog.getLogger(PkiUtil.class);
 
     //Suppress default constructor for noninstantiability
     private PkiUtil() {
@@ -34,7 +34,7 @@ public class PkiUtil {
     private static final String password;
     private static final String alias;
     private static final Cipher cipher;
-    private final static KeyPair keyPair;
+    private static final KeyPair keyPair;
 
     static {
         try {

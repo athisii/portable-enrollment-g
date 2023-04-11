@@ -35,7 +35,7 @@ public class AesFileUtil {
     }
 
     private static final Cipher cipher;
-    private static final String password = "P0rt@b1eEnr011ment";
+    private static final String PASSWORD = "P0rt@b1eEnr011ment";
     private static final SecureRandom secureRandom = new SecureRandom();
     private static byte[] saltBytes = new byte[8];
     private static byte[] ivBytes = new byte[16];
@@ -53,7 +53,7 @@ public class AesFileUtil {
     public static void encrypt(String jsonData, Path encOutputPath) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             secureRandom.nextBytes(saltBytes);
-            SecretKey secretKey = getSecretKey(password, saltBytes);
+            SecretKey secretKey = getSecretKey(PASSWORD, saltBytes);
             secureRandom.nextBytes(ivBytes);
             IvParameterSpec ivParameterSpec = new IvParameterSpec(ivBytes);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec);
@@ -80,7 +80,7 @@ public class AesFileUtil {
             ivBytes = Arrays.copyOfRange(readBytes, saltBytes.length, saltBytes.length + ivBytes.length);
             byte[] actualData = Arrays.copyOfRange(readBytes, saltBytes.length + ivBytes.length, readBytes.length);
 
-            SecretKey secretKey = getSecretKey(password, saltBytes);
+            SecretKey secretKey = getSecretKey(PASSWORD, saltBytes);
             IvParameterSpec ivParameterSpec = new IvParameterSpec(ivBytes);
             cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
 

@@ -36,9 +36,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -149,39 +147,14 @@ public class ImportExportController {
             return;
         }
 
-        // now decrypt the data and calls the save API
-        // run in multiple threads if size is greater than 3
-        ForkJoinTask<Boolean> future = null;
-        if (encryptedArcPaths.size() > 3) {
-            List<Path> subList2 = encryptedArcPaths.subList(encryptedArcPaths.size() / 2, encryptedArcPaths.size());
-            future = ForkJoinPool.commonPool().submit(() -> decryptAndSendToServer(subList2));
-            encryptedArcPaths = encryptedArcPaths.subList(0, encryptedArcPaths.size() / 2);
-        }
         boolean result = decryptAndSendToServer(encryptedArcPaths);
-        // size <= 3
-        if (future == null) {
-            if (result) {
-                updateUI("Data exported successfully.");
-                updateCapturedBiometric();
-                clearAllImportedUnits();
-                enableControls(homeBtn, backBtn);
-            }
-            return;
+        if (result) {
+            updateUI("Data exported successfully.");
+            updateCapturedBiometric();
+            clearAllImportedUnits();
+            enableControls(homeBtn, backBtn);
         }
-        // if reached here, size > 3, so we need to check both results for proper message.
-        try {
-            boolean workerThreadResult = future.get();
-            if (workerThreadResult && result) {
-                updateUI("Data exported successfully.");
-                updateCapturedBiometric();
-                clearAllImportedUnits();
-                enableControls(homeBtn, backBtn);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } catch (ExecutionException ignored) {
-        }
-        // error message already updated in call to decryptAndSendToServer()
+
     }
 
 
@@ -385,17 +358,15 @@ public class ImportExportController {
     private void updateImportedListView() {
         // throws exception
         try (Stream<Path> importFolder = Files.walk(Path.of(PropertyFile.getProperty(PropertyName.IMPORT_JSON_FOLDER)))) {
-            List<String> unitCaptions = importFolder
-                    .filter(Files::isRegularFile)
-                    .map(file -> {
-                        String[] splitFileName = file.getFileName().toString().split("-");
-                        if (splitFileName.length > 2) {
-                            //00001-INSI-INS INDIA
-                            return splitFileName[2];
-                        }
-                        LOGGER.log(Level.SEVERE, () -> "Malformed filename: " + file.getFileName());
-                        return "";
-                    }).filter(unitCaption -> !unitCaption.isBlank()).collect(Collectors.toList());
+            List<String> unitCaptions = importFolder.filter(Files::isRegularFile).map(file -> {
+                String[] splitFileName = file.getFileName().toString().split("-");
+                if (splitFileName.length > 2) {
+                    //00001-INSI-INS INDIA
+                    return splitFileName[2];
+                }
+                LOGGER.log(Level.SEVERE, () -> "Malformed filename: " + file.getFileName());
+                return "";
+            }).filter(unitCaption -> !unitCaption.isBlank()).collect(Collectors.toList());
 
             if (unitCaptions.isEmpty()) {
                 disableControls(clearImportBtn, clearAllImportBtn);

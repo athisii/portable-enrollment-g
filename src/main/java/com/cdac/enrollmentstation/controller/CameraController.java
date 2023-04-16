@@ -43,7 +43,8 @@ import static com.cdac.enrollmentstation.model.ARCDetailsHolder.getArcDetailsHol
 public class CameraController {
     private static final Logger LOGGER = ApplicationLog.getLogger(CameraController.class);
     private static final int COUNTDOWN = 5;
-    private static final int THREAD_EXEC_PERIOD = 50; // in milliseconds
+    private static final int FIXED_DELAY_TIME_IN_MILLIS = 5; // in milliseconds
+    private static final int EXECUTOR_SHUTDOWN_WAIT_TIME_IN_MILLIS = 50; // in milliseconds
     private static final int THRESHOLD_FOR_RED_BOX = 10;
     private static final int IMAGE_CAPTURE_LIMIT = 30;
     private static final String INPUT_FILE;
@@ -253,7 +254,7 @@ public class CameraController {
             startStopCameraBtn.setDisable(false);
             message.setText("");
         });
-        scheduledExecutorService.scheduleAtFixedRate(this::grabFrame, 0, THREAD_EXEC_PERIOD, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(this::grabFrame, 0, FIXED_DELAY_TIME_IN_MILLIS, TimeUnit.MILLISECONDS);
     }
 
     private void liveImageThread() {
@@ -435,7 +436,7 @@ public class CameraController {
             try {
                 // stop the timer
                 scheduledExecutorService.shutdown();
-                scheduledExecutorService.awaitTermination(THREAD_EXEC_PERIOD, TimeUnit.MILLISECONDS);
+                scheduledExecutorService.awaitTermination(EXECUTOR_SHUTDOWN_WAIT_TIME_IN_MILLIS, TimeUnit.MILLISECONDS);
             } catch (InterruptedException ex) {
                 LOGGER.log(Level.INFO, ex::getMessage);
                 Thread.currentThread().interrupt();

@@ -39,7 +39,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -150,16 +152,40 @@ public class ImportExportController {
             return;
         }
 
-        boolean result = decryptAndSendToServer(encryptedArcPaths);
-        if (result) {
+        int processorCounts = Runtime.getRuntime().availableProcessors();
+        int perProcessor = encryptedArcPaths.size() / processorCounts;
+        List<Future<Boolean>> futures = new ArrayList<>();
+        if (perProcessor > 0) {
+            for (int i = 0; i < processorCounts; i++) {
+                int effectiveFinal = i; // need to copy as value of 'i' changes quickly
+                futures.add(ForkJoinPool.commonPool().submit(() -> decryptAndSendToServer(encryptedArcPaths.subList(effectiveFinal * perProcessor, perProcessor * effectiveFinal + perProcessor))));
+            }
+        }
+        if (encryptedArcPaths.size() % processorCounts != 0) {
+            futures.add(ForkJoinPool.commonPool().submit(() -> decryptAndSendToServer(encryptedArcPaths.subList(processorCounts * perProcessor, encryptedArcPaths.size()))));
+        }
+        boolean exportedSuccessfully = true;
+        for (Future<Boolean> future : futures) {
+            try {
+                if (Boolean.FALSE.equals(future.get())) {
+                    exportedSuccessfully = false;
+                }
+            } catch (InterruptedException | ExecutionException ex) {
+                if (ex instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
+                LOGGER.log(Level.SEVERE, ex.getMessage());
+                updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+                exportedSuccessfully = false;
+            }
+        }
+        if (exportedSuccessfully) {
             updateUI("Data exported successfully.");
             updateCapturedBiometric();
             clearAllImportedUnits();
             enableControls(homeBtn, backBtn);
             removeCipherFromThreadLocal();
-
         }
-
     }
 
 
@@ -190,7 +216,6 @@ public class ImportExportController {
             if (saveEnrollmentResDto == null) {
                 removeCipherFromThreadLocal();
                 updateUI(TIMEOUT_ERR_MSG);
-                enableControls(exportBtn);
                 enableControls(homeBtn, backBtn);
                 return false;
             }

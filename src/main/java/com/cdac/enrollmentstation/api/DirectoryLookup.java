@@ -32,6 +32,7 @@ public class DirectoryLookup {
         String ldapUrl = PropertyFile.getProperty(PropertyName.LDAP_URL);
         // domain = "CDACAD"
         // ldapUrl = "ldap://10.184.36.14"
+        // securityPrincipal = "uid=username,dc=cdac,dc=in" //
         String securityPrincipal = domain + "\\" + username;
         Properties properties = new Properties();
         properties.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");

@@ -1,5 +1,4 @@
 module com.cdac.enrollmentstation {
-//    requires java.base;
     requires java.net.http;
     requires java.logging;
     requires java.naming;
@@ -19,8 +18,6 @@ module com.cdac.enrollmentstation {
     requires iengine.ansi.iso.main;
     requires sdk.commons.main;
 
-    // transitively import ans1.runtime
-    requires asn1.converter;
     // for ans1 encoded hex decoding
     requires org.bouncycastle.provider;
 
@@ -32,11 +29,6 @@ module com.cdac.enrollmentstation {
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;
 
-    // xml
-    requires java.xml.bind;
-
-    requires org.apache.commons.io;
-    requires json.io;
 
     opens com.cdac.enrollmentstation to javafx.fxml;
     opens RealScan to javafx.fxml;
@@ -56,9 +48,6 @@ module com.cdac.enrollmentstation {
     opens com.cdac.enrollmentstation.logging to javafx.fxml;
     exports com.cdac.enrollmentstation.util;
     opens com.cdac.enrollmentstation.util to javafx.fxml;
-
-
-    requires json;
 
     requires static lombok;
     requires MFS;

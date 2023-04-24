@@ -24,10 +24,10 @@ public class HttpUtil {
     private static final int NO_OF_RETRIES = 1;
     private static final int CONNECTION_TIMEOUT_IN_SEC = 5;
     private static final int WRITE_TIMEOUT_IN_SEC = 30;
-    private static final HttpClient httpClient;
+    private static final ThreadLocal<HttpClient> HTTP_CLIENT_THREAD_LOCAL;
 
     static {
-        httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(CONNECTION_TIMEOUT_IN_SEC)).build();
+        HTTP_CLIENT_THREAD_LOCAL = ThreadLocal.withInitial(() -> HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(CONNECTION_TIMEOUT_IN_SEC)).build());
     }
 
     //Suppress default constructor for noninstantiability
@@ -76,7 +76,7 @@ public class HttpUtil {
         HttpResponse<String> response = null;
         while (noOfRetries > 0) {
             try {
-                response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                response = HTTP_CLIENT_THREAD_LOCAL.get().send(httpRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
                 if (response.statusCode() == 200) {
                     break;
                 }
@@ -96,5 +96,8 @@ public class HttpUtil {
         return response;
     }
 
+    public static void removeHttpClientFromThreadLocal() {
+        HTTP_CLIENT_THREAD_LOCAL.remove();
+    }
 
 }

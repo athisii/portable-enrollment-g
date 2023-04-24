@@ -22,7 +22,7 @@ import java.io.IOException;
  * @author root
  */
 public class AdminAuthController {
-    private static final int MAX_LENGTH = 15;
+    private static final int MAX_LENGTH = 30;
     @FXML
     private Label statusMsg;
 

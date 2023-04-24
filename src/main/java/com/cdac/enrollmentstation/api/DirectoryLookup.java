@@ -30,10 +30,10 @@ public class DirectoryLookup {
     public static boolean doLookup(String username, String password) {
         String domain = PropertyFile.getProperty(PropertyName.LDAP_DOMAIN);
         String ldapUrl = PropertyFile.getProperty(PropertyName.LDAP_URL);
-        // domain = "CDACAD"
-        // ldapUrl = "ldap://10.184.36.14"
+        // domain = "@hq.inidannavy.mil"
+        // ldapUrl = "ldap://10.184.36.14:389"
         // securityPrincipal = "uid=username,dc=cdac,dc=in" //
-        String securityPrincipal = domain + "\\" + username;
+        String securityPrincipal = username + domain;
         Properties properties = new Properties();
         properties.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         properties.put(Context.PROVIDER_URL, ldapUrl);

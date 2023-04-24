@@ -985,7 +985,7 @@ public class SlapScannerController {
     // throws Generic Exception
     private synchronized void checkSequence(RSImageInfo[] fingerImageArray) {
         // not very useful for now.
-        int seqCheckResult = -1;
+        int seqCheckResult = 0;
         for (RSImageInfo finger : fingerImageArray)
             fingerSetTypeToRsImageInfoMap.forEach((fingerSetType, rsImageInfo) -> {
                 int mSlapType; // slap type is different for-each flow

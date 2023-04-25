@@ -3,7 +3,6 @@ module com.cdac.enrollmentstation {
     requires java.logging;
     requires java.naming;
 
-
     //javafx
     requires javafx.controls;
     requires javafx.fxml;
@@ -15,8 +14,12 @@ module com.cdac.enrollmentstation {
     requires MantraUtility;
     requires MIDIris.Enroll;
     requires MIDFingerAuth;
+    requires MFS; // card reader
+
+    // fingerprint template conversions
     requires iengine.ansi.iso.main;
     requires sdk.commons.main;
+
 
     // for ans1 encoded hex decoding
     requires org.bouncycastle.provider;
@@ -25,6 +28,7 @@ module com.cdac.enrollmentstation {
     requires opencv;
     requires jython;
 
+    // json serialization and deserialization
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;
@@ -50,7 +54,4 @@ module com.cdac.enrollmentstation {
     opens com.cdac.enrollmentstation.util to javafx.fxml;
 
     requires static lombok;
-    requires MFS;
-
-
 }

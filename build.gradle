@@ -32,7 +32,7 @@ application {
 }
 
 javafx {
-    version = '13'
+    version = '11.0.2'
     modules = ['javafx.controls', 'javafx.fxml', 'javafx.web', 'javafx.swing']
 }
 
@@ -43,7 +43,6 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
     implementation 'net.java.dev.jna:jna:4.2.2'
     implementation 'org.bouncycastle:bcprov-jdk15on:1.60' // latest version not supported
-    implementation 'org.controlsfx:controlsfx:8.40.11'
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")

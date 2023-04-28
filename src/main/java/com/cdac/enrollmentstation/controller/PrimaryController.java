@@ -26,7 +26,7 @@ public class PrimaryController {
 
     @FXML
     public void onSettings() throws IOException {
-        App.setRoot("admin_auth");
+        App.setRoot("admin_config");
     }
 
     @FXML

@@ -55,7 +55,7 @@
                 <AnchorPane fx:id="anchorheader" layoutY="-8.0" prefHeight="108.0" prefWidth="1366.0"
                             style="-fx-background-color: #1990ea;">
 
-                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="17.0" layoutY="3.0" pickOnBounds="true"
+                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="17.0" layoutY="10.0" pickOnBounds="true"
                                preserveRatio="true">
 
                         <Image url="@../img/navylogo.png"/>

@@ -189,7 +189,7 @@ public class BiometricCaptureCompleteController {
                 // encrypted successfully
                 if (result) {
                     Platform.runLater(() -> {
-                        messageLabel.setText("Data encrypted and saved locally.");
+                        messageLabel.setText("Record saved successfully.");
                         submitBtn.setDisable(true);
                         progressIndicator.setVisible(false);
                         homeBtn.setDisable(false);
@@ -220,7 +220,7 @@ public class BiometricCaptureCompleteController {
         } else {
             // else saved successfully on the server
             // runs on main thread
-            updateUiIconOnServerResponse(true, "Data submitted to server successfully.");
+            updateUiIconOnServerResponse(true, "Record submitted to server successfully.");
         }
 
         // time for cleanup
@@ -313,7 +313,7 @@ public class BiometricCaptureCompleteController {
     }
 
 
-    // encrypt and save data by arc number as a fine name.
+    // encrypt and save data by e-ARC number as a fine name.
     private void encryptAndSaveLocally(String arcNo, String jsonData) {
         // pass temp path to for encryption.
         String encFolderString = PropertyFile.getProperty(PropertyName.ENC_EXPORT_FOLDER);

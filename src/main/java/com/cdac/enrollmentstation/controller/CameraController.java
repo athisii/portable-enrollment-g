@@ -143,7 +143,7 @@ public class CameraController {
         confirmNoBtn.setOnAction(this::confirmNo);
         confirmYesBtn.setOnAction(this::confirmYes);
         if (getArcDetailsHolder().getArcDetails() != null && getArcDetailsHolder().getArcDetails().getArcNo() != null) {
-            arcLbl.setText("ARC: " + getArcDetailsHolder().getArcDetails().getArcNo());
+            arcLbl.setText("e-ARC: " + getArcDetailsHolder().getArcDetails().getArcNo());
         }
 //        camSlider.setVisible(true);
 //        brightness.setVisible(true);

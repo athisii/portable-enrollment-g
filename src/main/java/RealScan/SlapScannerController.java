@@ -178,7 +178,7 @@ public class SlapScannerController {
         thumbToFingerTypeLinkedHashMap = getFingersToScanSeqMap(getArcDetailsHolder().getArcDetails().getFingers(), FingerSetType.THUMB);
 
         if (getArcDetailsHolder().getArcDetails() != null && getArcDetailsHolder().getArcDetails().getArcNo() != null) {
-            displayArcLabel.setText("ARC: " + getArcDetailsHolder().getArcDetails().getArcNo());
+            displayArcLabel.setText("e-ARC: " + getArcDetailsHolder().getArcDetails().getArcNo());
         }
     }
 

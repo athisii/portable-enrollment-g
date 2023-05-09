@@ -101,8 +101,8 @@ public class ARCNoController {
         } else if (arcDetails.getBiometricOptions().trim().equalsIgnoreCase("both") || arcDetails.getBiometricOptions().trim().equalsIgnoreCase("biometric")) {
             setNextScreen();
         } else {
-            messageLabel.setText("Biometric capturing not required for Arc number: " + arcNumberTextField.getText());
-            LOGGER.log(Level.INFO, "Biometric capturing not required for given ARC Number");
+            messageLabel.setText("Biometric capturing not required for e-ARC number: " + arcNumberTextField.getText());
+            LOGGER.log(Level.INFO, "Biometric capturing not required for given e-ARC Number");
         }
 
     }
@@ -117,7 +117,7 @@ public class ARCNoController {
             return;
         }
 
-        // different arc number is entered.
+        // different e-ARC number is entered.
         if (saveEnrollmentDetails.getArcNo() == null || !ARCDetailsHolder.getArcDetailsHolder().getArcDetails().getArcNo().equals(saveEnrollmentDetails.getArcNo())) {
             try {
                 App.setRoot("slap_scanner");
@@ -125,7 +125,7 @@ public class ARCNoController {
                 LOGGER.log(Level.SEVERE, ex.getMessage());
             }
         } else {
-            // same arc number is entered as the one saved in saveEnrollment.txt file.
+            // same e-ARC number is entered as the one saved in saveEnrollment.txt file.
             ARCDetailsHolder.getArcDetailsHolder().setSaveEnrollmentDetails(saveEnrollmentDetails);
             changeScreenBasedOnEnrollmentStatus();
         }
@@ -180,7 +180,7 @@ public class ARCNoController {
 
     private void showArcDetails() {
         if (isMalformedArc()) {
-            updateUI("Kindly enter correct Arc number.");
+            updateUI("Kindly enter correct e-ARC number.");
             return;
         }
         boolean alreadyCaptured;
@@ -188,7 +188,7 @@ public class ARCNoController {
         // check if already captured
         ForkJoinTask<Boolean> alreadyCapturedFuture = ForkJoinPool.commonPool().submit(this::checkIfAlreadyCaptured);
 
-        // check if arc number exists
+        // check if e-ARC number exists
         ForkJoinTask<ARCDetails> arcDetailsFuture = ForkJoinPool.commonPool().submit(this::checkIfArcNumberExist);
 
         // waits for both the worker threads to finish
@@ -208,22 +208,22 @@ public class ARCNoController {
         if (alreadyCaptured) {
             LOGGER.log(Level.INFO, () -> arcNumberTextField.getText() + " is already enrolled.");
             updateUiLabel(null);
-            updateUI("Biometric already provided for arc number: " + arcNumberTextField.getText());
+            updateUI("Biometric already provided for e-ARC number: " + arcNumberTextField.getText());
             return;
         }
 
 
         if (arcDetails == null) {
-            LOGGER.log(Level.INFO, () -> "Not found for Arc number: " + arcNumberTextField.getText());
+            LOGGER.log(Level.INFO, () -> "Not found for e-ARC number: " + arcNumberTextField.getText());
             updateUiLabel(null);
-            updateUI("Not found for Arc number: " + arcNumberTextField.getText());
+            updateUI("Not found for e-ARC number: " + arcNumberTextField.getText());
             return;
         }
 
         if (arcDetails.getBiometricOptions() == null || arcDetails.getBiometricOptions().isBlank() || arcDetails.getBiometricOptions().trim().equalsIgnoreCase("none")) {
-            LOGGER.log(Level.INFO, () -> "Biometric capturing not required for Arc: " + arcNumberTextField.getText());
+            LOGGER.log(Level.INFO, () -> "Biometric capturing not required for e-ARC: " + arcNumberTextField.getText());
             updateUiLabel(arcDetails);
-            updateUI("Biometric capturing not required for Arc: " + arcNumberTextField.getText());
+            updateUI("Biometric capturing not required for e-ARC: " + arcNumberTextField.getText());
             continueBtn.setDisable(true);
             return;
         }
@@ -259,7 +259,7 @@ public class ARCNoController {
                     .filter(path -> {
                         if (Files.isRegularFile(path)) {
                             // 00001-INSI-INS INDIA --> filename format
-                            // 00001-A-AA21 --> arc format
+                            // 00001-A-AA21 --> e-ARC format
                             return arcNumberTextField.getText().split("-")[0].equals(path.getFileName().toString().split("-")[0]);
                         }
                         return false;
@@ -280,10 +280,10 @@ public class ARCNoController {
                 }
             }
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Error occurred while searching arc number in import folder");
+            LOGGER.log(Level.SEVERE, "Error occurred while searching e-ARC number in import folder");
             updateUI(ApplicationConstant.GENERIC_ERR_MSG);
         }
-        //Arc number not found
+        //e-ARC number not found
         return null;
     }
 
@@ -308,7 +308,7 @@ public class ARCNoController {
 
     private void updateUiLabel(ARCDetails arcDetails) {
         if (arcDetails == null) {
-            messageLabel.setText("No data found for entered Arc number.");
+            messageLabel.setText("No data found for entered e-ARC number.");
             clearLabelText(txtName, txtRank, txtApp, txtUnit, txtFinger, txtIris, txtBiometricOptions, txtArcStatus);
             return;
         }

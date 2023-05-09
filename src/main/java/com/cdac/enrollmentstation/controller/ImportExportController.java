@@ -141,14 +141,14 @@ public class ImportExportController {
                 return false;
             }).collect(Collectors.toList());
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, "Error occurred while getting encrypted arc files for exporting.");
+            LOGGER.log(Level.SEVERE, "Error occurred while getting encrypted e-ARC files for exporting.");
             updateUI(ApplicationConstant.GENERIC_ERR_MSG);
             disableControls(exportBtn);
             enableControls(homeBtn, backBtn);
             return;
         }
         if (encryptedArcPaths.isEmpty()) {
-            updateUI("No Arc to be exported.");
+            updateUI("No e-ARC to be exported.");
             return;
         }
 
@@ -192,7 +192,7 @@ public class ImportExportController {
     private boolean decryptAndSendToServer(List<Path> paths) {
         String decryptedJsonData;
         for (Path path : paths) {
-            updateUI("Exporting Arc: " + path.getFileName().toString().split("\\.")[0]);
+            updateUI("Exporting e-ARC: " + path.getFileName().toString().split("\\.")[0]);
             // throws GenericException
             try {
                 decryptedJsonData = AesFileUtil.decrypt(path);
@@ -356,7 +356,7 @@ public class ImportExportController {
         }
 
         if (arcDetailsList.isEmpty()) {
-            updateUI("No ARC found for imported unit.");
+            updateUI("No e-ARC found for imported unit.");
             return;
         }
 

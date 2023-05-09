@@ -31,14 +31,14 @@ import java.util.logging.Logger;
 public class AdminConfigController {
     //For Application Log
     private static final Logger LOGGER = ApplicationLog.getLogger(AdminConfigController.class);
-    private final static int fingerprintLivenessMax;
-    private final static int fingerprintLivenessMin;
+    private static final int FINGERPRINT_LIVENESS_MAX;
+    private static final int FINGERPRINT_LIVENESS_MIN;
     private final int fingerprintLivenessValue = Integer.parseInt(PropertyFile.getProperty(PropertyName.FINGERPRINT_LIVENESS_VALUE).trim());
 
     static {
         try {
-            fingerprintLivenessMax = Integer.parseInt(PropertyFile.getProperty(PropertyName.FINGERPRINT_LIVENESS_MAX).trim());
-            fingerprintLivenessMin = Integer.parseInt(PropertyFile.getProperty(PropertyName.FINGERPRINT_LIVENESS_MIN).trim());
+            FINGERPRINT_LIVENESS_MAX = Integer.parseInt(PropertyFile.getProperty(PropertyName.FINGERPRINT_LIVENESS_MAX).trim());
+            FINGERPRINT_LIVENESS_MIN = Integer.parseInt(PropertyFile.getProperty(PropertyName.FINGERPRINT_LIVENESS_MIN).trim());
         } catch (NumberFormatException ex) {
             throw new GenericException("Invalid max or min fingerprint liveness value. It must be a number.");
         }
@@ -74,7 +74,7 @@ public class AdminConfigController {
             Platform.runLater(() -> messageLabel.setText((camId == 0 ? ApplicationConstant.INTERNAL : ApplicationConstant.EXTERNAL) + " Camera Selected"));
             LOGGER.log(Level.INFO, PropertyFile.getProperty(PropertyName.CAMERA_ID));
         });
-        liveFpTextField.setText(fingerprintLivenessValue + "");
+        liveFpTextField.setText(String.valueOf(fingerprintLivenessValue));
         liveFpBtn.setOnAction(event -> liveFpBtnAction());
 
     }
@@ -83,7 +83,7 @@ public class AdminConfigController {
         // check how text on edit button should be displayed
         if (liveFpTextField.isEditable()) {
             String inputValue = liveFpTextField.getText();
-            String displayMessage = "Please enter a number between " + fingerprintLivenessMin + " and " + fingerprintLivenessMax;
+            String displayMessage = "Please enter a number between " + FINGERPRINT_LIVENESS_MIN + " and " + FINGERPRINT_LIVENESS_MAX;
             if (inputValue.isBlank()) {
                 messageLabel.setText(displayMessage);
                 return;
@@ -91,7 +91,7 @@ public class AdminConfigController {
             int number;
             try {
                 number = Integer.parseInt(inputValue);
-                if (number < fingerprintLivenessMin || number > fingerprintLivenessMax) {
+                if (number < FINGERPRINT_LIVENESS_MIN || number > FINGERPRINT_LIVENESS_MAX) {
                     throw new NumberFormatException("Invalid fingerprint value");
                 }
             } catch (NumberFormatException ex) {
@@ -138,7 +138,7 @@ public class AdminConfigController {
             App.setRoot("device_status");
         } catch (IOException ex) {
             Logger.getLogger(AdminConfigController.class.getName()).log(Level.SEVERE, null, ex);
-            LOGGER.log(Level.INFO, ex + "IOException:");
+            LOGGER.log(Level.INFO, ()->ex + "IOException:");
         }
     }
 

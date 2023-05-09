@@ -38,7 +38,7 @@ public class MafisServerApi {
     }
 
     /**
-     * Fetches single ARCDetails based on ARC number.
+     * Fetches single ARCDetails based on e-ARC number.
      * Caller must handle the exception.
      *
      * @param url   url of the API.
@@ -110,7 +110,7 @@ public class MafisServerApi {
 
         if (base64EncodedUniqueKeyOptional.isEmpty()) {
             LOGGER.log(Level.SEVERE, "Unique key header not found in http response");
-            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+            throw new GenericException("Unique Key not received from server.");
         }
         // received base64 encoded encrypted secret key from server
         byte[] encryptedSecretKey = Base64.getDecoder().decode(base64EncodedUniqueKeyOptional.get());
@@ -161,7 +161,7 @@ public class MafisServerApi {
 
 
     /**
-     * Fetches list of ARC based on unitCode.
+     * Fetches list of e-ARC based on unitCode.
      * Caller must handle the exception.
      *
      * @return List<ARCDetails> or null on connection timeout

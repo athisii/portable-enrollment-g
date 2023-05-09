@@ -103,7 +103,7 @@
                 <Button fx:id="fetchArcBtn" disable="true" layoutX="583.0" layoutY="617.0" maxHeight="36.0"
                         maxWidth="150.0" minHeight="36.0" minWidth="150.0" mnemonicParsing="false"
                         onAction="#fetchArcBtnAction" prefHeight="36.0" prefWidth="150.0"
-                        style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="FETCH ARC"
+                        style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="FETCH e-ARC"
                         textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0"/>

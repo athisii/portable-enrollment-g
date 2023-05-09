@@ -171,7 +171,7 @@ public class IrisController implements MIDIrisEnrollCallback {
             backBtn.setDisable(false);
         }
 
-        arcLabel.setText("ARC: " + getArcDetailsHolder().getArcDetails().getArcNo());
+        arcLabel.setText("e-ARC: " + getArcDetailsHolder().getArcDetails().getArcNo());
         irisTypeToCapture = getIrisToScan(getArcDetailsHolder().getArcDetails().getIris());
         if (IrisType.NONE == irisTypeToCapture) {
             capturePhotoBtn.setDisable(false);

@@ -214,9 +214,9 @@ public class ARCNoController {
 
 
         if (arcDetails == null) {
-            LOGGER.log(Level.INFO, () -> "Not found for e-ARC number: " + arcNumberTextField.getText());
+            LOGGER.log(Level.INFO, () -> "Details not found for e-ARC number: " + arcNumberTextField.getText());
             updateUiLabel(null);
-            updateUI("Not found for e-ARC number: " + arcNumberTextField.getText());
+            updateUI("Details not found for e-ARC number: " + arcNumberTextField.getText());
             return;
         }
 
@@ -308,7 +308,7 @@ public class ARCNoController {
 
     private void updateUiLabel(ARCDetails arcDetails) {
         if (arcDetails == null) {
-            messageLabel.setText("No data found for entered e-ARC number.");
+            messageLabel.setText("Details not found for entered e-ARC number.");
             clearLabelText(txtName, txtRank, txtApp, txtUnit, txtFinger, txtIris, txtBiometricOptions, txtArcStatus);
             return;
         }

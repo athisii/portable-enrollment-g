@@ -16,6 +16,7 @@ import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.util.PropertyFile;
 
 import javax.naming.AuthenticationException;
+import javax.naming.CommunicationException;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.InitialDirContext;
@@ -32,7 +33,7 @@ public class DirectoryLookup {
         String ldapUrl = PropertyFile.getProperty(PropertyName.LDAP_URL);
         // domain = "@hq.inidannavy.mil"
         // ldapUrl = "ldap://10.184.36.14:389"
-        // securityPrincipal = "uid=username,dc=cdac,dc=in" //
+        // securityPrincipal = "uid=username,dc=cdac,dc=in" // or usernmae@domain
         String securityPrincipal = username + domain;
         Properties properties = new Properties();
         properties.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -43,11 +44,14 @@ public class DirectoryLookup {
         try {
             new InitialDirContext(properties);
             return true;
-        } catch (AuthenticationException e) {
+        } catch (AuthenticationException ex) {
             LOGGER.log(Level.SEVERE, () -> "Failed to authenticate user.");
             throw new GenericException(ApplicationConstant.INVALID_CREDENTIALS);
-        } catch (NamingException e) {
-            LOGGER.log(Level.SEVERE, e::getMessage);
+        } catch (CommunicationException ex) {
+            LOGGER.log(Level.SEVERE, "Failed to connect with server.");
+            throw new GenericException("Failed to connect with server.");
+        } catch (NamingException ex) {
+            LOGGER.log(Level.SEVERE, ex::getMessage);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }

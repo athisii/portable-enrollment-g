@@ -267,6 +267,7 @@ public class SlapScannerController {
         } catch (GenericException ex) {
             messageLabel.setText(ex.getMessage());
             scanBtn.setDisable(false);
+            backBtn.setDisable(false);
             return;
         }
         clearFingerprintOnUI();

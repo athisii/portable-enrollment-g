@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
@@ -43,9 +38,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * FXML Controller class
- *
- * @author root
+ * @author athisii, CDAC
+ * Created on 29/03/23
  */
 public class BiometricCaptureCompleteController {
     //For Application Log
@@ -170,7 +164,10 @@ public class BiometricCaptureCompleteController {
         }
         // starts another thread for encrypting data to avoid wasting cpu time when API call fails.
         // but this encrypted data file must be DELETED if API call succeeds
-        ForkJoinTask<Boolean> encryptionProcessFuture = ForkJoinPool.commonPool().submit(() -> startEncryptionProcess(arcDetails.getArcNo(), jsonData));
+        ForkJoinTask<Boolean> encryptionProcessFuture = ForkJoinPool.commonPool().submit(() -> {
+            LOGGER.log(Level.INFO, () -> "EncryptingThread: " + Thread.currentThread().getName());
+            return startEncryptionProcess(arcDetails.getArcNo(), jsonData);
+        });
 
         SaveEnrollmentResDto saveEnrollmentResDto;
         // try submitting to the server.

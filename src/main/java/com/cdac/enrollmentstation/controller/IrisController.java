@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
@@ -41,9 +36,8 @@ import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_IR
 import static com.cdac.enrollmentstation.model.ARCDetailsHolder.getArcDetailsHolder;
 
 /**
- * FXML Controller class
- *
- * @author boss
+ * @author athisii, CDAC
+ * Created on 29/03/23
  */
 public class IrisController implements MIDIrisEnrollCallback {
     private static final Logger LOGGER = ApplicationLog.getLogger(IrisController.class);

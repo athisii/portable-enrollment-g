@@ -44,6 +44,11 @@ import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ER
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_RS_ERR_MSG;
 import static com.cdac.enrollmentstation.model.ARCDetailsHolder.getArcDetailsHolder;
 
+/**
+ * @author athisii, CDAC
+ * Created on 29/03/23
+ */
+
 public class SlapScannerController {
     private static final Logger LOGGER = ApplicationLog.getLogger(SlapScannerController.class);
     private static final int TIME_TO_WAIT_FOR_NEXT_CAPTURE_IN_SEC = 3; // to be on safe side

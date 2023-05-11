@@ -35,7 +35,7 @@ public class App extends Application {
         });
         primaryStage.initStyle(StageStyle.UNDECORATED);
         primaryStage.setScene(scene);
-        primaryStage.setTitle("Enrollment Application");
+        primaryStage.setTitle("Enrolment Application");
         primaryStage.setResizable(false);
         primaryStage.show();
         LOGGER.log(Level.INFO, () -> "Touch is " + (Platform.isSupported(ConditionalFeature.INPUT_TOUCH) ? "" : "not") + " supported.");

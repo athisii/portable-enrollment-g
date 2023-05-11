@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
@@ -17,9 +13,8 @@ import javafx.scene.input.KeyCode;
 import java.io.IOException;
 
 /**
- * FXML Controller class
- *
- * @author root
+ * @author athisii, CDAC
+ * Created on 29/03/23
  */
 public class AdminAuthController {
     private static final int MAX_LENGTH = 30;

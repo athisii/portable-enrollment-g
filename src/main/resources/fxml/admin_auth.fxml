@@ -12,9 +12,6 @@
         <center>
             <AnchorPane prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: #fff;"
                         BorderPane.alignment="CENTER">
-
-                <AnchorPane layoutY="711.0" prefHeight="57.0" prefWidth="1366.0"
-                            style="-fx-background-color: #1990ea;"/>
                 <AnchorPane prefHeight="100.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
 
                     <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="17.0" layoutY="3.0" pickOnBounds="true"
@@ -83,6 +80,8 @@
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
+                <AnchorPane layoutY="711.0" prefHeight="57.0" prefWidth="1366.0"
+                            style="-fx-background-color: #1990ea;"/>
 
             </AnchorPane>
         </center>

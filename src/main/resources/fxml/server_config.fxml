@@ -46,12 +46,12 @@
                            prefWidth="205.0"/>
 
                 <Text fill="#04127b" layoutX="456.0" layoutY="390.0" strokeType="OUTSIDE" strokeWidth="0.0"
-                      text="Enrollment Station ID :"/>
+                      text="Enrolment Station ID :"/>
                 <TextField fx:id="enrollmentStationIdTextField" disable="true" layoutX="647.0" layoutY="372.0"
                            prefHeight="26.0" prefWidth="203.0"/>
 
                 <Text fill="#04127b" layoutX="456.0" layoutY="437.0" strokeType="OUTSIDE" strokeWidth="0.0"
-                      text="Enrollment Station Unit ID :"/>
+                      text="Enrolment Station Unit ID :"/>
                 <ComboBox fx:id="enrollmentStationUnitIdsComboBox" disable="true" layoutX="648.0" layoutY="419.0"
                           prefHeight="26.0" prefWidth="201.0"/>
                 <Button fx:id="fetchUnitsBtn" disable="true" layoutX="873.0" layoutY="415.0" maxHeight="35.0"

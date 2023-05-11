@@ -28,6 +28,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+/**
+ * @author athisii, CDAC
+ * Created on 29/03/23
+ */
 
 public class ServerConfigController {
     private static final Logger LOGGER = ApplicationLog.getLogger(ServerConfigController.class);
@@ -82,7 +86,7 @@ public class ServerConfigController {
             return;
         }
         if (enrollmentStationIdTextField.getText().isBlank()) {
-            messageLabel.setText("Enrollment station id is empty.");
+            messageLabel.setText("Enrolment station id is empty.");
             return;
         }
 

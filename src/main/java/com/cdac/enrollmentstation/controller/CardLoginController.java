@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
@@ -187,6 +182,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         // connection timeout
         if (asn1EncodedHexByteArrayMap == null) {
             messageLabel.setText(CONNECTION_TIMEOUT_MSG);
+            return;
         }
         if (!twoFactorAuthEnabled) {
             try {

@@ -26,6 +26,11 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * @author athisii, CDAC
+ * Created on 29/03/23
+ */
+
 public class MafisServerApi {
     private static final String UNIQUE_KEY_HEADER = "UniqueKey";
     private static final String HASH_KEY_HEADER = "HashKey";

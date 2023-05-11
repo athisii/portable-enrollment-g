@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
@@ -24,9 +20,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * FXML Controller class
- *
- * @author root
+ * @author athisii, CDAC
+ * Created on 29/03/23
  */
 public class AdminConfigController {
     //For Application Log
@@ -138,7 +133,7 @@ public class AdminConfigController {
             App.setRoot("device_status");
         } catch (IOException ex) {
             Logger.getLogger(AdminConfigController.class.getName()).log(Level.SEVERE, null, ex);
-            LOGGER.log(Level.INFO, ()->ex + "IOException:");
+            LOGGER.log(Level.INFO, () -> ex + "IOException:");
         }
     }
 

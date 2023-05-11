@@ -4,7 +4,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.1"
+<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.PrimaryController">
 
     <BorderPane prefHeight="778.0" prefWidth="1024.0">
@@ -25,11 +25,46 @@
                            text="INS INDIA" textAlignment="CENTER" textFill="#030303" visible="false"/>
 
                 </AnchorPane>
-                <AnchorPane layoutY="728.0" prefHeight="40.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
 
-                    <Label fx:id="version" layoutX="646.0" layoutY="8.0" prefHeight="16.0" prefWidth="29.0"
-                           textFill="#fffdfd"/>
-                </AnchorPane>
+
+                <ImageView fitHeight="47.0" fitWidth="48.0" layoutX="21.0" layoutY="112.0" pickOnBounds="true"
+                           preserveRatio="true">
+
+                    <Image url="@../img/home.png"/>
+
+                </ImageView>
+                <Label layoutX="66.0" layoutY="131.0" prefHeight="27.0" prefWidth="77.0" text="HOME">
+                    <font>
+                        <Font size="16.0"/>
+                    </font>
+                </Label>
+
+                <ImageView fitHeight="45.0" fitWidth="48.0" layoutX="1055.0" layoutY="122.0" pickOnBounds="true"
+                           preserveRatio="true">
+
+                    <Image url="@../img/settingfirst.png"/>
+
+                </ImageView>
+                <Label layoutX="1110.0" layoutY="130.0" onMouseClicked="#onSettings" prefHeight="27.0" prefWidth="88.0"
+                       style="-fx-cursor: hand;" text="SETTINGS" underline="true">
+                    <font>
+                        <Font size="16.0"/>
+                    </font>
+                </Label>
+
+                <ImageView fitHeight="36.0" fitWidth="35.0" layoutX="1231.0" layoutY="123.0" pickOnBounds="true"
+                           preserveRatio="true">
+
+                    <Image url="@../img/logout.png"/>
+
+                </ImageView>
+                <Label layoutX="1276.0" layoutY="131.0" onMouseClicked="#onLogout" prefHeight="27.0" prefWidth="77.0"
+                       style="-fx-cursor: hand;" text="LOGOUT" underline="true">
+                    <font>
+                        <Font size="16.0"/>
+                    </font>
+                </Label>
+
                 <AnchorPane layoutX="239.0" layoutY="235.0" prefHeight="349.0" prefWidth="373.0">
 
                     <ImageView fitHeight="190.0" fitWidth="254.0" layoutX="95.0" layoutY="51.0" pickOnBounds="true"
@@ -41,7 +76,7 @@
                     <Button layoutX="46.0" layoutY="275.0" mnemonicParsing="false" onAction="#showEnrollmentHome"
                             prefHeight="51.0" prefWidth="303.0"
                             style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
-                            text="BIOMETRIC ENROLLMENT" textFill="WHITE">
+                            text="BIOMETRIC ENROLMENT" textFill="WHITE">
                         <font>
                             <Font size="16.0"/>
                         </font>
@@ -56,8 +91,8 @@
                         <Image url="@../img/importexport.jpeg"/>
 
                     </ImageView>
-                    <Button layoutX="32.0" layoutY="309.0" mnemonicParsing="false"
-                            onAction="#showImportExport" prefHeight="50.0" prefWidth="310.0"
+                    <Button layoutX="32.0" layoutY="309.0" mnemonicParsing="false" onAction="#showImportExport"
+                            prefHeight="50.0" prefWidth="310.0"
                             style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
                             text="IMPORT/EXPORT" textFill="WHITE">
                         <font>
@@ -66,49 +101,11 @@
                     </Button>
 
                 </AnchorPane>
+                <AnchorPane layoutY="728.0" prefHeight="40.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
 
-                <ImageView fitHeight="47.0" fitWidth="48.0" layoutX="21.0" layoutY="112.0" pickOnBounds="true"
-                           preserveRatio="true">
-
-                    <Image url="@../img/home.png"/>
-
-                </ImageView>
-                <Label layoutX="66.0" layoutY="131.0" prefHeight="27.0" prefWidth="77.0" text="HOME">
-                    <font>
-                        <Font size="16.0"/>
-                    </font>
-                </Label>
-                <Label layoutX="1276.0" layoutY="131.0" onMouseClicked="#onLogout" prefHeight="27.0"
-                       prefWidth="77.0" style="-fx-cursor: hand;" text="LOGOUT" underline="true">
-                    <font>
-                        <Font size="16.0"/>
-                    </font>
-                </Label>
-                <ImageView fitHeight="36.0" fitWidth="35.0" layoutX="1231.0" layoutY="123.0" pickOnBounds="true"
-                           preserveRatio="true">
-
-                    <Image url="@../img/logout.png"/>
-
-                </ImageView>
-                <Label alignment="CENTER" layoutX="367.0" layoutY="623.0" prefHeight="27.0"
-                       prefWidth="582.0">
-                    <font>
-                        <Font name="System Bold" size="17.0"/>
-                    </font>
-                </Label>
-                <Label layoutX="1110.0" layoutY="130.0" onMouseClicked="#onSettings" prefHeight="27.0"
-                       prefWidth="88.0" style="-fx-cursor: hand;" text="SETTINGS" underline="true">
-                    <font>
-                        <Font size="16.0"/>
-                    </font>
-                </Label>
-                <ImageView fitHeight="45.0" fitWidth="48.0" layoutX="1055.0" layoutY="122.0" pickOnBounds="true"
-                           preserveRatio="true">
-
-                    <Image url="@../img/settingfirst.png"/>
-
-                </ImageView>
-
+                    <Label fx:id="version" layoutX="646.0" layoutY="8.0" prefHeight="16.0" prefWidth="29.0"
+                           textFill="#fffdfd"/>
+                </AnchorPane>
             </AnchorPane>
         </top>
     </BorderPane>

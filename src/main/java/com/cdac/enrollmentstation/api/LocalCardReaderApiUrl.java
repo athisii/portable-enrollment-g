@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.cdac.enrollmentstation.api;
 
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
@@ -15,7 +11,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * @author root
+ * @author athisii, CDAC
+ * Created on 29/03/23
  */
 public class LocalCardReaderApiUrl {
     public static final Logger LOGGER = ApplicationLog.getLogger(LocalCardReaderApiUrl.class);

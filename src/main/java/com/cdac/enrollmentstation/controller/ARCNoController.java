@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
@@ -39,9 +34,8 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 /**
- * FXML Controller class
- *
- * @author boss
+ * @author athisii, CDAC
+ * Created on 29/03/23
  */
 public class ARCNoController {
     @FXML

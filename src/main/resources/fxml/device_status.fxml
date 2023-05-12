@@ -113,19 +113,19 @@
                         <Font size="11.0"/>
                     </font>
                 </Label>
-                <ImageView fx:id="cameraSdk" fitHeight="52.0" fitWidth="61.0" layoutX="786.0" layoutY="363.0"
+                <ImageView fitHeight="52.0" fitWidth="61.0" layoutX="786.0" layoutY="363.0"
                            pickOnBounds="true" preserveRatio="true">
                     <Image url="@../img/notavailable.png"/>
                 </ImageView>
-                <ImageView fx:id="barcodeSdk" fitHeight="52.0" fitWidth="61.0" layoutX="786.0" layoutY="444.0"
+                <ImageView fitHeight="52.0" fitWidth="61.0" layoutX="786.0" layoutY="444.0"
                            pickOnBounds="true" preserveRatio="true">
                     <Image url="@../img/notavailable.png"/>
                 </ImageView>
-                <ImageView fx:id="serverSdk" fitHeight="52.0" fitWidth="61.0" layoutX="786.0" layoutY="523.0"
+                <ImageView  fitHeight="52.0" fitWidth="61.0" layoutX="786.0" layoutY="523.0"
                            pickOnBounds="true" preserveRatio="true">
                     <Image url="@../img/notavailable.png"/>
                 </ImageView>
-                <Button fx:id="backButton" layoutX="394.0" layoutY="623.0" maxHeight="35.0" maxWidth="150.0"
+                <Button  layoutX="394.0" layoutY="623.0" maxHeight="35.0" maxWidth="150.0"
                         minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#back"
                         prefHeight="35.0" prefWidth="150.0"
                         style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="BACK"
@@ -134,7 +134,7 @@
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <Button fx:id="refreshButton" layoutX="631.0" layoutY="623.0" maxHeight="35.0" maxWidth="150.0"
+                <Button layoutX="631.0" layoutY="623.0" maxHeight="35.0" maxWidth="150.0"
                         minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#refresh" prefHeight="35.0"
                         prefWidth="150.0" style="-fx-background-color: #3eb650; -fx-background-radius: 20 20 20 20;"
                         text="REFRESH" textFill="WHITE">
@@ -142,7 +142,7 @@
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <Button fx:id="homeButton" layoutX="864.0" layoutY="623.0" maxHeight="35.0" maxWidth="150.0"
+                <Button layoutX="864.0" layoutY="623.0" maxHeight="35.0" maxWidth="150.0"
                         minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#home"
                         prefHeight="35.0" prefWidth="150.0"
                         style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;" text="HOME"

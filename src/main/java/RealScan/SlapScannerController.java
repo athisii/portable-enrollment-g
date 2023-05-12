@@ -55,6 +55,7 @@ public class SlapScannerController {
     private static final int TIME_TO_WAIT_FOR_USER_IN_SEC = 3; // wait for users to place their fingers on sensor
     private static final int TIME_TO_WAIT_FOR_SWITCHING_FINGER_TYPE_TO_SCAN_IN_MILLIS = 100;
     private static final int SECURITY_LEVEL_FOR_SEQUENCE_CHECK = 5; // range: 0~7
+    public static final String UNSUPPORTED_FINGER_SET_TYPE = "Unsupported finger set type.";
     private boolean isFpScanCompleted;
     // cannot be static.
     private final int fingerprintLivenessValue = Integer.parseInt(PropertyFile.getProperty(PropertyName.FINGERPRINT_LIVENESS_VALUE).trim());
@@ -431,8 +432,8 @@ public class SlapScannerController {
             button = thumbScanBtn;
             successMessage = "Thumbprints captured successfully. Please wait.";
         } else {
-            LOGGER.log(Level.SEVERE, "Unsupported finger set type.");
-            throw new GenericException("Unsupported finger set type.");
+            LOGGER.log(Level.SEVERE, UNSUPPORTED_FINGER_SET_TYPE);
+            throw new GenericException(UNSUPPORTED_FINGER_SET_TYPE);
         }
         // very important
         // error message set by RS_TakeCurrentImageData call in setModeAndStartCapture ()
@@ -449,7 +450,7 @@ public class SlapScannerController {
         try {
             checkLFD();
         } catch (GenericException ex) {
-            updateUI("Quality standard not met. Please try again.");
+            updateUI(ex.getMessage());
             enableControls(backBtn, button);
             return;
         }
@@ -501,7 +502,7 @@ public class SlapScannerController {
             // SHOULD START FROM ANOTHER THREAD ELSE FINGERPRINT SCANNER ALWAYS STAYS ON UNTIL IT RETURNS
             ForkJoinPool.commonPool().execute(this::convertToTemplate);
         } else {
-            LOGGER.log(Level.SEVERE, "Unsupported finger set type.");
+            LOGGER.log(Level.SEVERE, UNSUPPORTED_FINGER_SET_TYPE);
             updateUI(GENERIC_RS_ERR_MSG);
         }
     }
@@ -536,8 +537,9 @@ public class SlapScannerController {
         for (int i = 0; i < mFingersToScanSeqMap.size(); i++) {
             // exit immediately if fake fingerprint captured.
             if (rsLfdResult.nResult[i] == RS_LFD_FAKE) {
-                LOGGER.log(Level.SEVERE, "Fake fingerprint detected. Score: " + rsLfdResult.nScore[i]);
-                throw new GenericException("Captured fake fingerprint. Kindly place your real fingers on the sensor.");
+                int j = i; //used in lambda
+                LOGGER.log(Level.SEVERE, () -> "Fake fingerprint detected. Score: " + rsLfdResult.nScore[j]);
+                throw new GenericException("Quality standard not met or captured fake fingerprint. Kindly try again.");
             }
         }
 
@@ -563,8 +565,8 @@ public class SlapScannerController {
             slapType = RS_SLAP_RIGHT_FOUR;
         } else {
             // meant for developers
-            LOGGER.log(Level.SEVERE, "Unsupported finger set type.");
-            throw new GenericException("Unsupported finger set type.");
+            LOGGER.log(Level.SEVERE, UNSUPPORTED_FINGER_SET_TYPE);
+            throw new GenericException(UNSUPPORTED_FINGER_SET_TYPE);
         }
 
          /* RS_SetCaptureMode Error Codes:
@@ -971,8 +973,8 @@ public class SlapScannerController {
             fingersMap.put("RT", RS_FGP_RIGHT_THUMB);  // 1
         } else {
             // meant for developers
-            LOGGER.log(Level.SEVERE, "Unsupported finger set type.");
-            throw new GenericException("Unsupported finger set type.");
+            LOGGER.log(Level.SEVERE, UNSUPPORTED_FINGER_SET_TYPE);
+            throw new GenericException(UNSUPPORTED_FINGER_SET_TYPE);
         }
 
         fingersException.forEach(fingersMap::remove);

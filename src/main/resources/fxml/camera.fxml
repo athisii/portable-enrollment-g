@@ -9,7 +9,7 @@
 <VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.CameraController">
     <BorderPane prefHeight="778.0" prefWidth="1024.0">
-        <center>
+        <bottom>
             <AnchorPane prefHeight="767.0" prefWidth="1024.0" style="-fx-background-color: #fff;"
                         BorderPane.alignment="CENTER">
                 <Button fx:id="savePhotoBtn" layoutX="670.0" layoutY="689.0" maxHeight="36.0" maxWidth="274.0"
@@ -54,15 +54,19 @@
                 </Label>
                 <ImageView fx:id="resultImageView" fitHeight="134.0" fitWidth="203.0" layoutX="269.0" layoutY="395.0"
                            pickOnBounds="true" preserveRatio="true"/>
-
-                <ImageView fx:id="msgIcon" fitHeight="120.0" fitWidth="117.0" layoutX="858.0" layoutY="386.0"
-                           pickOnBounds="true" preserveRatio="true"/>
-                <AnchorPane layoutY="730.0" prefHeight="39.0" prefWidth="1366.0"
-                            style="-fx-background-color: #1990ea;"/>
                 <ImageView fx:id="sunGlassIcon" fitHeight="118.0" fitWidth="117.0" layoutX="857.0" layoutY="318.0"
                            pickOnBounds="true" preserveRatio="true">
                     <Image url="@../img/no-goggles.jpg"/>
                 </ImageView>
+                <ImageView fx:id="msgIcon" fitHeight="120.0" fitWidth="117.0" layoutX="858.0" layoutY="386.0"
+                           pickOnBounds="true" preserveRatio="true"/>
+                <ImageView fx:id="iconFrame" fitHeight="90.0" fitWidth="120.0" layoutX="860.0" layoutY="446.0"
+                           pickOnBounds="true" preserveRatio="true">
+                    <Image url="@../img/nomask.png"/>
+                </ImageView>
+
+                <AnchorPane layoutY="730.0" prefHeight="39.0" prefWidth="1366.0"
+                            style="-fx-background-color: #1990ea;"/>
                 <AnchorPane layoutY="151.0" prefHeight="60.0" prefWidth="1366.0" style="-fx-background-color: #04127b;">
                     <Label fx:id="arcLbl" layoutX="18.0" layoutY="19.0" text="ARCNo : aabbcc" textFill="WHITE">
                         <font>
@@ -85,19 +89,10 @@
                         <Image url="@../img/navylogo.png"/>
 
                     </ImageView>
-                    <Label alignment="CENTER" layoutX="876.0" layoutY="42.0" prefHeight="31.0" prefWidth="108.0"
-                           style="-fx-background-color: #fff; -fx-background-radius: 0 20 20 0; -fx-border-width: 1; -fx-border-color: #00aaff; -fx-border-radius: 0 20 20 0;"
-                           text="INS INDIA" textAlignment="CENTER" visible="false"/>
 
                 </AnchorPane>
                 <AnchorPane layoutX="160.0" layoutY="227.0" prefHeight="60.0" prefWidth="1024.0"
                             style="-fx-background-color: #fff;">
-
-                    <Label layoutX="105.0" layoutY="19.0" text="ARCNo : aabbcc" textFill="WHITE">
-                        <font>
-                            <Font size="16.0"/>
-                        </font>
-                    </Label>
                     <ProgressBar layoutX="121.0" layoutY="23.0" prefHeight="14.0" prefWidth="783.0" progress="0.75"/>
                     <Circle fill="WHITE" layoutX="119.0" layoutY="29.0" radius="14.0" stroke="BLACK" strokeType="INSIDE"
                             strokeWidth="0.0" style="-fx-fill: #04127b;"/>
@@ -116,11 +111,7 @@
                     <Label layoutX="891.0" layoutY="24.0" prefHeight="16.0" prefWidth="22.0" text="5"/>
 
                 </AnchorPane>
-                <ImageView fx:id="iconFrame" fitHeight="90.0" fitWidth="120.0" layoutX="860.0" layoutY="446.0"
-                           pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../img/nomask.png"/>
 
-                </ImageView>
                 <AnchorPane fx:id="confirmPane" layoutX="230.0" layoutY="610.0" prefHeight="67.0" prefWidth="863.0"
                             style="-fx-border-color: #04127b;" visible="false">
 
@@ -158,14 +149,14 @@
                         <Insets top="-10.0"/>
                     </opaqueInsets>
                 </AnchorPane>
-<!--                <Slider fx:id="camSlider" blockIncrement="0.1" layoutX="292.0" layoutY="483.0" max="2.0"-->
-<!--                        onDragDetected="#camSlider" prefHeight="16.0" prefWidth="126.0" visible="false"/>-->
-<!--                <ImageView fx:id="brightness" fitHeight="20.0" fitWidth="28.0" layoutX="267.0" layoutY="482.0"-->
-<!--                           pickOnBounds="true" preserveRatio="true" visible="false">-->
-<!--                    <Image url="@../img/brightness.png"/>-->
+                <!--                <Slider fx:id="camSlider" blockIncrement="0.1" layoutX="292.0" layoutY="483.0" max="2.0"-->
+                <!--                        onDragDetected="#camSlider" prefHeight="16.0" prefWidth="126.0" visible="false"/>-->
+                <!--                <ImageView fx:id="brightness" fitHeight="20.0" fitWidth="28.0" layoutX="267.0" layoutY="482.0"-->
+                <!--                           pickOnBounds="true" preserveRatio="true" visible="false">-->
+                <!--                    <Image url="@../img/brightness.png"/>-->
 
-<!--                </ImageView>-->
+                <!--                </ImageView>-->
             </AnchorPane>
-        </center>
+        </bottom>
     </BorderPane>
 </VBox>

@@ -16,28 +16,23 @@
                 <AnchorPane layoutX="188.0" layoutY="319.0" prefHeight="177.0" prefWidth="326.0"
                             style="-fx-border-color: #04127b;">
 
-                    <ImageView fitHeight="131.0" fitWidth="151.0" layoutX="7.0" layoutY="41.0" pickOnBounds="true"
+                    <ImageView fitHeight="131.0" fitWidth="151.0" layoutX="5.0" layoutY="25.0" pickOnBounds="true"
                                preserveRatio="true">
                         <Image url="@../img/leftscan.png"/>
                     </ImageView>
                     <ImageView fx:id="leftLittleFingerImageView" fitHeight="56.0" fitWidth="56.0" layoutX="180.0"
-                               layoutY="9.0"
-                               pickOnBounds="true" preserveRatio="true"/>
+                               layoutY="9.0" pickOnBounds="true" preserveRatio="true"/>
                     <ImageView fx:id="leftMiddleFingerImageView" fitHeight="56.0" fitWidth="56.0" layoutX="252.0"
-                               layoutY="9.0"
-                               pickOnBounds="true" preserveRatio="true"/>
+                               layoutY="9.0" pickOnBounds="true" preserveRatio="true"/>
                     <ImageView fx:id="leftRingFingerImageView" fitHeight="56.0" fitWidth="56.0" layoutX="180.0"
-                               layoutY="75.0"
-                               pickOnBounds="true" preserveRatio="true"/>
+                               layoutY="75.0" pickOnBounds="true" preserveRatio="true"/>
                     <ImageView fx:id="leftIndexFingerImageView" fitHeight="56.0" fitWidth="56.0" layoutX="252.0"
-                               layoutY="75.0"
-                               pickOnBounds="true" preserveRatio="true"/>
+                               layoutY="75.0" pickOnBounds="true" preserveRatio="true"/>
 
                     <Button fx:id="leftScanBtn" disable="true" layoutX="164.0" layoutY="143.0" maxHeight="35.0"
-                            maxWidth="150.0" minHeight="28.0" minWidth="150.0" mnemonicParsing="false"
-                            prefHeight="28.0" prefWidth="150.0"
-                            style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="LEFT SCAN"
-                            textFill="WHITE">
+                            maxWidth="150.0" minHeight="28.0" minWidth="150.0" mnemonicParsing="false" prefHeight="28.0"
+                            prefWidth="150.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
+                            text="LEFT SCAN" textFill="WHITE">
                         <font>
                             <Font name="System Bold" size="14.0"/>
                         </font>
@@ -51,37 +46,26 @@
                             <Font size="14.0"/>
                         </font>
                     </Label>
-                    <Label layoutX="5.0" layoutY="17.0" prefHeight="23.0" prefWidth="139.0"
-                           text="Scan left hand fingers" textFill="#04127b">
-                        <font>
-                            <Font size="12.0"/>
-                        </font>
-                    </Label>
 
                 </AnchorPane>
                 <AnchorPane layoutX="522.0" layoutY="321.0" prefHeight="176.0" prefWidth="327.0"
                             style="-fx-border-color: #04127b;">
-                    <ImageView fitHeight="131.0" fitWidth="151.0" layoutX="5.0" layoutY="39.0" pickOnBounds="true"
+                    <ImageView fitHeight="131.0" fitWidth="151.0" layoutX="5.0" layoutY="27.0" pickOnBounds="true"
                                preserveRatio="true">
                         <Image url="@../img/rightscan.png"/>
                     </ImageView>
                     <ImageView fx:id="rightIndexFingerImageView" fitHeight="56.0" fitWidth="56.0" layoutX="179.0"
-                               layoutY="10.0"
-                               pickOnBounds="true" preserveRatio="true"/>
+                               layoutY="10.0" pickOnBounds="true" preserveRatio="true"/>
                     <ImageView fx:id="rightMiddleFingerImageView" fitHeight="56.0" fitWidth="56.0" layoutX="254.0"
-                               layoutY="10.0"
-                               pickOnBounds="true" preserveRatio="true"/>
+                               layoutY="10.0" pickOnBounds="true" preserveRatio="true"/>
                     <ImageView fx:id="rightRingFingerImageView" fitHeight="56.0" fitWidth="56.0" layoutX="178.0"
-                               layoutY="70.0"
-                               pickOnBounds="true" preserveRatio="true"/>
+                               layoutY="70.0" pickOnBounds="true" preserveRatio="true"/>
                     <ImageView fx:id="rightLittleFingerImageView" fitHeight="56.0" fitWidth="56.0" layoutX="254.0"
-                               layoutY="70.0"
-                               pickOnBounds="true" preserveRatio="true"/>
+                               layoutY="70.0" pickOnBounds="true" preserveRatio="true"/>
                     <Button fx:id="rightScanBtn" disable="true" layoutX="163.0" layoutY="142.0" maxHeight="28.0"
-                            maxWidth="150.0" minHeight="25.0" minWidth="150.0" mnemonicParsing="false"
-                            prefHeight="28.0" prefWidth="150.0"
-                            style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="RIGHT SCAN"
-                            textFill="WHITE">
+                            maxWidth="150.0" minHeight="25.0" minWidth="150.0" mnemonicParsing="false" prefHeight="28.0"
+                            prefWidth="150.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
+                            text="RIGHT SCAN" textFill="WHITE">
                         <font>
                             <Font name="System Bold" size="14.0"/>
                         </font>
@@ -96,51 +80,36 @@
                             <Font size="14.0"/>
                         </font>
                     </Label>
-                    <Label layoutX="2.0" layoutY="19.0" prefHeight="23.0" prefWidth="141.0"
-                           text="Scan right hand fingers" textFill="#04127b">
-                        <font>
-                            <Font size="12.0"/>
-                        </font>
-                    </Label>
 
                 </AnchorPane>
                 <AnchorPane layoutX="857.0" layoutY="321.0" prefHeight="176.0" prefWidth="321.0"
                             style="-fx-border-color: #552e75;">
 
-                    <ImageView fitHeight="124.0" fitWidth="131.0" layoutX="8.0" layoutY="47.0"
-                               pickOnBounds="true" preserveRatio="true">
+                    <ImageView fitHeight="124.0" fitWidth="131.0" layoutX="8.0" layoutY="30.0" pickOnBounds="true"
+                               preserveRatio="true">
                         <Image url="@../img/thumbboth.png"/>
                     </ImageView>
                     <ImageView fx:id="leftThumbImageView" fitHeight="56.0" fitWidth="56.0" layoutX="177.0"
-                               layoutY="45.0"
-                               pickOnBounds="true" preserveRatio="true"/>
+                               layoutY="45.0" pickOnBounds="true" preserveRatio="true"/>
                     <ImageView fx:id="rightThumbImageView" fitHeight="56.0" fitWidth="56.0" layoutX="251.0"
-                               layoutY="45.0"
-                               pickOnBounds="true" preserveRatio="true"/>
+                               layoutY="45.0" pickOnBounds="true" preserveRatio="true"/>
                     <Button fx:id="thumbScanBtn" disable="true" layoutX="154.0" layoutY="142.0" maxHeight="28.0"
                             maxWidth="150.0" minHeight="28.0" minWidth="150.0" mnemonicParsing="false" prefHeight="28.0"
-                            prefWidth="150.0"
-                            style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="THUMB SCAN"
-                            textFill="WHITE">
+                            prefWidth="150.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
+                            text="THUMB SCAN" textFill="WHITE">
                         <font>
                             <Font name="System Bold" size="14.0"/>
                         </font>
                     </Button>
                     <Line endX="-26.0" endY="113.0" layoutX="168.0" layoutY="59.0" startX="-26.0" startY="-60.0"
                           stroke="#04127b" strokeWidth="1.5"/>
-                    <Label layoutX="7.0" layoutY="18.0" prefHeight="23.0" prefWidth="141.0" text="Scan thumb fingers"
-                           textFill="#04127b">
-                        <font>
-                            <Font size="12.0"/>
-                        </font>
-                    </Label>
 
                 </AnchorPane>
-                <Text fill="#04127b" layoutX="214.0" layoutY="514.0" strokeType="OUTSIDE" strokeWidth="0.0"
+                <Text fill="#04127b" layoutX="266.0" layoutY="513.0" strokeType="OUTSIDE" strokeWidth="0.0"
                       text="LEFT HAND FINGERS"/>
-                <Text fill="#04127b" layoutX="546.0" layoutY="513.0" strokeType="OUTSIDE" strokeWidth="0.0"
+                <Text fill="#04127b" layoutX="598.0" layoutY="513.0" strokeType="OUTSIDE" strokeWidth="0.0"
                       text="RIGHT HAND FINGERS"/>
-                <Text fill="#04127b" layoutX="878.0" layoutY="513.0" strokeType="OUTSIDE" strokeWidth="0.0"
+                <Text fill="#04127b" layoutX="953.0" layoutY="513.0" strokeType="OUTSIDE" strokeWidth="0.0"
                       text="THUMB FINGERS" wrappingWidth="127.85498046875"/>
                 <Button fx:id="backBtn" layoutX="441.0" layoutY="666.0" maxHeight="35.0" maxWidth="150.0"
                         minHeight="35.0" minWidth="150.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="150.0"
@@ -151,27 +120,23 @@
                     </font>
                 </Button>
                 <Button fx:id="captureIrisBtn" disable="true" layoutX="773.0" layoutY="666.0" maxHeight="35.0"
-                        maxWidth="150.0" minHeight="35.0" minWidth="150.0" mnemonicParsing="false"
-                        prefHeight="35.0" prefWidth="150.0"
-                        style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="CAPTURE IRIS"
-                        textFill="WHITE">
+                        maxWidth="150.0" minHeight="35.0" minWidth="150.0" mnemonicParsing="false" prefHeight="35.0"
+                        prefWidth="150.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
+                        text="CAPTURE IRIS" textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
                 <ImageView fx:id="rawFingerprintImageView" fitHeight="181.0" fitWidth="215.0" layoutX="165.0"
-                           layoutY="525.0"
-                           pickOnBounds="true" preserveRatio="true"/>
+                           layoutY="525.0" pickOnBounds="true" preserveRatio="true"/>
                 <Label fx:id="messageLabel" alignment="CENTER" layoutX="187.0" layoutY="547.0" prefHeight="21.0"
-                       prefWidth="990.0" textAlignment="CENTER"
-                       text="Click the SCAN button to start.">
+                       prefWidth="990.0" text="Click the SCAN button to start." textAlignment="CENTER">
                     <font>
                         <Font name="System Bold" size="17.0"/>
                     </font>
                 </Label>
                 <Button fx:id="scanBtn" layoutX="608.0" layoutY="666.0" maxHeight="35.0" maxWidth="150.0"
-                        minHeight="35.0" minWidth="150.0" mnemonicParsing="false"
-                        prefHeight="35.0" prefWidth="150.0"
+                        minHeight="35.0" minWidth="150.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="150.0"
                         style="-fx-background-color: #3eb650; -fx-background-radius: 20 20 20 20;" text="SCAN"
                         textFill="WHITE">
                     <font>
@@ -210,12 +175,6 @@
                 </AnchorPane>
                 <AnchorPane layoutX="170.0" layoutY="214.0" prefHeight="60.0" prefWidth="1024.0"
                             style="-fx-background-color: #fff;">
-
-                    <Label layoutX="111.0" layoutY="19.0" text="ARCNo : aabbcc" textFill="WHITE">
-                        <font>
-                            <Font size="16.0"/>
-                        </font>
-                    </Label>
                     <ProgressBar layoutX="127.0" layoutY="22.0" prefHeight="14.0" prefWidth="783.0" progress="0.25"/>
                     <Circle fill="WHITE" layoutX="125.0" layoutY="29.0" radius="14.0" stroke="BLACK" strokeType="INSIDE"
                             strokeWidth="0.0" style="-fx-fill: #04127b;"/>
@@ -245,10 +204,9 @@
                             style="-fx-border-color: #04127b;" visible="false">
 
                     <Button fx:id="confirmYesBtn" layoutX="212.0" layoutY="32.0" maxHeight="35.0" maxWidth="150.0"
-                            minHeight="28.0" minWidth="150.0" mnemonicParsing="false"
-                            prefHeight="28.0" prefWidth="150.0"
-                            style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="Yes"
-                            textFill="WHITE">
+                            minHeight="28.0" minWidth="150.0" mnemonicParsing="false" prefHeight="28.0"
+                            prefWidth="150.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
+                            text="Yes" textFill="WHITE">
                         <font>
                             <Font name="System Bold" size="14.0"/>
                         </font>
@@ -261,10 +219,9 @@
                         </font>
                     </Text>
                     <Button fx:id="confirmNoBtn" layoutX="401.0" layoutY="31.0" maxHeight="35.0" maxWidth="150.0"
-                            minHeight="28.0" minWidth="150.0" mnemonicParsing="false"
-                            prefHeight="28.0" prefWidth="150.0"
-                            style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="No"
-                            textFill="WHITE">
+                            minHeight="28.0" minWidth="150.0" mnemonicParsing="false" prefHeight="28.0"
+                            prefWidth="150.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
+                            text="No" textFill="WHITE">
                         <font>
                             <Font name="System Bold" size="14.0"/>
                         </font>

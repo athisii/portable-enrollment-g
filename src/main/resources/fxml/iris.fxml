@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
-<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.1"
+<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.IrisController">
 
     <BorderPane prefHeight="778.0" prefWidth="1024.0">
@@ -15,9 +15,8 @@
                         BorderPane.alignment="CENTER">
 
                 <Button fx:id="capturePhotoBtn" disable="true" layoutX="804.0" layoutY="666.0" maxHeight="36.0"
-                        maxWidth="163.0"
-                        minHeight="36.0" minWidth="150.0" mnemonicParsing="false" onAction="#cameraCapture"
-                        onTouchPressed="#cameraCapture" prefHeight="36.0" prefWidth="163.0"
+                        maxWidth="163.0" minHeight="36.0" minWidth="150.0" mnemonicParsing="false"
+                        onAction="#cameraCapture" onTouchPressed="#cameraCapture" prefHeight="36.0" prefWidth="163.0"
                         style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="CAPTURE PHOTO"
                         textFill="WHITE">
                     <font>
@@ -53,7 +52,7 @@
                     </ImageView>
 
                 </Pane>
-                <Label fx:id="messageLabel" alignment="CENTER" layoutX="320.0" layoutY="567.0" prefHeight="23.0"
+                <Label fx:id="messageLabel" alignment="CENTER" layoutX="320.0" layoutY="577.0" prefHeight="23.0"
                        prefWidth="724.0">
                     <font>
                         <Font name="System Bold" size="16.0"/>
@@ -70,7 +69,7 @@
                 </Button>
                 <ImageView fx:id="statusImageView" fitHeight="116.0" fitWidth="118.0" layoutX="990.0" layoutY="422.0"
                            pickOnBounds="true" preserveRatio="true"/>
-                <AnchorPane layoutY="711.0" prefHeight="60.0" prefWidth="1353.0"
+                <AnchorPane layoutY="730.0" prefHeight="40.0" prefWidth="1366.0"
                             style="-fx-background-color: #1990ea;"/>
                 <AnchorPane layoutY="151.0" prefHeight="60.0" prefWidth="1366.0" style="-fx-background-color: #04127b;">
 
@@ -102,12 +101,6 @@
                 </AnchorPane>
                 <AnchorPane layoutX="200.0" layoutY="227.0" prefHeight="60.0" prefWidth="1024.0"
                             style="-fx-background-color: #fff;">
-
-                    <Label layoutX="120.0" layoutY="19.0" text="ARCNo : aabbcc" textFill="WHITE">
-                        <font>
-                            <Font size="16.0"/>
-                        </font>
-                    </Label>
                     <ProgressBar layoutX="136.0" layoutY="23.0" prefHeight="14.0" prefWidth="783.0" progress="0.5"/>
                     <Circle fill="WHITE" layoutX="134.0" layoutY="29.0" radius="14.0" stroke="BLACK" strokeType="INSIDE"
                             strokeWidth="0.0" style="-fx-fill: #04127b;"/>
@@ -135,18 +128,16 @@
                 </Label>
                 <ImageView fitHeight="108.0" fitWidth="122.0" layoutX="997.0" layoutY="278.0" pickOnBounds="true"
                            preserveRatio="true">
-
                     <Image url="@../img/iris_image.png"/>
 
                 </ImageView>
                 <AnchorPane fx:id="confirmPane" layoutX="297.0" layoutY="592.0" prefHeight="67.0" prefWidth="798.0"
                             style="-fx-border-color: #04127b;" visible="false">
 
-                    <Button fx:id="confirmYesBtn" layoutX="206.0" layoutY="32.0" maxHeight="35.0" maxWidth="150.0"
-                            minHeight="28.0" minWidth="150.0" mnemonicParsing="false" onAction="#goBack"
-                            prefHeight="28.0" prefWidth="150.0"
-                            style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="Yes"
-                            textFill="WHITE">
+                    <Button layoutX="206.0" layoutY="32.0" maxHeight="35.0" maxWidth="150.0" minHeight="28.0"
+                            minWidth="150.0" mnemonicParsing="false" onAction="#goBack" prefHeight="28.0"
+                            prefWidth="150.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
+                            text="Yes" textFill="WHITE">
                         <font>
                             <Font name="System Bold" size="14.0"/>
                         </font>
@@ -157,11 +148,10 @@
                             <Font size="18.0"/>
                         </font>
                     </Text>
-                    <Button fx:id="confirmNoBtn" layoutX="395.0" layoutY="31.0" maxHeight="35.0" maxWidth="150.0"
-                            minHeight="28.0" minWidth="150.0" mnemonicParsing="false" onAction="#stayBack"
-                            prefHeight="28.0" prefWidth="150.0"
-                            style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="No"
-                            textFill="WHITE">
+                    <Button layoutX="395.0" layoutY="31.0" maxHeight="35.0" maxWidth="150.0" minHeight="28.0"
+                            minWidth="150.0" mnemonicParsing="false" onAction="#stayBack" prefHeight="28.0"
+                            prefWidth="150.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
+                            text="No" textFill="WHITE">
                         <font>
                             <Font name="System Bold" size="14.0"/>
                         </font>

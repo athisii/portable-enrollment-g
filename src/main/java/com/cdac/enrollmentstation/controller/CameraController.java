@@ -67,7 +67,7 @@ public class CameraController {
             INPUT_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.IMG_INPUT_FILE));
             WEBCAM_COMMAND = requireNonBlank(PropertyFile.getProperty(PropertyName.PYTHON_WEBCAM_COMMAND));
             SUB_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.IMG_SUB_FILE));
-            // loads --> /com/cdac/enrollmentstation/img/
+            // loads --> /img/
             NO_MASK_IMAGE = loadFileFromImgDirectory("nomask.png");
             NO_GLASSES_IMAGE = loadFileFromImgDirectory("no-goggles.jpg");
             // loads --> /facecode

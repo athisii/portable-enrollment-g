@@ -27,19 +27,14 @@
                             style="-fx-background-color: #1990ea;"/>
                 <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="315.0" layoutY="341.0" pickOnBounds="true"
                            preserveRatio="true">
-
                     <Image url="@../img/thumbnew.png"/>
-
                 </ImageView>
                 <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="580.0" layoutY="341.0" pickOnBounds="true"
                            preserveRatio="true">
-
                     <Image url="@../img/iris.jpg"/>
-
                 </ImageView>
                 <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="817.0" layoutY="341.0" pickOnBounds="true"
                            preserveRatio="true">
-
                     <Image url="@../img/photo_blue.png"/>
 
                 </ImageView>
@@ -47,25 +42,13 @@
 
                     <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="17.0" layoutY="3.0" pickOnBounds="true"
                                preserveRatio="true">
-
                         <Image url="@../img/navylogo.png"/>
-
                     </ImageView>
-                    <Label alignment="CENTER" layoutX="876.0" layoutY="42.0" prefHeight="31.0" prefWidth="108.0"
-                           style="-fx-background-color: #fff; -fx-background-radius: 0 20 20 0; -fx-border-width: 1; -fx-border-color: #00aaff; -fx-border-radius: 0 20 20 0;"
-                           text="INS INDIA" textAlignment="CENTER" visible="false"/>
-
                 </AnchorPane>
                 <ImageView fx:id="statusImageView" fitHeight="60.0" fitWidth="75.0" layoutX="1133.0" layoutY="263.0"
                            pickOnBounds="true" preserveRatio="true"/>
                 <AnchorPane layoutX="160.0" layoutY="206.0" prefHeight="60.0" prefWidth="1024.0"
                             style="-fx-background-color: #fff;">
-
-                    <Label layoutX="111.0" layoutY="19.0" text="ARCNo : aabbcc" textFill="WHITE">
-                        <font>
-                            <Font size="16.0"/>
-                        </font>
-                    </Label>
                     <ProgressBar layoutX="127.0" layoutY="23.0" prefHeight="14.0" prefWidth="783.0" progress="1.0"/>
                     <Circle fill="WHITE" layoutX="125.0" layoutY="29.0" radius="14.0" stroke="BLACK" strokeType="INSIDE"
                             strokeWidth="0.0" style="-fx-fill: #04127b;"/>

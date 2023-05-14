@@ -4,7 +4,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.1"
+<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.OnlineLoginController">
 
     <BorderPane prefHeight="778.0" prefWidth="1024.0">
@@ -14,10 +14,10 @@
 
                 <AnchorPane prefHeight="100.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
 
-                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="17.0" layoutY="3.0" pickOnBounds="true"
+                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="20.0" layoutY="10.0" pickOnBounds="true"
                                preserveRatio="true">
 
-                        <Image url="@../img/navylogo.png"/>
+                        <Image url="@../img/navy_logo.png"/>
 
                     </ImageView>
                     <Label alignment="CENTER" layoutX="876.0" layoutY="42.0" prefHeight="31.0" prefWidth="108.0"
@@ -39,8 +39,7 @@
                     <TextField fx:id="textField" layoutX="164.0" layoutY="32.0" prefHeight="26.0" prefWidth="190.0"
                                promptText="Username"/>
                     <PasswordField fx:id="passwordField" layoutX="164.0" layoutY="85.0" prefHeight="26.0"
-                                   prefWidth="194.0"
-                                   promptText="Password"/>
+                                   prefWidth="194.0" promptText="Password"/>
                     <ImageView fitHeight="43.0" fitWidth="41.0" layoutX="83.0" layoutY="25.0" pickOnBounds="true"
                                preserveRatio="true">
 
@@ -62,24 +61,23 @@
                         <Font name="System Bold" size="15.0"/>
                     </font>
                 </Label>
-                <Button layoutX="566.0" layoutY="487.0" maxHeight="35.0" maxWidth="150.0"
-                        minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#showHome" prefHeight="35.0"
+                <Button layoutX="566.0" layoutY="487.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0"
+                        minWidth="150.0" mnemonicParsing="false" onAction="#showHome" prefHeight="35.0"
                         prefWidth="150.0" style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;"
                         text="BACK" textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <Button  layoutX="734.0" layoutY="487.0" maxHeight="35.0" maxWidth="150.0"
-                        minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#showPrimaryScreen"
-                        prefHeight="35.0" prefWidth="150.0"
-                        style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="LOGIN"
-                        textFill="WHITE">
+                <Button layoutX="734.0" layoutY="487.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0"
+                        minWidth="150.0" mnemonicParsing="false" onAction="#showPrimaryScreen" prefHeight="35.0"
+                        prefWidth="150.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
+                        text="LOGIN" textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <AnchorPane layoutY="711.0" prefHeight="57.0" prefWidth="1366.0"
+                <AnchorPane layoutY="729.0" prefHeight="40.0" prefWidth="1366.0"
                             style="-fx-background-color: #1990ea;"/>
 
             </AnchorPane>

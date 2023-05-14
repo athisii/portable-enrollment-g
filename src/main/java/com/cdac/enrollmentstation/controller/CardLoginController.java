@@ -59,7 +59,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     private static final byte FINGERPRINT_TYPE = 25; // Fingerprint file -> 25
     private static final int CARD_READER_MAX_BUFFER_SIZE = 1024; // Max bytes card can handle
     private static final String CONNECTION_TIMEOUT_MSG = "Connection timeout. Please try again.";
-    private static final int MAX_LENGTH = 15;
+    private static final int MAX_LENGTH = 30;
     private int jniErrorCode;
     private EnumMap<DataType, byte[]> asn1EncodedHexByteArrayMap; // GLOBAL data store.
 
@@ -434,11 +434,11 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     }
 
     public void matchFingerprintTemplate(byte[] template) {
-        int fpMinThreshold;
+        int fpMatchMinThreshold;
         try {
-            fpMinThreshold = Integer.parseInt(PropertyFile.getProperty(PropertyName.LOGIN_FP_MIN_THRESHOLD).trim());
+            fpMatchMinThreshold = Integer.parseInt(PropertyFile.getProperty(PropertyName.FP_MATCH_MIN_THRESHOLD).trim());
         } catch (NumberFormatException | GenericException ex) {
-            LOGGER.log(Level.SEVERE, () -> "Not a number or no entry for '" + PropertyName.LOGIN_FP_MIN_THRESHOLD + "' in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+            LOGGER.log(Level.SEVERE, () -> "Not a number or no entry for '" + PropertyName.FP_MATCH_MIN_THRESHOLD + "' in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
             throw new GenericException(GENERIC_ERR_MSG);
         }
         int[] matchScore = new int[1];
@@ -453,7 +453,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             LOGGER.log(Level.SEVERE, () -> midFingerAuth.GetErrorMessage(jniErrorCode));
             throw new GenericException(GENERIC_ERR_MSG);
         }
-        if (matchScore[0] < fpMinThreshold) {
+        if (matchScore[0] < fpMatchMinThreshold) {
             LOGGER.log(Level.SEVERE, "Fingerprint not matched.");
             throw new GenericException("Fingerprint not matched. Please try again.");
         }

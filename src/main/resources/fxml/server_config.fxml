@@ -14,10 +14,10 @@
                         BorderPane.alignment="CENTER">
                 <AnchorPane prefHeight="100.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
 
-                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="17.0" layoutY="3.0" pickOnBounds="true"
+                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="20.0" layoutY="10.0" pickOnBounds="true"
                                preserveRatio="true">
 
-                        <Image url="@../img/navylogo.png"/>
+                        <Image url="@../img/navy_logo.png"/>
 
                     </ImageView>
                     <Label alignment="CENTER" layoutX="876.0" layoutY="42.0" prefHeight="31.0" prefWidth="108.0"
@@ -28,7 +28,7 @@
                 <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="14.0" layoutY="106.0" pickOnBounds="true"
                            preserveRatio="true">
 
-                    <Image url="@../img/settings.jpg"/>
+                    <Image url="@../img/settings_jpg.jpg"/>
 
                 </ImageView>
                 <Label layoutX="67.0" layoutY="105.0" prefHeight="45.0" prefWidth="417.0" text="SERVER CONFIGURATION"
@@ -101,7 +101,7 @@
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <AnchorPane layoutY="711.0" prefHeight="57.0" prefWidth="1366.0"
+                <AnchorPane layoutY="729.0" prefHeight="40.0" prefWidth="1366.0"
                             style="-fx-background-color: #1990ea;"/>
             </AnchorPane>
         </center>

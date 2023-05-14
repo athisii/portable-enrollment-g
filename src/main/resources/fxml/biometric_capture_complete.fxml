@@ -4,8 +4,8 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
-<?import javafx.scene.text.*?>
-<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.1"
+<?import javafx.scene.text.Font?>
+<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.cdac.enrollmentstation.controller.BiometricCaptureCompleteController">
 
@@ -14,20 +14,20 @@
             <AnchorPane prefHeight="618.0" prefWidth="1024.0" style="-fx-background-color: #fff;"
                         BorderPane.alignment="CENTER">
 
-                <Button fx:id="homeBtn" disable="true" layoutX="373.0" layoutY="617.0" maxHeight="36.0"
-                        maxWidth="150.0" minHeight="36.0" minWidth="150.0" mnemonicParsing="false"
-                        onAction="#homeBtnAction" prefHeight="36.0" prefWidth="150.0"
+                <Button fx:id="homeBtn" disable="true" layoutX="373.0" layoutY="617.0" maxHeight="36.0" maxWidth="150.0"
+                        minHeight="36.0" minWidth="150.0" mnemonicParsing="false" onAction="#homeBtnAction"
+                        prefHeight="36.0" prefWidth="150.0"
                         style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="HOME"
                         textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <AnchorPane layoutY="711.0" prefHeight="57.0" prefWidth="1360.0"
+                <AnchorPane layoutY="728.0" prefHeight="40.0" prefWidth="1360.0"
                             style="-fx-background-color: #1990ea;"/>
                 <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="315.0" layoutY="341.0" pickOnBounds="true"
                            preserveRatio="true">
-                    <Image url="@../img/thumbnew.png"/>
+                    <Image url="@../img/thumb_new.png"/>
                 </ImageView>
                 <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="580.0" layoutY="341.0" pickOnBounds="true"
                            preserveRatio="true">
@@ -40,9 +40,9 @@
                 </ImageView>
                 <AnchorPane prefHeight="100.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
 
-                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="17.0" layoutY="3.0" pickOnBounds="true"
+                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="20.0" layoutY="10.0" pickOnBounds="true"
                                preserveRatio="true">
-                        <Image url="@../img/navylogo.png"/>
+                        <Image url="@../img/navy_logo.png"/>
                     </ImageView>
                 </AnchorPane>
                 <ImageView fx:id="statusImageView" fitHeight="60.0" fitWidth="75.0" layoutX="1133.0" layoutY="263.0"

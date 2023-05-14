@@ -13,9 +13,9 @@
 
                 <AnchorPane prefHeight="100.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
 
-                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="17.0" layoutY="3.0" pickOnBounds="true" preserveRatio="true">
+                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="20.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true">
 
-                        <Image url="@../img/navylogo.png" />
+                        <Image url="@../img/navy_logo.png" />
 
                     </ImageView>
                     <Label alignment="CENTER" layoutX="876.0" layoutY="42.0" prefHeight="31.0" prefWidth="108.0" style="-fx-background-color: #fff; -fx-background-radius: 0 20 20 0; -fx-border-width: 1; -fx-border-color: #00aaff; -fx-border-radius: 0 20 20 0;" text="INS INDIA" textAlignment="CENTER" visible="false" />
@@ -31,7 +31,7 @@
 
                     <ImageView fx:id="iconOrFpImageView" fitHeight="131.0" fitWidth="132.0" layoutX="143.0" layoutY="9.0" pickOnBounds="true" preserveRatio="true">
 
-                        <Image url="@../img/showtoken.jpeg" />
+                        <Image url="@../img/card.jpeg" />
 
                     </ImageView>
                     <Label fx:id="cardPinLabel" layoutX="67.0" layoutY="158.0" text="Card Pin:">
@@ -59,7 +59,7 @@
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
-                <AnchorPane layoutY="711.0" prefHeight="59.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;" />
+                <AnchorPane layoutY="728.0" prefHeight="40.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;" />
             </AnchorPane>
         </center>
     </BorderPane>

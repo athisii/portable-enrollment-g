@@ -12,9 +12,9 @@
             <AnchorPane prefHeight="607.0" prefWidth="1024.0" style="-fx-background-color: #fff;"
                         BorderPane.alignment="CENTER">
                 <AnchorPane prefHeight="100.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
-                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="17.0" layoutY="3.0" pickOnBounds="true"
+                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="20.0" layoutY="10.0" pickOnBounds="true"
                                preserveRatio="true">
-                        <Image url="@../img/navylogo.png"/>
+                        <Image url="@../img/navy_logo.png"/>
                     </ImageView>
                     <Label alignment="CENTER" layoutX="876.0" layoutY="42.0" prefHeight="31.0" prefWidth="108.0"
                            style="-fx-background-color: #fff; -fx-background-radius: 0 20 20 0; -fx-border-width: 1; -fx-border-color: #00aaff; -fx-border-radius: 0 20 20 0;"
@@ -70,36 +70,36 @@
                 </Button>
                 <ImageView fx:id="slapUsbImage" fitHeight="52.0" fitWidth="61.0" layoutX="680.0" layoutY="209.0"
                            pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../img/redcross.png"/>
+                    <Image url="@../img/red_cross.png"/>
                 </ImageView>
                 <ImageView fx:id="irisUsbImage" fitHeight="52.0" fitWidth="61.0" layoutX="680.0" layoutY="283.0"
                            pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../img/redcross.png"/>
+                    <Image url="@../img/red_cross.png"/>
                 </ImageView>
 
                 <ImageView fx:id="cameraImage" fitHeight="52.0" fitWidth="61.0" layoutX="680.0" layoutY="363.0"
                            pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../img/redcross.png"/>
+                    <Image url="@../img/red_cross.png"/>
                 </ImageView>
 
                 <ImageView fx:id="barcodeImage" fitHeight="52.0" fitWidth="61.0" layoutX="680.0" layoutY="443.0"
                            pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../img/redcross.png"/>
+                    <Image url="@../img/red_cross.png"/>
                 </ImageView>
 
                 <ImageView fx:id="mafisUrlImage" fitHeight="52.0" fitWidth="61.0" layoutX="680.0" layoutY="523.0"
                            pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../img/redcross.png"/>
+                    <Image url="@../img/red_cross.png"/>
                 </ImageView>
 
 
                 <ImageView fx:id="irisSdkImage" fitHeight="52.0" fitWidth="61.0" layoutX="786.0" layoutY="283.0"
                            pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../img/redcross.png"/>
+                    <Image url="@../img/red_cross.png"/>
                 </ImageView>
                 <ImageView fx:id="slapSdkImage" fitHeight="52.0" fitWidth="61.0" layoutX="786.0" layoutY="209.0"
                            pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../img/redcross.png"/>
+                    <Image url="@../img/red_cross.png"/>
                 </ImageView>
                 <Label layoutX="627.0" layoutY="167.0" prefHeight="28.0" prefWidth="128.0" text="Usb Connection Status"
                        textFill="#04127b">
@@ -113,45 +113,43 @@
                         <Font size="11.0"/>
                     </font>
                 </Label>
-                <ImageView fitHeight="52.0" fitWidth="61.0" layoutX="786.0" layoutY="363.0"
-                           pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../img/notavailable.png"/>
+                <ImageView fitHeight="52.0" fitWidth="61.0" layoutX="786.0" layoutY="363.0" pickOnBounds="true"
+                           preserveRatio="true">
+                    <Image url="@../img/not_available.png"/>
                 </ImageView>
-                <ImageView fitHeight="52.0" fitWidth="61.0" layoutX="786.0" layoutY="444.0"
-                           pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../img/notavailable.png"/>
+                <ImageView fitHeight="52.0" fitWidth="61.0" layoutX="786.0" layoutY="444.0" pickOnBounds="true"
+                           preserveRatio="true">
+                    <Image url="@../img/not_available.png"/>
                 </ImageView>
-                <ImageView  fitHeight="52.0" fitWidth="61.0" layoutX="786.0" layoutY="523.0"
-                           pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../img/notavailable.png"/>
+                <ImageView fitHeight="52.0" fitWidth="61.0" layoutX="786.0" layoutY="523.0" pickOnBounds="true"
+                           preserveRatio="true">
+                    <Image url="@../img/not_available.png"/>
                 </ImageView>
-                <Button  layoutX="394.0" layoutY="623.0" maxHeight="35.0" maxWidth="150.0"
-                        minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#back"
-                        prefHeight="35.0" prefWidth="150.0"
+                <Button layoutX="394.0" layoutY="623.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0"
+                        minWidth="150.0" mnemonicParsing="false" onAction="#back" prefHeight="35.0" prefWidth="150.0"
                         style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="BACK"
                         textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <Button layoutX="631.0" layoutY="623.0" maxHeight="35.0" maxWidth="150.0"
-                        minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#refresh" prefHeight="35.0"
-                        prefWidth="150.0" style="-fx-background-color: #3eb650; -fx-background-radius: 20 20 20 20;"
-                        text="REFRESH" textFill="WHITE">
+                <Button layoutX="631.0" layoutY="623.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0"
+                        minWidth="150.0" mnemonicParsing="false" onAction="#refresh" prefHeight="35.0" prefWidth="150.0"
+                        style="-fx-background-color: #3eb650; -fx-background-radius: 20 20 20 20;" text="REFRESH"
+                        textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <Button layoutX="864.0" layoutY="623.0" maxHeight="35.0" maxWidth="150.0"
-                        minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#home"
-                        prefHeight="35.0" prefWidth="150.0"
+                <Button layoutX="864.0" layoutY="623.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0"
+                        minWidth="150.0" mnemonicParsing="false" onAction="#home" prefHeight="35.0" prefWidth="150.0"
                         style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;" text="HOME"
                         textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <AnchorPane layoutY="711.0" prefHeight="57.0" prefWidth="1366.0"
+                <AnchorPane layoutY="728.0" prefHeight="40.0" prefWidth="1366.0"
                             style="-fx-background-color: #1990ea;"/>
             </AnchorPane>
         </top>

@@ -56,16 +56,16 @@
                            pickOnBounds="true" preserveRatio="true"/>
                 <ImageView fx:id="sunGlassIcon" fitHeight="118.0" fitWidth="117.0" layoutX="857.0" layoutY="318.0"
                            pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../img/no-goggles.jpg"/>
+                    <Image url="@../img/no_goggles.jpg"/>
                 </ImageView>
                 <ImageView fx:id="msgIcon" fitHeight="120.0" fitWidth="117.0" layoutX="858.0" layoutY="386.0"
                            pickOnBounds="true" preserveRatio="true"/>
                 <ImageView fx:id="iconFrame" fitHeight="90.0" fitWidth="120.0" layoutX="860.0" layoutY="446.0"
                            pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../img/nomask.png"/>
+                    <Image url="@../img/no_mask.png"/>
                 </ImageView>
 
-                <AnchorPane layoutY="730.0" prefHeight="39.0" prefWidth="1366.0"
+                <AnchorPane layoutY="730.0" prefHeight="40.0" prefWidth="1366.0"
                             style="-fx-background-color: #1990ea;"/>
                 <AnchorPane layoutY="151.0" prefHeight="60.0" prefWidth="1366.0" style="-fx-background-color: #04127b;">
                     <Label fx:id="arcLbl" layoutX="18.0" layoutY="19.0" text="ARCNo : aabbcc" textFill="WHITE">
@@ -83,10 +83,10 @@
                 </Label>
                 <AnchorPane prefHeight="100.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
 
-                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="17.0" layoutY="3.0" pickOnBounds="true"
+                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="20.0" layoutY="10.0" pickOnBounds="true"
                                preserveRatio="true">
 
-                        <Image url="@../img/navylogo.png"/>
+                        <Image url="@../img/navy_logo.png"/>
 
                     </ImageView>
 

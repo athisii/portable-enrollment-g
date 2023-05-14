@@ -42,7 +42,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
-import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_RS_ERR_MSG;
 import static com.cdac.enrollmentstation.security.Asn1EncodedHexUtil.CardDataIndex;
 
 
@@ -132,28 +131,34 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         }
         if (twoFactorAuthEnabled) {
             midFingerAuth = new MIDFingerAuth(this);
-            List<String> devices = new ArrayList<>();
-            jniErrorCode = midFingerAuth.GetConnectedDevices(devices);
-            if (jniErrorCode != 0 || devices.isEmpty()) {
-                LOGGER.log(Level.INFO, () -> midFingerAuth.GetErrorMessage(jniErrorCode));
-                messageLabel.setText(GENERIC_RS_ERR_MSG);
-                return;
-            }
-            if (!midFingerAuth.IsDeviceConnected(DeviceModel.MFS100)) {
-                LOGGER.log(Level.INFO, "MFS100 device not connected");
-                messageLabel.setText("Device not connected. Please connect and try again.");
-                return;
-            }
-
-            deviceInfo = new DeviceInfo();
-            jniErrorCode = midFingerAuth.Init(DeviceModel.MFS100, deviceInfo);
-            if (jniErrorCode != 0) {
-                LOGGER.log(Level.INFO, () -> midFingerAuth.GetErrorMessage(jniErrorCode));
-                LOGGER.log(Level.INFO, GENERIC_RS_ERR_MSG);
-            }
-            isDeviceInitialized = true;
+            initFpReader();
         }
 
+    }
+
+    private boolean initFpReader() {
+        List<String> devices = new ArrayList<>();
+        jniErrorCode = midFingerAuth.GetConnectedDevices(devices);
+        if (jniErrorCode != 0 || devices.isEmpty()) {
+            LOGGER.log(Level.INFO, () -> midFingerAuth.GetErrorMessage(jniErrorCode));
+            messageLabel.setText("Single fingerprint reader not connected.");
+            return false;
+        }
+        if (!midFingerAuth.IsDeviceConnected(DeviceModel.valueFor(devices.get(0)))) {
+            LOGGER.log(Level.INFO, "Fingerprint reader not connected");
+            messageLabel.setText("Device not connected. Please connect and try again.");
+            return false;
+        }
+
+        deviceInfo = new DeviceInfo();
+        jniErrorCode = midFingerAuth.Init(DeviceModel.valueFor(devices.get(0)), deviceInfo);
+        if (jniErrorCode != 0) {
+            LOGGER.log(Level.INFO, () -> midFingerAuth.GetErrorMessage(jniErrorCode));
+            messageLabel.setText("Single fingerprint reader not initialized.");
+            return false;
+        }
+        isDeviceInitialized = true;
+        return true;
     }
 
     @FXML
@@ -211,7 +216,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             captureFingerprint();
         } catch (GenericException ex) {
             pinNoPasswordField.clear();
-            messageLabel.setText("" + ex.getMessage());
+            messageLabel.setText(ex.getMessage());
             enableControls(backBtn, loginBtn);
         }
     }
@@ -364,12 +369,9 @@ public class CardLoginController implements MIDFingerAuth_Callback {
 
 
     private void captureFingerprint() {
-        if (!isDeviceInitialized) {
-            jniErrorCode = midFingerAuth.Init(DeviceModel.MFS100, deviceInfo);
-            if (jniErrorCode != 0) {
-                LOGGER.log(Level.INFO, () -> midFingerAuth.GetErrorMessage(jniErrorCode));
-                throw new GenericException(GENERIC_ERR_MSG);
-            }
+        if (!isDeviceInitialized && (!initFpReader())) {
+            //message updated by initFpReader()
+            return;
         }
         jniErrorCode = midFingerAuth.StartCapture(MIN_QUALITY, (int) TimeUnit.SECONDS.toMillis(FINGERPRINT_CAPTURE_TIMEOUT_IN_SEC));
         if (jniErrorCode != 0) {
@@ -440,12 +442,6 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             throw new GenericException(GENERIC_ERR_MSG);
         }
         int[] matchScore = new int[1];
-        //////////////////////////////////////////////////////////////////
-        // TODO: hardcoded, but why? should read from card. Need to clarify.
-        // TODO: should be removed
-//        byte[] fmrTemplate = Base64.getDecoder().decode("Rk1SADAzMAAAAAHhAAEAAAAB0v///////////wAAAAAAAAAAAMUAxQABRQHdYEiApAED7WSAoADG0GRAcQDx0GJA4ADll2SAbQEOTGSA5gEHjWSA8ADnoWRAhACjtGRAnQFIeWSBBwDotGSA1ACOYmSBFADuumSAkgCAlWSAuAB9eWSAVgCSq2SBAgFGh2SAJgDHsmRAGwELtWSAyABg5GRADQD5oVdA2AGIAFpA6wGRfkKAqgA8fGRA2gG192SAiQEEUWSAqwDG3WRA2wDyIWRAxQEjBmSAuwEqdWSAbQDFv2SA2gC3VmSAqACem2RA+AEaIGSA4gCjzGRAeAFRcmRA/ACqzGSA6AFLB2SARQE");
-//        jniErrorCode = midFingerAuth.MatchTemplate(template, fmrTemplate, matchScore, TemplateFormat.FMR_V2011);
-
         byte[] fingerprintBytes = asn1EncodedHexByteArrayMap.get(DataType.FINGERPRINT);
         if (fingerprintBytes == null) {
             LOGGER.log(Level.SEVERE, () -> "Read null fingerprint value from card.");

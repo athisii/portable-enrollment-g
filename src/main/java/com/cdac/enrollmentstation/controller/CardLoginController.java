@@ -52,6 +52,7 @@ import static com.cdac.enrollmentstation.security.Asn1EncodedHexUtil.CardDataInd
  */
 public class CardLoginController implements MIDFingerAuth_Callback {
     private static final Logger LOGGER = ApplicationLog.getLogger(CardLoginController.class);
+    private static final String ERROR_MESSAGE = "Kindly place a valid card and try again.";
     private boolean twoFactorAuthEnabled;
     private static final String MANTRA_CARD_READER_NAME = "Mantra Reader (1.00) 00 00";
     private static final byte CARD_TYPE = 4; // Naval ID/Contractor Card value is 4
@@ -251,7 +252,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         // -1409286131 -> prerequisites failed error
         if (jniErrorCode != 0 && jniErrorCode != -1409286131) {
             LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
-            throw new GenericException(GENERIC_ERR_MSG);
+            throw new GenericException(ERROR_MESSAGE);
         }
         CRInitializeResDto crInitializeResDto = LocalCardReaderApi.getInitialize();
         // connection timeout
@@ -261,7 +262,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         jniErrorCode = crInitializeResDto.getRetVal();
         if (jniErrorCode != 0) {
             LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
-            throw new GenericException(GENERIC_ERR_MSG);
+            throw new GenericException(ERROR_MESSAGE);
         }
         String reqData;
         try {
@@ -279,7 +280,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         jniErrorCode = crWaitForConnectResDto.getRetVal();
         if (jniErrorCode != 0) {
             LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
-            throw new GenericException(GENERIC_ERR_MSG);
+            throw new GenericException(ERROR_MESSAGE);
         }
 
         try {
@@ -296,7 +297,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         jniErrorCode = crSelectAppResDto.getRetVal();
         if (jniErrorCode != 0) {
             LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
-            throw new GenericException(GENERIC_ERR_MSG);
+            throw new GenericException(ERROR_MESSAGE);
         }
         EnumMap<DataType, byte[]> ans1EncodedHexByteArrayMap = new EnumMap<>(DataType.class);
         ans1EncodedHexByteArrayMap.put(DataType.STATIC, readDataFromCard(crWaitForConnectResDto.getHandle(), DataType.STATIC));
@@ -323,7 +324,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
                 // if first request failed throw exception
                 if (offset == 0 && jniErrorCode != 0) {
                     LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
-                    throw new GenericException(GENERIC_ERR_MSG);
+                    throw new GenericException(ERROR_MESSAGE);
                 }
                 // consider 1st request responseLen  = 1024 bytes
                 // therefore, we assumed more data is left to be read,

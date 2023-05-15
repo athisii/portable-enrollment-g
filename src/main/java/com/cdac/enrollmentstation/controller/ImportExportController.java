@@ -380,6 +380,7 @@ public class ImportExportController {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             updateUI(ApplicationConstant.GENERIC_ERR_MSG);
         }
+        updateUI("Unit imported successfully.");
 
     }
 

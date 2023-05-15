@@ -1,6 +1,7 @@
 package com.cdac.enrollmentstation.api;
 
 import com.cdac.enrollmentstation.constant.HttpHeader;
+import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 
 import java.io.IOException;
@@ -85,12 +86,15 @@ public class HttpUtil {
                 noOfRetries--;
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
+            } catch (RuntimeException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage());
+                throw new GenericException("Received an invalid url or ip address. Kindly try again.");
             }
         }
         // connection timeout - very important
         // based on null value, connection status is determined is some APIs
         if (response == null || noOfRetries == 0) {
-            LOGGER.log(Level.INFO, "Connection timeout");
+            LOGGER.log(Level.SEVERE, "Connection timeout");
             return null;
         }
         return response;

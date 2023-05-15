@@ -32,7 +32,7 @@
                 </AnchorPane>
                 <AnchorPane layoutX="461.0" layoutY="251.0" prefHeight="144.0" prefWidth="487.0"
                             style="-fx-border-color: #04127b;">
-                    <TextField fx:id="textField" layoutX="154.0" layoutY="22.0" prefHeight="26.0" prefWidth="190.0"
+                    <TextField fx:id="username" layoutX="154.0" layoutY="22.0" prefHeight="26.0" prefWidth="190.0"
                                promptText="Username"/>
                     <PasswordField fx:id="passwordField" layoutX="154.0" layoutY="75.0" prefHeight="26.0"
                                    prefWidth="194.0" promptText="Password"/>

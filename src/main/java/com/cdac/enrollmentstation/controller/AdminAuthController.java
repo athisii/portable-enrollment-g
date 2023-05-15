@@ -25,7 +25,7 @@ public class AdminAuthController {
     private PasswordField passwordField;
 
     @FXML
-    private TextField textField;
+    private TextField username;
 
     @FXML
     public void showHome() throws IOException {
@@ -36,7 +36,7 @@ public class AdminAuthController {
     @FXML
     public void serverConfig() {
         try {
-            if (AuthUtil.authenticate(textField.getText(), passwordField.getText())) {
+            if (AuthUtil.authenticate(username.getText(), passwordField.getText())) {
                 App.setRoot("admin_config");
                 return;
             }
@@ -45,18 +45,18 @@ public class AdminAuthController {
             statusMsg.setText(ex.getMessage());
         }
         // clean up UI on failure
-        textField.requestFocus();
-        textField.setText("");
+        username.requestFocus();
+        username.setText("");
         passwordField.setText("");
     }
 
     public void initialize() {
         // restrict the TextField Length
-        textField.textProperty().addListener((observable, oldValue, newValue) -> limitCharacters(textField, oldValue, newValue));
+        username.textProperty().addListener((observable, oldValue, newValue) -> limitCharacters(username, oldValue, newValue));
         passwordField.textProperty().addListener((observable, oldValue, newValue) -> limitCharacters(passwordField, oldValue, newValue));
 
         // ease of use for operator
-        textField.setOnKeyPressed(event -> {
+        username.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
                 passwordField.requestFocus();
                 event.consume();
@@ -67,6 +67,8 @@ public class AdminAuthController {
                 serverConfig();
             }
         });
+        // only meant for PES(as virtual keyboard not used)
+        username.requestFocus();
     }
 
     private void limitCharacters(TextField textField, String oldValue, String newValue) {

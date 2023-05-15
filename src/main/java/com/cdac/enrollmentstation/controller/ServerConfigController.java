@@ -23,7 +23,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -104,9 +103,10 @@ public class ServerConfigController {
             messageLabel.setText(("Not a valid url."));
             return;
         }
+        homeBtn.requestFocus();
         messageLabel.setText("Fetching units...");
         disableControls(backBtn, homeBtn, editBtn, fetchUnitsBtn);
-        ForkJoinPool.commonPool().execute(this::fetchUnits);
+        new Thread(this::fetchUnits).start();
 
     }
 

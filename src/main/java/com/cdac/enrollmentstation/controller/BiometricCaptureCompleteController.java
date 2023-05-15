@@ -247,6 +247,7 @@ public class BiometricCaptureCompleteController {
         } catch (GenericException ex) {
             isDone = true;
             isEncryptedAndSaved = false;
+            countDownLatch.countDown();
             onErrorUpdateUiControls();
             return;
         }

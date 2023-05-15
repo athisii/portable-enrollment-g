@@ -31,11 +31,11 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
 
 /**
  * @author athisii, CDAC
@@ -45,6 +45,9 @@ public class BiometricCaptureCompleteController {
     //For Application Log
     private static final Logger LOGGER = ApplicationLog.getLogger(BiometricCaptureCompleteController.class);
     private static final String NOT_AVAILABLE = "Not Available";
+    private static volatile boolean isEncryptedAndSaved = false;
+    private static volatile boolean isDone = false;
+    private static final CountDownLatch countDownLatch = new CountDownLatch(1);
 
 
     @FXML
@@ -95,7 +98,7 @@ public class BiometricCaptureCompleteController {
         submitBtn.setDisable(true);
         progressIndicator.setVisible(true);
         messageLabel.setText("Please wait...");
-        ForkJoinPool.commonPool().execute(this::submitData);
+        new Thread(this::submitData).start();
     }
 
     private void submitData() {
@@ -164,10 +167,8 @@ public class BiometricCaptureCompleteController {
         }
         // starts another thread for encrypting data to avoid wasting cpu time when API call fails.
         // but this encrypted data file must be DELETED if API call succeeds
-        ForkJoinTask<Boolean> encryptionProcessFuture = ForkJoinPool.commonPool().submit(() -> {
-            LOGGER.log(Level.INFO, () -> "EncryptingThread: " + Thread.currentThread().getName());
-            return startEncryptionProcess(arcDetails.getArcNo(), jsonData);
-        });
+        Thread workerThread = new Thread(() -> startEncryptionProcess(arcDetails.getArcNo(), jsonData));
+        workerThread.start();
 
         SaveEnrollmentResDto saveEnrollmentResDto;
         // try submitting to the server.
@@ -175,48 +176,45 @@ public class BiometricCaptureCompleteController {
             saveEnrollmentResDto = MafisServerApi.postEnrollment(jsonData);
         } catch (GenericException ignored) {
             onErrorUpdateUiControls();
+            workerThread.interrupt();
             return;
         }
 
+        // to avoid spurious wakeup, keep in loop
+        while (!isDone) {
+            try {
+                countDownLatch.await();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+        }
         // connection timeout error
         // saves the data locally
         if (saveEnrollmentResDto == null) {
-            try {
-                boolean result = encryptionProcessFuture.get();
-                // encrypted successfully
-                if (result) {
-                    Platform.runLater(() -> {
-                        messageLabel.setText("Record saved successfully.");
-                        submitBtn.setDisable(true);
-                        progressIndicator.setVisible(false);
-                        homeBtn.setDisable(false);
-                        fetchArcBtn.setDisable(false);
-                    });
-                    try {
-                        SaveEnrollmentDetailsUtil.delete();
-                    } catch (GenericException ignored) {
-                        onErrorUpdateUiControls();
-                    }
-                    return;
+            if (isEncryptedAndSaved) {
+                Platform.runLater(() -> {
+                    messageLabel.setText("Record saved successfully.");
+                    submitBtn.setDisable(true);
+                    progressIndicator.setVisible(false);
+                    homeBtn.setDisable(false);
+                    fetchArcBtn.setDisable(false);
+                });
+                try {
+                    SaveEnrollmentDetailsUtil.delete();
+                } catch (GenericException ignored) {
+                    onErrorUpdateUiControls();
                 }
-            } catch (InterruptedException | ExecutionException ex) {
-                if (ex instanceof InterruptedException) {
-                    Thread.currentThread().interrupt();
-                }
-                LOGGER.log(Level.SEVERE, ex.getMessage());
+            } else {
+                onErrorUpdateUiControls();
             }
-            onErrorUpdateUiControls();
             return;
         }
 
         // checks for error response
         if (!"0".equals(saveEnrollmentResDto.getErrorCode())) {
             LOGGER.log(Level.SEVERE, () -> "Server desc: " + saveEnrollmentResDto.getDesc());
-            // runs on main thread
             updateUiIconOnServerResponse(false, saveEnrollmentResDto.getDesc());
         } else {
-            // else saved successfully on the server
-            // runs on main thread
             updateUiIconOnServerResponse(true, "Record submitted to server successfully.");
         }
 
@@ -227,30 +225,34 @@ public class BiometricCaptureCompleteController {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             onErrorUpdateUiControls();
         }
+        // deletes encrypted file saved by worker thread.
+        deleteEncryptedFile(arcDetails.getArcNo());
+    }
 
+    private void deleteEncryptedFile(String arcNumber) {
         // deletes encrypted file saved by worker thread.
         try {
-            boolean result = encryptionProcessFuture.get();
-            if (result) {
-                Files.delete(Paths.get(PropertyFile.getProperty(PropertyName.ENC_EXPORT_FOLDER) + "/" + arcDetails.getArcNo() + ".json.enc"));
+            if (isEncryptedAndSaved) {
+                Files.delete(Paths.get(PropertyFile.getProperty(PropertyName.ENC_EXPORT_FOLDER) + "/" + arcNumber + ".json.enc"));
             }
-        } catch (InterruptedException | ExecutionException | IOException ex) {
-            if (ex instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
+        } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             onErrorUpdateUiControls();
         }
-
     }
 
-    private boolean startEncryptionProcess(String arcNumber, String jsonData) {
+    private void startEncryptionProcess(String arcNumber, String jsonData) {
         try {
             encryptAndSaveLocally(arcNumber, jsonData);
-            return true;
         } catch (GenericException ex) {
+            isDone = true;
+            isEncryptedAndSaved = false;
             onErrorUpdateUiControls();
-            return false;
+            return;
+        }
+        // some exception has happened in API call, so must delete the saved file
+        if (Thread.currentThread().isInterrupted()) {
+            deleteEncryptedFile(arcNumber);
         }
     }
 
@@ -280,13 +282,13 @@ public class BiometricCaptureCompleteController {
         String subPhoto = PropertyFile.getProperty(PropertyName.IMG_SUB_FILE);
         if (subPhoto == null || subPhoto.isBlank()) {
             LOGGER.log(Level.SEVERE, "No entry for '" + PropertyName.IMG_SUB_FILE + ", in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
-            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+            throw new GenericException(GENERIC_ERR_MSG);
         }
 
         String compressPhoto = PropertyFile.getProperty(PropertyName.IMG_COMPRESS_FILE);
         if (compressPhoto == null || compressPhoto.isBlank()) {
             LOGGER.log(Level.SEVERE, "No entry for '" + PropertyName.IMG_COMPRESS_FILE + ", in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
-            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+            throw new GenericException(GENERIC_ERR_MSG);
         }
 
         Path subPhotoPath = Paths.get(subPhoto);
@@ -295,7 +297,7 @@ public class BiometricCaptureCompleteController {
         // check if photo files exists.
         if (!Files.exists(subPhotoPath) || !Files.exists(compressPhotoPath)) {
             LOGGER.log(Level.SEVERE, "Both or either sub photo and compress photo file not found.");
-            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+            throw new GenericException(GENERIC_ERR_MSG);
         }
 
         try {
@@ -303,7 +305,7 @@ public class BiometricCaptureCompleteController {
             saveEnrollmentDetails.setPhotoCompressed(Base64.getEncoder().encodeToString(Files.readAllBytes(compressPhotoPath)));
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+            throw new GenericException(GENERIC_ERR_MSG);
 
         }
         saveEnrollmentDetails.setEnrollmentStatus("PhotoCompleted");
@@ -316,17 +318,20 @@ public class BiometricCaptureCompleteController {
         String encFolderString = PropertyFile.getProperty(PropertyName.ENC_EXPORT_FOLDER);
         if (encFolderString == null || encFolderString.isBlank()) {
             LOGGER.log(Level.SEVERE, "No entry for '" + PropertyName.ENC_EXPORT_FOLDER + ", in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
-            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+            throw new GenericException(GENERIC_ERR_MSG);
         }
         Path encOutputPath = Paths.get(encFolderString + "/" + arcNo + ".json.enc");
         AesFileUtil.encrypt(jsonData, encOutputPath);
         AesFileUtil.removeCipherFromThreadLocal();
+        isEncryptedAndSaved = true;
+        isDone = true;
+        countDownLatch.countDown();
     }
 
     private void onErrorUpdateUiControls() {
         Platform.runLater(() -> {
             progressIndicator.setVisible(false);
-            messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
+            messageLabel.setText(GENERIC_ERR_MSG);
             homeBtn.setDisable(false);
             fetchArcBtn.setDisable(false);
         });

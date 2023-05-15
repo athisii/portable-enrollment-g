@@ -187,7 +187,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
 
         // connection timeout
         if (asn1EncodedHexByteArrayMap == null) {
-            messageLabel.setText(CONNECTION_TIMEOUT_MSG);
+            messageLabel.setText("Something went wrong. Please contact the system admin.");
             return;
         }
         if (!twoFactorAuthEnabled) {

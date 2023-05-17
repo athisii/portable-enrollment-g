@@ -49,7 +49,7 @@ public class PrimaryController {
             throw new GenericException("No entry for '" + PropertyName.APP_VERSION_NUMBER + "' or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
         }
         version.setText(appVersionNumber);
-        if (!App.getIsNudLogin()) {
+        if (!App.isNudLogin()) {
             importExportBtn.setDisable(true);
         }
     }

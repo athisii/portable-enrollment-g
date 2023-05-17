@@ -10,10 +10,7 @@ import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ARCDetails;
 import com.cdac.enrollmentstation.model.Unit;
-import com.cdac.enrollmentstation.security.Aes256Util;
 import com.cdac.enrollmentstation.security.AesFileUtil;
-import com.cdac.enrollmentstation.security.HmacUtil;
-import com.cdac.enrollmentstation.security.PkiUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -34,13 +31,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
 
 /**
  * @author athisii, CDAC
@@ -103,23 +99,39 @@ public class ImportExportController {
         });
         disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportBtn);
         messageLabel.setText("Fetching units.....");
-        ForkJoinPool.commonPool().execute(this::fetchAllUnits);
-        ForkJoinPool.commonPool().execute(this::updateImportedListView);
-        ForkJoinPool.commonPool().execute(this::updateCapturedBiometric);
+        App.getThreadPool().execute(this::fetchAllUnits);
+        App.getThreadPool().execute(this::updateImportedListView);
+        App.getThreadPool().execute(this::updateCapturedBiometric);
 
     }
 
     private void exportBtnAction() {
         messageLabel.setText("Exporting. Please Wait...");
-        disableControls(exportBtn, homeBtn, backBtn);
-        ForkJoinPool.commonPool().execute(this::exportData);
+        disableControls(importUnitBtn, backBtn, homeBtn, clearImportBtn, clearAllImportBtn, exportBtn);
+        App.getThreadPool().execute(this::exportData);
     }
 
     private void exportData() {
+        List<Path> encryptedArcPaths;
+        try {
+            encryptedArcPaths = getEncryptedArcPaths();
+        } catch (GenericException ex) {
+            updateUI(ex.getMessage());
+            enableControls(importUnitBtn, backBtn, homeBtn, clearImportBtn, clearAllImportBtn, exportBtn);
+            return;
+        }
+        if (encryptedArcPaths.isEmpty()) {
+            updateUI("No e-ARC to be exported.");
+            return;
+        }
+        decryptAndSendToServer(encryptedArcPaths);
+    }
+
+    private List<Path> getEncryptedArcPaths() {
         String encFolderString = PropertyFile.getProperty(PropertyName.ENC_EXPORT_FOLDER);
         if (encFolderString == null || encFolderString.isBlank()) {
             LOGGER.log(Level.SEVERE, "Entry for '" + PropertyName.ENC_EXPORT_FOLDER + "' not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
-            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+            throw new GenericException(GENERIC_ERR_MSG);
         }
         Path encFolderPath = Paths.get(encFolderString);
 
@@ -135,96 +147,74 @@ public class ImportExportController {
                 return false;
             }).collect(Collectors.toList());
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, "Error occurred while getting encrypted e-ARC files for exporting.");
-            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
-            disableControls(exportBtn);
-            enableControls(homeBtn, backBtn);
-            return;
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            throw new GenericException(GENERIC_ERR_MSG);
         }
-        if (encryptedArcPaths.isEmpty()) {
-            updateUI("No e-ARC to be exported.");
-            return;
-        }
-
-        int processorCounts = Runtime.getRuntime().availableProcessors();
-        int perProcessor = encryptedArcPaths.size() / processorCounts;
-        List<Future<Boolean>> futures = new ArrayList<>();
-        if (perProcessor > 0) {
-            for (int i = 0; i < processorCounts; i++) {
-                int effectiveFinal = i; // need to copy as value of 'i' changes quickly
-                futures.add(ForkJoinPool.commonPool().submit(() -> decryptAndSendToServer(encryptedArcPaths.subList(effectiveFinal * perProcessor, perProcessor * effectiveFinal + perProcessor))));
-            }
-        }
-        if (encryptedArcPaths.size() % processorCounts != 0) {
-            futures.add(ForkJoinPool.commonPool().submit(() -> decryptAndSendToServer(encryptedArcPaths.subList(processorCounts * perProcessor, encryptedArcPaths.size()))));
-        }
-        boolean exportedSuccessfully = true;
-        for (Future<Boolean> future : futures) {
-            try {
-                if (Boolean.FALSE.equals(future.get())) {
-                    exportedSuccessfully = false;
-                }
-            } catch (InterruptedException | ExecutionException ex) {
-                if (ex instanceof InterruptedException) {
-                    Thread.currentThread().interrupt();
-                }
-                LOGGER.log(Level.SEVERE, ex.getMessage());
-                updateUI(ApplicationConstant.GENERIC_ERR_MSG);
-                exportedSuccessfully = false;
-            }
-        }
-        if (exportedSuccessfully) {
-            updateUI("Data exported successfully.");
-            updateCapturedBiometric();
-            clearAllImportedUnits();
-            enableControls(homeBtn, backBtn);
-            removeCipherFromThreadLocal();
-        }
+        return encryptedArcPaths;
     }
 
 
-    private boolean decryptAndSendToServer(List<Path> paths) {
+    private void decryptAndSendToServer(List<Path> paths) {
         String decryptedJsonData;
         for (Path path : paths) {
-            updateUI("Exporting e-ARC: " + path.getFileName().toString().split("\\.")[0]);
-            // throws GenericException
+            String arcNumber = path.getFileName().toString().split("\\.")[0];
+            updateUI("Exporting e-ARC: " + arcNumber);
             try {
                 decryptedJsonData = AesFileUtil.decrypt(path);
             } catch (GenericException ex) {
-                removeCipherFromThreadLocal();
-                updateUI(ApplicationConstant.GENERIC_ERR_MSG);
-                enableControls(homeBtn, backBtn);
-                return false;
+                LOGGER.log(Level.SEVERE, () -> "Error decrypting arc: " + arcNumber);
+                continue;
             }
 
             SaveEnrollmentResDto saveEnrollmentResDto;
             try {
                 saveEnrollmentResDto = MafisServerApi.postEnrollment(decryptedJsonData);
-            } catch (GenericException ignored) {
-                removeCipherFromThreadLocal();
-                updateUI(ApplicationConstant.GENERIC_ERR_MSG);
-                enableControls(homeBtn, backBtn);
-                return false;
+            } catch (GenericException ex) {
+                updateUI(ex.getMessage());
+                enableControls(importUnitBtn, backBtn, homeBtn, clearImportBtn, clearAllImportBtn, exportBtn);
+                continue;
             }
             // timeout connection
             if (saveEnrollmentResDto == null) {
-                removeCipherFromThreadLocal();
                 updateUI(TIMEOUT_ERR_MSG);
-                enableControls(homeBtn, backBtn);
-                return false;
+                enableControls(importUnitBtn, backBtn, homeBtn, clearImportBtn, clearAllImportBtn, exportBtn);
+                return;
             }
 
+            if (!"0".equals(saveEnrollmentResDto.getErrorCode())) {
+                String errorMessage = saveEnrollmentResDto.getErrorCode().toLowerCase();
+                LOGGER.log(Level.SEVERE, () -> "Error Desc: " + errorMessage);
+                if (!errorMessage.contains("already") && !errorMessage.contains("provided") && !errorMessage.contains("given") && !errorMessage.contains("submitted")) {
+                    continue;
+                }
+            }
             try {
                 Files.delete(path);
             } catch (IOException ex) {
-                removeCipherFromThreadLocal();
                 LOGGER.log(Level.SEVERE, ex.getMessage());
-                updateUI(ApplicationConstant.GENERIC_ERR_MSG);
-                enableControls(homeBtn, backBtn);
-                return false;
+                updateUI(GENERIC_ERR_MSG);
+                enableControls(importUnitBtn, backBtn, homeBtn, clearImportBtn, clearAllImportBtn, exportBtn);
+                return;
             }
         }
-        return true;
+
+        List<Path> encryptedArcPaths;
+        try {
+            encryptedArcPaths = getEncryptedArcPaths();
+        } catch (GenericException ex) {
+            updateUI(ex.getMessage());
+            enableControls(importUnitBtn, backBtn, homeBtn, clearImportBtn, clearAllImportBtn, exportBtn);
+            return;
+        }
+        if (encryptedArcPaths.isEmpty()) {
+            updateUI("Record(s) exported successfully.");
+        } else {
+            updateUI("Unable to export all captured biometrics. Kindly try again.");
+            enableControls(exportBtn);
+        }
+        updateCapturedBiometric();
+        clearAllImportedUnits();
+        enableControls(homeBtn, backBtn, importUnitBtn);
     }
 
     @FXML
@@ -241,7 +231,7 @@ public class ImportExportController {
 
     public void refresh() {
         messageLabel.setText("Fetching units....");
-        ForkJoinPool.commonPool().execute(this::fetchAllUnits);
+        App.getThreadPool().execute(this::fetchAllUnits);
     }
 
     // runs in WorkerThread
@@ -320,7 +310,7 @@ public class ImportExportController {
             return;
         }
         for (String unitCode : selectedUnitCodes) {
-            ForkJoinPool.commonPool().execute(() -> importUnit(unitCode));
+            App.getThreadPool().execute(() -> importUnit(unitCode));
         }
         disableControls(importUnitBtn);
         messageLabel.setText("Importing unit. Please wait.......");
@@ -365,7 +355,7 @@ public class ImportExportController {
             jsonArcList = Singleton.getObjectMapper().writeValueAsString(arcDetailsList);
         } catch (JsonProcessingException e) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
-            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+            updateUI(GENERIC_ERR_MSG);
             return;
         }
 
@@ -378,7 +368,7 @@ public class ImportExportController {
             updateImportedListView();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
-            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+            updateUI(GENERIC_ERR_MSG);
         }
         updateUI("Unit imported successfully.");
 
@@ -406,7 +396,7 @@ public class ImportExportController {
             });
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error updating imported list view.");
-            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+            updateUI(GENERIC_ERR_MSG);
         }
     }
 
@@ -434,7 +424,7 @@ public class ImportExportController {
             updateImportedListView();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error deleting selected unit.");
-            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+            updateUI(GENERIC_ERR_MSG);
         }
 
     }
@@ -445,7 +435,7 @@ public class ImportExportController {
             updateImportedListView();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error while deleting files");
-            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+            updateUI(GENERIC_ERR_MSG);
         }
     }
 
@@ -454,7 +444,7 @@ public class ImportExportController {
             Files.delete(path);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, () -> "Error deleting selected file: " + path.getFileName());
-            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+            updateUI(GENERIC_ERR_MSG);
         }
     }
 
@@ -485,15 +475,8 @@ public class ImportExportController {
 
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error occurred while getting the count of captured biometric data");
-            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+            updateUI(GENERIC_ERR_MSG);
         }
-    }
-
-    private void removeCipherFromThreadLocal() {
-        AesFileUtil.removeCipherFromThreadLocal();
-        Aes256Util.removeCipherFromThreadLocal();
-        PkiUtil.removeCipherFromThreadLocal();
-        HmacUtil.removeCipherFromThreadLocal();
     }
 
     private void updateUI(String message) {

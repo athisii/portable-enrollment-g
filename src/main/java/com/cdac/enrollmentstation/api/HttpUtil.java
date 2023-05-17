@@ -24,7 +24,7 @@ public class HttpUtil {
 
     private static final int NO_OF_RETRIES = 1;
     private static final int CONNECTION_TIMEOUT_IN_SEC = 5;
-    private static final int WRITE_TIMEOUT_IN_SEC = 30;
+    private static final int WRITE_TIMEOUT_IN_SEC = 60;
     private static final ThreadLocal<HttpClient> HTTP_CLIENT_THREAD_LOCAL;
 
     public enum MethodType {

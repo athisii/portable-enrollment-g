@@ -27,7 +27,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -229,9 +228,9 @@ public class CameraController {
             updateImageView(msgIcon, null);
             updateImageView(resultImageView, null);
             // thread for showing live image
-            ForkJoinPool.commonPool().execute(this::liveImageThread);
+            App.getThreadPool().execute(this::liveImageThread);
             // thread for capturing photo
-            ForkJoinPool.commonPool().execute(this::capturePhotoThread);
+            App.getThreadPool().execute(this::capturePhotoThread);
         }
     }
 

@@ -28,7 +28,7 @@ public class App extends Application {
 
     static {
         int processorCount = Runtime.getRuntime().availableProcessors();
-        executorService = Executors.newFixedThreadPool(Math.min(processorCount, 4));
+        executorService = Executors.newFixedThreadPool(Math.min(processorCount, 3));
     }
 
     @Override
@@ -72,7 +72,7 @@ public class App extends Application {
         isNudLogin = nudLogin;
     }
 
-    public static boolean getIsNudLogin() {
+    public static boolean isNudLogin() {
         return isNudLogin;
     }
 }

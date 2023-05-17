@@ -32,7 +32,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -277,22 +276,22 @@ public class SlapScannerController {
             return;
         }
         clearFingerprintOnUI();
-        ForkJoinPool.commonPool().execute(this::startLeftScan);
+        App.getThreadPool().execute(this::startLeftScan);
     }
 
     private void leftScanBtnAction() {
         disableControls(scanBtn, leftScanBtn, rightScanBtn, thumbScanBtn, backBtn, captureIrisBtn);
-        ForkJoinPool.commonPool().execute(this::startLeftScan);
+        App.getThreadPool().execute(this::startLeftScan);
     }
 
     private void rightScanBtnAction() {
         disableControls(scanBtn, leftScanBtn, rightScanBtn, thumbScanBtn, backBtn, captureIrisBtn);
-        ForkJoinPool.commonPool().execute(this::startRightScan);
+        App.getThreadPool().execute(this::startRightScan);
     }
 
     private void thumbScanBtnAction() {
         disableControls(scanBtn, leftScanBtn, rightScanBtn, thumbScanBtn, backBtn, captureIrisBtn);
-        ForkJoinPool.commonPool().execute(this::startThumbScan);
+        App.getThreadPool().execute(this::startThumbScan);
     }
 
     private void startLeftScan() {
@@ -486,13 +485,13 @@ public class SlapScannerController {
             fingerSetTypeToScan = FingerSetType.RIGHT;
             isFromPrevScan = true;
             // SHOULD START FROM ANOTHER THREAD ELSE FINGERPRINT SCANNER ALWAYS STAYS ON UNTIL IT RETURNS
-            ForkJoinPool.commonPool().execute(this::startRightScan);
+            App.getThreadPool().execute(this::startRightScan);
         } else if (FingerSetType.RIGHT == fingerSetTypeToScan) {
             // second call is the result of right finger scan
             fingerSetTypeToScan = FingerSetType.THUMB;
             isFromPrevScan = true;
             // SHOULD START FROM ANOTHER THREAD ELSE FINGERPRINT SCANNER ALWAYS STAYS ON UNTIL IT RETURNS
-            ForkJoinPool.commonPool().execute(this::startThumbScan);
+            App.getThreadPool().execute(this::startThumbScan);
 
         } else if (FingerSetType.THUMB == fingerSetTypeToScan) {
             // third call is the result of thumb scan
@@ -500,7 +499,7 @@ public class SlapScannerController {
             isFromPrevScan = false;
             releaseDevice();
             // SHOULD START FROM ANOTHER THREAD ELSE FINGERPRINT SCANNER ALWAYS STAYS ON UNTIL IT RETURNS
-            ForkJoinPool.commonPool().execute(this::convertToTemplate);
+            App.getThreadPool().execute(this::convertToTemplate);
         } else {
             LOGGER.log(Level.SEVERE, UNSUPPORTED_FINGER_SET_TYPE);
             updateUI(GENERIC_RS_ERR_MSG);

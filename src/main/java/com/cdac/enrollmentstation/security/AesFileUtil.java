@@ -88,7 +88,6 @@ public class AesFileUtil {
             byte[] decryptedBytes = CIPHER_THREAD_LOCAL.get().doFinal(actualData);
             return new String(decryptedBytes, StandardCharsets.UTF_8);
         } catch (GeneralSecurityException | IOException ex) {
-            removeCipherFromThreadLocal();
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }

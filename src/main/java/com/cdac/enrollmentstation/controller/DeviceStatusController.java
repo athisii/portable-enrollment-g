@@ -23,7 +23,6 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,14 +53,8 @@ public class DeviceStatusController {
     private ImageView mafisUrlImage;
 
     private void checkDevicesStatus() {
-        ForkJoinPool.commonPool().execute(() -> {
-            LOGGER.log(Level.INFO, () -> "MafisApi:Thread: " + Thread.currentThread().getName());
-            checkMafisApi();
-        });
-        ForkJoinPool.commonPool().execute(() -> {
-            LOGGER.log(Level.INFO, () -> "SlapScanner:Thread: " + Thread.currentThread().getName());
-            checkSlapScanner();
-        });
+        App.getThreadPool().execute(this::checkMafisApi);
+        App.getThreadPool().execute(this::checkSlapScanner);
         checkCamera();
         checkIris();
     }
@@ -129,15 +122,15 @@ public class DeviceStatusController {
         } catch (InvalidPathException e) {
             LOGGER.log(Level.SEVERE, () -> PropertyFile.getProperty(PropertyName.BARCODE_FILE_PATH) + "not found.");
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, () -> "An error occur reading barcode file.");
+            LOGGER.log(Level.SEVERE, () -> "An error occurred while reading barcode file.");
             e.printStackTrace();
-            throw new GenericException("An error occur reading barcode file.");
+            throw new GenericException("An error occurred while reading barcode file.");
         }
     }
 
     private void checkMafisApi() {
         try {
-            ARCDetails arcDetails = MafisServerApi.fetchARCDetails(MafisServerApi.getArcUrl(), "123abc");
+            ARCDetails arcDetails = MafisServerApi.fetchARCDetails(MafisServerApi.getArcUrl(), "123");
             if (arcDetails == null) {
                 mafisUrlImage.setImage(RED_CROSS_IMAGE);
                 return;

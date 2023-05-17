@@ -15,6 +15,7 @@ import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -92,13 +93,12 @@ public class BiometricCaptureCompleteController {
         }
     }
 
-
     @FXML
     private void submitBtnAction() {
-        submitBtn.setDisable(true);
         progressIndicator.setVisible(true);
         messageLabel.setText("Please wait...");
-        new Thread(this::submitData).start();
+        disableControls(homeBtn, fetchArcBtn, submitBtn);
+        App.getThreadPool().execute(this::submitData);
     }
 
     private void submitData() {
@@ -165,51 +165,25 @@ public class BiometricCaptureCompleteController {
             onErrorUpdateUiControls();
             return;
         }
-        // starts another thread for encrypting data to avoid wasting cpu time when API call fails.
-        // but this encrypted data file must be DELETED if API call succeeds
-        Thread workerThread = new Thread(() -> startEncryptionProcess(arcDetails.getArcNo(), jsonData));
-        workerThread.start();
+
+        if (!App.isNudLogin()) {
+            App.getThreadPool().execute(() -> startEncryptionProcess(arcDetails.getArcNo(), jsonData));
+            return;
+        }
 
         SaveEnrollmentResDto saveEnrollmentResDto;
         // try submitting to the server.
         try {
             saveEnrollmentResDto = MafisServerApi.postEnrollment(jsonData);
-        } catch (GenericException ignored) {
-            onErrorUpdateUiControls();
-            workerThread.interrupt();
+        } catch (GenericException ex) {
+            updateUiIconOnServerResponse(false, ex.getMessage());
             return;
         }
-
-        // to avoid spurious wakeup, keep in loop
-        while (!isDone) {
-            try {
-                countDownLatch.await();
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-            }
-        }
-        // connection timeout error
-        // saves the data locally
+        //connection timeout
         if (saveEnrollmentResDto == null) {
-            if (isEncryptedAndSaved) {
-                Platform.runLater(() -> {
-                    messageLabel.setText("Record saved successfully.");
-                    submitBtn.setDisable(true);
-                    progressIndicator.setVisible(false);
-                    homeBtn.setDisable(false);
-                    fetchArcBtn.setDisable(false);
-                });
-                try {
-                    SaveEnrollmentDetailsUtil.delete();
-                } catch (GenericException ignored) {
-                    onErrorUpdateUiControls();
-                }
-            } else {
-                onErrorUpdateUiControls();
-            }
+            App.getThreadPool().execute(() -> startEncryptionProcess(arcDetails.getArcNo(), jsonData));
             return;
         }
-
         // checks for error response
         if (!"0".equals(saveEnrollmentResDto.getErrorCode())) {
             LOGGER.log(Level.SEVERE, () -> "Server desc: " + saveEnrollmentResDto.getDesc());
@@ -217,7 +191,6 @@ public class BiometricCaptureCompleteController {
         } else {
             updateUiIconOnServerResponse(true, "Record submitted to server successfully.");
         }
-
         // time for cleanup
         try {
             SaveEnrollmentDetailsUtil.delete();
@@ -225,35 +198,22 @@ public class BiometricCaptureCompleteController {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             onErrorUpdateUiControls();
         }
-        // deletes encrypted file saved by worker thread.
-        deleteEncryptedFile(arcDetails.getArcNo());
-    }
-
-    private void deleteEncryptedFile(String arcNumber) {
-        // deletes encrypted file saved by worker thread.
-        try {
-            if (isEncryptedAndSaved) {
-                Files.delete(Paths.get(PropertyFile.getProperty(PropertyName.ENC_EXPORT_FOLDER) + "/" + arcNumber + ".json.enc"));
-            }
-        } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage());
-            onErrorUpdateUiControls();
-        }
     }
 
     private void startEncryptionProcess(String arcNumber, String jsonData) {
+        enableControls(homeBtn, fetchArcBtn, submitBtn); // enable all controls regardless of operation result
         try {
             encryptAndSaveLocally(arcNumber, jsonData);
+            updateUiIconOnServerResponse(true, "Record saved successfully.");
         } catch (GenericException ex) {
-            isDone = true;
-            isEncryptedAndSaved = false;
-            countDownLatch.countDown();
-            onErrorUpdateUiControls();
-            return;
+            updateUiIconOnServerResponse(false, ex.getMessage());
         }
-        // some exception has happened in API call, so must delete the saved file
-        if (Thread.currentThread().isInterrupted()) {
-            deleteEncryptedFile(arcNumber);
+        // time for cleanup
+        try {
+            SaveEnrollmentDetailsUtil.delete();
+        } catch (GenericException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            onErrorUpdateUiControls();
         }
     }
 
@@ -271,9 +231,8 @@ public class BiometricCaptureCompleteController {
             }
             messageLabel.setText(message);
             statusImageView.setImage(new Image(inputStream));
-            submitBtn.setDisable(true);
-            homeBtn.setDisable(false);
-            fetchArcBtn.setDisable(false);
+            enableControls(homeBtn, fetchArcBtn);
+            submitBtn.setDisable(success);
             progressIndicator.setVisible(false);
         });
     }
@@ -323,21 +282,27 @@ public class BiometricCaptureCompleteController {
         }
         Path encOutputPath = Paths.get(encFolderString + "/" + arcNo + ".json.enc");
         AesFileUtil.encrypt(jsonData, encOutputPath);
-        AesFileUtil.removeCipherFromThreadLocal();
-        isEncryptedAndSaved = true;
-        isDone = true;
-        countDownLatch.countDown();
     }
 
     private void onErrorUpdateUiControls() {
         Platform.runLater(() -> {
             progressIndicator.setVisible(false);
             messageLabel.setText(GENERIC_ERR_MSG);
-            homeBtn.setDisable(false);
-            fetchArcBtn.setDisable(false);
+            enableControls(homeBtn, fetchArcBtn, submitBtn);
         });
     }
 
+    private void disableControls(Node... nodes) {
+        for (Node node : nodes) {
+            node.setDisable(true);
+        }
+    }
+
+    private void enableControls(Node... nodes) {
+        for (Node node : nodes) {
+            node.setDisable(false);
+        }
+    }
 }
 
  

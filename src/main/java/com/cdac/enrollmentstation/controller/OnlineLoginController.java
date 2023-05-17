@@ -47,10 +47,12 @@ public class OnlineLoginController {
         }));
         timeline.setCycleCount(1);
         timeline.play();
-        new Thread(() -> {
+        App.getThreadPool().execute(() -> {
             try {
                 if (AuthUtil.authenticate(textField.getText(), passwordField.getText())) {
+                    App.setNudLogin(true);
                     App.setRoot("main_screen");
+                    isDone = true;
                     return;
                 }
                 updateUi("Wrong username or password.");
@@ -61,8 +63,7 @@ public class OnlineLoginController {
             // clean up UI on failure
             clearPasswordField();
 
-        }).start();
-
+        });
     }
 
     public void initialize() {

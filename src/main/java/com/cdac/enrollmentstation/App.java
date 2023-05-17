@@ -14,12 +14,22 @@ import org.opencv.core.Core;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class App extends Application {
     private static final Logger LOGGER = ApplicationLog.getLogger(App.class);
+    private static boolean isNudLogin = false;
     private static Scene scene;
+    // GLOBAL THREAD POOL for the application.
+    private static final ExecutorService executorService;
+
+    static {
+        int processorCount = Runtime.getRuntime().availableProcessors();
+        executorService = Executors.newFixedThreadPool(Math.min(processorCount, 4));
+    }
 
     @Override
     public void start(Stage primaryStage) throws IOException {
@@ -54,4 +64,15 @@ public class App extends Application {
         launch();
     }
 
+    public static ExecutorService getThreadPool() {
+        return executorService;
+    }
+
+    public static void setNudLogin(boolean nudLogin) {
+        isNudLogin = nudLogin;
+    }
+
+    public static boolean getIsNudLogin() {
+        return isNudLogin;
+    }
 }

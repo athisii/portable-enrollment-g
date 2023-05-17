@@ -898,7 +898,7 @@ public class SlapScannerController {
             if (isDeviceInitialised) {
                 releaseDevice();
             }
-            App.setRoot("enrollment_arc");
+            App.setRoot("biometric_enrollment");
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);

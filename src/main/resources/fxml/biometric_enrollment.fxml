@@ -7,7 +7,7 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 <VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.ARCNoController">
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.BiometricEnrollmentController">
 
     <BorderPane prefHeight="768.0" prefWidth="1282.0">
         <left>

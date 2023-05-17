@@ -4,6 +4,7 @@ package com.cdac.enrollmentstation.api;
  * @author athisii, CDAC
  * Created on 29/03/23
  */
+
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
@@ -47,7 +48,7 @@ public class DirectoryLookup {
             throw new GenericException("Failed to connect with server.");
         } catch (NamingException ex) {
             LOGGER.log(Level.SEVERE, ex::getMessage);
-            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+            throw new GenericException("Connection timeout or ldap is configured incorrectly.");
         }
     }
 

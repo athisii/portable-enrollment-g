@@ -15,6 +15,7 @@ import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -27,8 +28,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -37,7 +37,9 @@ import java.util.stream.Stream;
  * @author athisii, CDAC
  * Created on 29/03/23
  */
-public class ARCNoController {
+public class BiometricEnrollmentController {
+    private String tempArc;
+
     @FXML
     public Button continueBtn;
     @FXML
@@ -69,18 +71,30 @@ public class ARCNoController {
 
     @FXML
     private Label txtBiometricOptions;
-    private static final Logger LOGGER = ApplicationLog.getLogger(ARCNoController.class);
+    private static final Logger LOGGER = ApplicationLog.getLogger(BiometricEnrollmentController.class);
 
     public void initialize() {
         backBtn.setOnAction(event -> back());
-        showArcBtn.setOnAction(event -> showArcDetails());
+        showArcBtn.setOnAction(event -> showArcBtnAction());
         continueBtn.setOnAction(event -> continueBtnAction());
 
         arcNumberTextField.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
-                showArcDetails();
+                showArcBtnAction();
             }
         });
+    }
+
+    private void showArcBtnAction() {
+        tempArc = arcNumberTextField.getText().trim();
+        if (isMalformedArc()) {
+            messageLabel.setText("Kindly enter the valid format for e-ARC number.");
+            return;
+        }
+        disableControls(showArcBtn, backBtn, continueBtn);
+        // fetches e-ARC in worker thread.
+        App.getThreadPool().execute(this::showArcDetails);
+        messageLabel.setText("Fetching details for e-ARC: " + tempArc + ". Kindly wait...");
     }
 
     private void continueBtnAction() {
@@ -95,7 +109,7 @@ public class ARCNoController {
         } else if (arcDetails.getBiometricOptions().trim().equalsIgnoreCase("both") || arcDetails.getBiometricOptions().trim().equalsIgnoreCase("biometric")) {
             setNextScreen();
         } else {
-            messageLabel.setText("Biometric capturing not required for e-ARC number: " + arcNumberTextField.getText());
+            messageLabel.setText("Biometric capturing not required for e-ARC number: " + tempArc);
             LOGGER.log(Level.INFO, "Biometric capturing not required for given e-ARC Number");
         }
 
@@ -144,13 +158,11 @@ public class ARCNoController {
                 }
                 break;
             case "PhotoCompleted":
-
             case "SUCCESS":
                 try {
                     App.setRoot("biometric_capture_complete");
                 } catch (IOException ex) {
                     LOGGER.log(Level.SEVERE, ex.getMessage());
-
                 }
                 break;
             default:
@@ -173,76 +185,76 @@ public class ARCNoController {
     }
 
     private void showArcDetails() {
-        if (isMalformedArc()) {
-            updateUI("Kindly enter correct e-ARC number.");
-            return;
-        }
         boolean alreadyCaptured;
         ARCDetails arcDetails;
         // check if already captured
-        ForkJoinTask<Boolean> alreadyCapturedFuture = ForkJoinPool.commonPool().submit(this::checkIfAlreadyCaptured);
+        Future<Boolean> alreadyCapturedFuture = App.getThreadPool().submit(this::checkIfAlreadyCaptured);
 
         // check if e-ARC number exists
-        ForkJoinTask<ARCDetails> arcDetailsFuture = ForkJoinPool.commonPool().submit(this::checkIfArcNumberExist);
+        Future<ARCDetails> arcDetailsFuture = App.getThreadPool().submit(this::checkIfArcNumberExist);
 
         // waits for both the worker threads to finish
         try {
             alreadyCaptured = alreadyCapturedFuture.get();
             arcDetails = arcDetailsFuture.get();
         } catch (InterruptedException e) {
+            enableControls(backBtn, showArcBtn);
             Thread.currentThread().interrupt();
             return;
         } catch (ExecutionException e) {
             LOGGER.log(Level.SEVERE, "Error occurred while getting value from worker thread.");
-            updateUiLabel(null);
+            enableControls(backBtn, showArcBtn);
+            updateUiDynamicLabelText(null);
             updateUI(ApplicationConstant.GENERIC_ERR_MSG);
             return;
         }
 
         if (alreadyCaptured) {
-            LOGGER.log(Level.INFO, () -> arcNumberTextField.getText() + " is already enrolled.");
-            updateUiLabel(null);
-            updateUI("Biometric already provided for e-ARC number: " + arcNumberTextField.getText());
+            LOGGER.log(Level.INFO, () -> tempArc + " is already enrolled.");
+            enableControls(backBtn, showArcBtn);
+            updateUiDynamicLabelText(null);
+            updateUI("Biometric already provided for e-ARC number: " + tempArc);
             return;
         }
 
 
         if (arcDetails == null) {
-            LOGGER.log(Level.INFO, () -> "Details not found for e-ARC number: " + arcNumberTextField.getText());
-            updateUiLabel(null);
-            updateUI("Details not found for e-ARC number: " + arcNumberTextField.getText());
+            LOGGER.log(Level.INFO, () -> "Details not found for e-ARC number: " + tempArc);
+            enableControls(backBtn, showArcBtn);
+            updateUiDynamicLabelText(null);
+            updateUI("Details not found for e-ARC number: " + tempArc);
             return;
         }
 
         if (arcDetails.getBiometricOptions() == null || arcDetails.getBiometricOptions().isBlank() || arcDetails.getBiometricOptions().trim().equalsIgnoreCase("none")) {
-            LOGGER.log(Level.INFO, () -> "Biometric capturing not required for e-ARC: " + arcNumberTextField.getText());
-            updateUiLabel(arcDetails);
-            updateUI("Biometric capturing not required for e-ARC: " + arcNumberTextField.getText());
-            continueBtn.setDisable(true);
+            LOGGER.log(Level.INFO, () -> "Biometric capturing not required for e-ARC: " + tempArc);
+            enableControls(backBtn, showArcBtn);
+            updateUiDynamicLabelText(arcDetails);
+            updateUI("Biometric capturing not required for e-ARC: " + tempArc);
             return;
         }
+        updateUiDynamicLabelText(arcDetails);
+        updateUI("Details fetched successfully for e-ARC: " + tempArc);
 
-        updateUiLabel(arcDetails);
-        messageLabel.setText("");
 
         ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
         holder.setArcDetails(arcDetails);
         SaveEnrollmentDetails saveEnrollmentDetails = new SaveEnrollmentDetails();
 
-        //throws exception -- /etc/data.txt
         try {
             saveEnrollmentDetails.setEnrollmentStationUnitID(MafisServerApi.getEnrollmentStationUnitId());
             saveEnrollmentDetails.setEnrollmentStationID(MafisServerApi.getEnrollmentStationId());
         } catch (GenericException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
+            enableControls(backBtn, showArcBtn);
+            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
             return;
         }
 
         saveEnrollmentDetails.setArcNo(arcDetails.getArcNo());
         saveEnrollmentDetails.setBiometricOptions(arcDetails.getBiometricOptions());
         holder.setSaveEnrollmentDetails(saveEnrollmentDetails);
-        continueBtn.setDisable(false);
+        enableControls(showArcBtn, backBtn, continueBtn);
     }
 
 
@@ -300,28 +312,30 @@ public class ARCNoController {
         }
     }
 
-    private void updateUiLabel(ARCDetails arcDetails) {
-        if (arcDetails == null) {
-            messageLabel.setText("Details not found for entered e-ARC number.");
-            clearLabelText(txtName, txtRank, txtApp, txtUnit, txtFinger, txtIris, txtBiometricOptions, txtArcStatus);
-            return;
-        }
-        txtName.setText(arcDetails.getName());
-        txtRank.setText(arcDetails.getRank());
-        txtApp.setText(arcDetails.getApplicantID());
-        txtUnit.setText(arcDetails.getUnit());
-        if (arcDetails.getFingers().isEmpty()) {
-            txtFinger.setText("NA");
-        } else {
-            txtFinger.setText(String.join(",", arcDetails.getFingers()));
-        }
-        if (arcDetails.getIris().isEmpty()) {
-            txtIris.setText("NA");
-        } else {
-            txtIris.setText(String.join(",", arcDetails.getIris()));
-        }
-        txtBiometricOptions.setText(arcDetails.getBiometricOptions());
-        txtArcStatus.setText(arcDetails.getArcStatus());
+    private void updateUiDynamicLabelText(ARCDetails arcDetails) {
+        Platform.runLater(() -> {
+            if (arcDetails == null) {
+                messageLabel.setText("Details not found for entered e-ARC number.");
+                clearLabelText(txtName, txtRank, txtApp, txtUnit, txtFinger, txtIris, txtBiometricOptions, txtArcStatus);
+                return;
+            }
+            txtName.setText(arcDetails.getName());
+            txtRank.setText(arcDetails.getRank());
+            txtApp.setText(arcDetails.getApplicantID());
+            txtUnit.setText(arcDetails.getUnit());
+            if (arcDetails.getFingers().isEmpty()) {
+                txtFinger.setText("NA");
+            } else {
+                txtFinger.setText(String.join(",", arcDetails.getFingers()));
+            }
+            if (arcDetails.getIris().isEmpty()) {
+                txtIris.setText("NA");
+            } else {
+                txtIris.setText(String.join(",", arcDetails.getIris()));
+            }
+            txtBiometricOptions.setText(arcDetails.getBiometricOptions());
+            txtArcStatus.setText(arcDetails.getArcStatus());
+        });
     }
 
     private void clearLabelText(Label... labels) {
@@ -332,10 +346,22 @@ public class ARCNoController {
 
     private boolean isMalformedArc() {
         // 00001-A-AA01
-        return arcNumberTextField.getText().split("-").length != 3;
+        return tempArc.split("-").length != 3;
     }
 
     private void updateUI(String message) {
         Platform.runLater(() -> messageLabel.setText(message));
+    }
+
+    private void disableControls(Node... nodes) {
+        for (Node node : nodes) {
+            node.setDisable(true);
+        }
+    }
+
+    private void enableControls(Node... nodes) {
+        for (Node node : nodes) {
+            node.setDisable(false);
+        }
     }
 }

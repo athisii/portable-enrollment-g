@@ -156,7 +156,7 @@ public class CameraController {
         try {
             ARCDetailsHolder holder = getArcDetailsHolder();
             if (holder.getArcDetails().getBiometricOptions().trim().equalsIgnoreCase("Photo")) {
-                App.setRoot("enrollment_arc");
+                App.setRoot("biometric_enrollment");
             } else {
                 App.setRoot("iris");
             }

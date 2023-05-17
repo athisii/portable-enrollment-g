@@ -86,7 +86,7 @@ public class BiometricCaptureCompleteController {
     @FXML
     private void fetchArcBtnAction() {
         try {
-            App.setRoot("enrollment_arc");
+            App.setRoot("biometric_enrollment");
         } catch (IOException ex) {
             LOGGER.log(Level.INFO, ex.getMessage());
         }

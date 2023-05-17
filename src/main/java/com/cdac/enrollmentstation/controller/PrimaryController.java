@@ -7,6 +7,7 @@ import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
 import java.io.IOException;
@@ -15,12 +16,14 @@ import java.util.logging.Logger;
 
 public class PrimaryController {
     @FXML
+    private Button importExportBtn;
+    @FXML
     private Label version;
     private static final Logger LOGGER = ApplicationLog.getLogger(PrimaryController.class);
 
     @FXML
     private void showEnrollmentHome() throws IOException {
-        App.setRoot("enrollment_arc");
+        App.setRoot("biometric_enrollment");
 
     }
 
@@ -46,6 +49,9 @@ public class PrimaryController {
             throw new GenericException("No entry for '" + PropertyName.APP_VERSION_NUMBER + "' or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
         }
         version.setText(appVersionNumber);
+        if (!App.getIsNudLogin()) {
+            importExportBtn.setDisable(true);
+        }
     }
 
 

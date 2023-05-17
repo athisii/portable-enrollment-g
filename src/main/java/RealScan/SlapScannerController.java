@@ -54,7 +54,7 @@ public class SlapScannerController {
     private static final int TIME_TO_WAIT_FOR_USER_IN_SEC = 3; // wait for users to place their fingers on sensor
     private static final int TIME_TO_WAIT_FOR_SWITCHING_FINGER_TYPE_TO_SCAN_IN_MILLIS = 100;
     private static final int SECURITY_LEVEL_FOR_SEQUENCE_CHECK = 5; // range: 0~7
-    public static final String UNSUPPORTED_FINGER_SET_TYPE = "Unsupported finger set type.";
+    private static final String UNSUPPORTED_FINGER_SET_TYPE = "Unsupported finger set type.";
     private boolean isFpScanCompleted;
     // cannot be static.
     private final int fingerprintLivenessValue = Integer.parseInt(PropertyFile.getProperty(PropertyName.FINGERPRINT_LIVENESS_VALUE).trim());
@@ -70,6 +70,7 @@ public class SlapScannerController {
     private volatile int deviceHandler;
     private volatile int captureMode; // to be used when setting capture mode.
     private volatile int slapType; // to be used during segmentation.
+    private volatile boolean isSequenceCheckFailed;
     private final RSDeviceInfo deviceInfo = new RSDeviceInfo();
     private final EnumMap<FingerSetType, RSImageInfo> fingerSetTypeToRsImageInfoMap = new EnumMap<>(FingerSetType.class);
 
@@ -295,6 +296,15 @@ public class SlapScannerController {
     }
 
     private void startLeftScan() {
+        // display the message for 2 seconds.
+        if (isSequenceCheckFailed) {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        isSequenceCheckFailed = false;
         fingerSetTypeToScan = FingerSetType.LEFT;
         if (!isDeviceInitialised) {
             LOGGER.log(Level.SEVERE, "Device is not initialised. Status of isDeviceInitialised is 'false'.");
@@ -471,6 +481,10 @@ public class SlapScannerController {
             Thread.sleep(TIME_TO_WAIT_FOR_SWITCHING_FINGER_TYPE_TO_SCAN_IN_MILLIS);
         } catch (GenericException ex) {
             updateUI(ex.getMessage());
+            if (isSequenceCheckFailed) {
+                rescanFromStart();
+                return;
+            }
             enableControls(backBtn, button);
             isFromPrevScan = false;
             return;
@@ -504,6 +518,11 @@ public class SlapScannerController {
             LOGGER.log(Level.SEVERE, UNSUPPORTED_FINGER_SET_TYPE);
             updateUI(GENERIC_RS_ERR_MSG);
         }
+    }
+
+    private void rescanFromStart() {
+        scannedFingerTypeToRsImageInfoMap.clear();
+        leftScanBtnAction();
     }
 
     private void checkLFD() {
@@ -776,6 +795,7 @@ public class SlapScannerController {
 
     // throws GenericException
     private Map<Integer, RSImageInfo> segmentSlapImage(RSImageInfo rsImageInfo) {
+        isSequenceCheckFailed = false;
         Map<String, Integer> mFingersToScanSeqMap;
         if (FingerSetType.LEFT == fingerSetTypeToScan) {
             mFingersToScanSeqMap = leftFingerToFingerTypeLinkedHashMap;
@@ -1017,7 +1037,8 @@ public class SlapScannerController {
                 jniReturnedCode = RS_SequenceCheck(1, finger, rsImageInfo.pbyImgBuf, rsImageInfo.imageWidth, rsImageInfo.imageHeight, mSlapType, seqCheckResult, SECURITY_LEVEL_FOR_SEQUENCE_CHECK);
                 if (jniReturnedCode > 0) {
                     LOGGER.log(Level.SEVERE, "Sequence check failed.");
-                    throw new GenericException("Sequence check failed. Please try again..");
+                    isSequenceCheckFailed = true;
+                    throw new GenericException("Sequence check failed. Rescanning from the start....");
                 }
                 if (jniReturnedCode < 0) {
                     LOGGER.log(Level.SEVERE, RS_GetErrString(jniReturnedCode));

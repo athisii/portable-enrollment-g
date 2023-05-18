@@ -182,9 +182,9 @@ public class ImportExportController {
             }
 
             if (!"0".equals(saveEnrollmentResDto.getErrorCode())) {
-                String errorMessage = saveEnrollmentResDto.getErrorCode().toLowerCase();
+                String errorMessage = saveEnrollmentResDto.getDesc().toLowerCase();
                 LOGGER.log(Level.SEVERE, () -> "Error Desc: " + errorMessage);
-                if (!errorMessage.contains("already") && !errorMessage.contains("provided") && !errorMessage.contains("given") && !errorMessage.contains("submitted")) {
+                if (!errorMessage.contains("already provided")) {
                     continue;
                 }
             }

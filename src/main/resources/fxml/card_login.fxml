@@ -34,13 +34,13 @@
                         <Image url="@../img/card.jpeg" />
 
                     </ImageView>
-                    <Label fx:id="cardPinLabel" layoutX="67.0" layoutY="158.0" text="Card Pin:">
+                    <Label fx:id="cardPinLabel" layoutX="34.0" layoutY="158.0" text="Personal Number:">
                         <font>
                             <Font name="System Bold" size="14.0" />
                         </font>
                     </Label>
 
-                    <PasswordField fx:id="pinNoPasswordField" layoutX="144.0" layoutY="155.0" prefHeight="26.0" prefWidth="189.0" promptText="Card PNo" />
+                    <PasswordField fx:id="pinNoPasswordField" layoutX="184.0" layoutY="155.0" prefHeight="26.0" prefWidth="189.0" promptText="Personal Number" />
 
                 </AnchorPane>
 

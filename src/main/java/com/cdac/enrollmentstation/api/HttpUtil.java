@@ -111,8 +111,4 @@ public class HttpUtil {
         }
         return response;
     }
-
-    public static void removeHttpClientFromThreadLocal() {
-        HTTP_CLIENT_THREAD_LOCAL.remove();
-    }
 }

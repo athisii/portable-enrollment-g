@@ -215,7 +215,7 @@ public class MafisServerApi {
     public static String getMafisApiUrl() {
         String mafisServerApi = PropertyFile.getProperty(PropertyName.MAFIS_API_URL);
         if (mafisServerApi == null || mafisServerApi.isBlank()) {
-            throw new GenericException("'mafis.api.url' not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+            throw new GenericException("'" + PropertyName.MAFIS_API_URL + "' not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
         }
 
         if (mafisServerApi.endsWith("/")) {

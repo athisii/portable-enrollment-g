@@ -28,7 +28,7 @@ public class Asn1EncodedHexUtil {
         USER_CATEGORY_ID(3),
         NAME(4),
         SERVICE(5),
-        PIN_NUMBER(6),
+        PN(6),
         UNIQUE_ID(7),
         RANK(8),
         DESIGNATION(9),

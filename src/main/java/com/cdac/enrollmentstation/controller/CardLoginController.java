@@ -7,11 +7,13 @@ import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.*;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
+import com.cdac.enrollmentstation.model.CardHotlistDetail;
 import com.cdac.enrollmentstation.security.Asn1EncodedHexUtil;
 import com.cdac.enrollmentstation.util.LocalCardReaderErrMsgUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.mantra.midfingerauth.DeviceInfo;
 import com.mantra.midfingerauth.MIDFingerAuth;
 import com.mantra.midfingerauth.MIDFingerAuth_Callback;
@@ -33,10 +35,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.EnumMap;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,14 +60,12 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     private static final byte STATIC_TYPE = 21; // Static file -> 21
     private static final byte FINGERPRINT_TYPE = 25; // Fingerprint file -> 25
     private static final int CARD_READER_MAX_BUFFER_SIZE = 1024; // Max bytes card can handle
-    private static final String CONNECTION_TIMEOUT_MSG = "Connection timeout. Please try again.";
     private static final int MAX_LENGTH = 30;
     private int jniErrorCode;
     private EnumMap<DataType, byte[]> asn1EncodedHexByteArrayMap; // GLOBAL data store.
 
     private enum DataType {
-        STATIC(STATIC_TYPE),
-        FINGERPRINT(FINGERPRINT_TYPE);
+        STATIC(STATIC_TYPE), FINGERPRINT(FINGERPRINT_TYPE);
         private final byte value;
 
         DataType(byte val) {
@@ -193,7 +192,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         }
         if (!twoFactorAuthEnabled) {
             try {
-                authenticateByPin();
+                authenticateByPN();
                 App.setRoot("main_screen");
             } catch (Exception ex) {
                 if (ex instanceof IOException) {
@@ -209,7 +208,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         // if reached here, then two-factor auth is enabled.
         try {
             if (!isPinAuthCompleted) {
-                authenticateByPin();
+                authenticateByPN();
                 isPinAuthCompleted = true;
             }
             cardPinLabel.setVisible(false);
@@ -226,16 +225,34 @@ public class CardLoginController implements MIDFingerAuth_Callback {
 
     // throws GenericException
     // Caller must handle the exception
-    private void authenticateByPin() {
+    private void authenticateByPN() {
         // gets pin code from card
-        String cardPinNumber = Asn1EncodedHexUtil.extractFromStaticAns1EncodedHex(asn1EncodedHexByteArrayMap.get(DataType.STATIC), CardDataIndex.PIN_NUMBER);
-        if (cardPinNumber == null) {
-            LOGGER.log(Level.SEVERE, "Received null value from card.");
+        String pNumber = Asn1EncodedHexUtil.extractFromStaticAns1EncodedHex(asn1EncodedHexByteArrayMap.get(DataType.STATIC), CardDataIndex.PN);
+        String cardNumber = Asn1EncodedHexUtil.extractFromStaticAns1EncodedHex(asn1EncodedHexByteArrayMap.get(DataType.STATIC), CardDataIndex.CARD_NUMBER);
+        if (pNumber == null || pNumber.isBlank() || cardNumber == null || cardNumber.isBlank()) {
+            LOGGER.log(Level.SEVERE, "Received a null or empty value for PN or Card Number from card.");
             throw new GenericException(GENERIC_ERR_MSG);
         }
-        if (!cardPinNumber.equals(pinNoPasswordField.getText())) {
-            LOGGER.log(Level.INFO, "Card pin number and user input pin number do not match.");
-            throw new GenericException("Invalid card pin number.");
+        String cardHotlistedFilePathString = PropertyFile.getProperty(PropertyName.CARD_HOTLISTED_FILE);
+        if (cardHotlistedFilePathString == null || cardHotlistedFilePathString.isBlank()) {
+            throw new GenericException("'+" + PropertyName.CARD_HOTLISTED_FILE + "' is empty or not found in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+        }
+        List<CardHotlistDetail> cardHotlistDetails;
+        try {
+            cardHotlistDetails = Singleton.getObjectMapper().readValue(Files.readAllBytes(Paths.get(cardHotlistedFilePathString)), new TypeReference<>() {
+            });
+        } catch (IOException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            throw new GenericException(GENERIC_ERR_MSG);
+        }
+        Optional<CardHotlistDetail> optionalCardHotlistDetail = cardHotlistDetails.stream().filter(cardHotlistDetail -> cardHotlistDetail.getCardNo() != null && cardHotlistDetail.getPNo() != null && (cardHotlistDetail.getCardNo().trim().equals(cardNumber.trim()) || cardHotlistDetail.getPNo().trim().equals(pNumber.trim()))).findAny();
+        if (optionalCardHotlistDetail.isPresent()) {
+            LOGGER.log(Level.INFO, () -> "Hotlisted card or pn used. CN: " + optionalCardHotlistDetail.get().getCardNo() + " PN: " + optionalCardHotlistDetail.get().getPNo());
+            throw new GenericException("The Personal Number/Card Number is already hotlisted. Kindly try again.");
+        }
+        if (!pNumber.equals(pinNoPasswordField.getText())) {
+            LOGGER.log(Level.INFO, "Personal Number and user input number does not matched.");
+            throw new GenericException("Invalid Personal Number.");
         }
     }
 

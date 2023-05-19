@@ -63,5 +63,8 @@ public class PropertyName {
     public static final String FINGERPRINT_LIVENESS_VALUE = "fingerprint.liveness.value";
     public static final String TWO_FACTOR_AUTH_ENABLED = "two.factor.auth.enabled";
     public static final String APP_VERSION_NUMBER = "app.version.number";
+    public static final String CARD_API_HOTLISTED_URL = "card.api.hotlisted.url";
+    public static final String CARD_HOTLISTED_FILE = "card.hotlisted.file";
+
 
 }

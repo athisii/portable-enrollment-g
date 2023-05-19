@@ -166,6 +166,7 @@ public class BiometricCaptureCompleteController {
             return;
         }
 
+        // saves locally on card login.
         if (!App.isNudLogin()) {
             App.getThreadPool().execute(() -> startEncryptionProcess(arcDetails.getArcNo(), jsonData));
             return;

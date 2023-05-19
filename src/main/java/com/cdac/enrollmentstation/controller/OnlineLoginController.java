@@ -60,7 +60,6 @@ public class OnlineLoginController {
     private void authenticateUser() {
         try {
             if (AuthUtil.authenticate(textField.getText(), passwordField.getText())) {
-                App.setNudLogin(true);
                 App.setRoot("main_screen");
                 isDone = true;
                 return;
@@ -90,6 +89,7 @@ public class OnlineLoginController {
                 loginBtnAction();
             }
         });
+        App.setNudLogin(true);
     }
 
     private void limitCharacters(TextField textField, String oldValue, String newValue) {

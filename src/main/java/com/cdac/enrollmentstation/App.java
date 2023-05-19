@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 
 public class App extends Application {
     private static final Logger LOGGER = ApplicationLog.getLogger(App.class);
-    private static boolean isNudLogin = false;
+    private static volatile boolean isNudLogin;
     private static Scene scene;
     // GLOBAL THREAD POOL for the application.
     private static final ExecutorService executorService;

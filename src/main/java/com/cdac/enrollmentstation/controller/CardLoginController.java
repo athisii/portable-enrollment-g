@@ -133,7 +133,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             midFingerAuth = new MIDFingerAuth(this);
             initFpReader();
         }
-
+        App.setNudLogin(false);
     }
 
     private boolean initFpReader() {

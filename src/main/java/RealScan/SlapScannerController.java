@@ -167,7 +167,7 @@ public class SlapScannerController {
             initIEngineLicense();
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
+            messageLabel.setText(ex.getMessage());
             scanBtn.setDisable(true);
             return;
         }

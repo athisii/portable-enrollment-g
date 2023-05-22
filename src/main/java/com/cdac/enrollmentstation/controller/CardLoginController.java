@@ -36,6 +36,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -238,12 +239,18 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             throw new GenericException("'+" + PropertyName.CARD_HOTLISTED_FILE + "' is empty or not found in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
         }
         List<CardHotlistDetail> cardHotlistDetails;
+        Path path = Paths.get(cardHotlistedFilePathString);
         try {
-            cardHotlistDetails = Singleton.getObjectMapper().readValue(Files.readAllBytes(Paths.get(cardHotlistedFilePathString)), new TypeReference<>() {
+            cardHotlistDetails = Singleton.getObjectMapper().readValue(Files.readAllBytes(path), new TypeReference<>() {
             });
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
-            throw new GenericException(GENERIC_ERR_MSG);
+            try {
+                Files.writeString(path, "[]");
+                cardHotlistDetails = new ArrayList<>();
+            } catch (IOException ex1) {
+                throw new GenericException(ex1.getMessage());
+            }
         }
         Optional<CardHotlistDetail> optionalCardHotlistDetail = cardHotlistDetails.stream().filter(cardHotlistDetail -> cardHotlistDetail.getCardNo() != null && cardHotlistDetail.getPNo() != null && (cardHotlistDetail.getCardNo().trim().equals(cardNumber.trim()) || cardHotlistDetail.getPNo().trim().equals(pNumber.trim()))).findAny();
         if (optionalCardHotlistDetail.isPresent()) {

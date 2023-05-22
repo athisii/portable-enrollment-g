@@ -248,7 +248,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         Optional<CardHotlistDetail> optionalCardHotlistDetail = cardHotlistDetails.stream().filter(cardHotlistDetail -> cardHotlistDetail.getCardNo() != null && cardHotlistDetail.getPNo() != null && (cardHotlistDetail.getCardNo().trim().equals(cardNumber.trim()) || cardHotlistDetail.getPNo().trim().equals(pNumber.trim()))).findAny();
         if (optionalCardHotlistDetail.isPresent()) {
             LOGGER.log(Level.INFO, () -> "Hotlisted card or pn used. CN: " + optionalCardHotlistDetail.get().getCardNo() + " PN: " + optionalCardHotlistDetail.get().getPNo());
-            throw new GenericException("The Personal Number/Card Number is already hotlisted. Kindly try again.");
+            throw new GenericException("The Personal Number/Card Number is already hotlisted.");
         }
         if (!pNumber.equals(pinNoPasswordField.getText())) {
             LOGGER.log(Level.INFO, "Personal Number and user input number does not matched.");

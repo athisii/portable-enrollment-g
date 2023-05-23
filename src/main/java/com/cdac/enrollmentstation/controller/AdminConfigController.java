@@ -49,6 +49,9 @@ public class AdminConfigController {
     }
 
     @FXML
+    private Button serverConfigBtn;
+
+    @FXML
     private Label messageLabel;
     @FXML
     private Button downloadBtn;
@@ -83,6 +86,13 @@ public class AdminConfigController {
         liveFpTextField.setText(String.valueOf(fingerprintLivenessValue));
         liveFpBtn.setOnAction(event -> liveFpBtnAction());
         downloadBtn.setOnAction(event -> downloadBtnAction());
+
+        if (!App.isNudLogin()) {
+            downloadBtn.setDisable(true);
+            liveFpBtn.setDisable(true);
+            serverConfigBtn.setDisable(true);
+        }
+
     }
 
     private void updateUi(String message) {
@@ -121,7 +131,7 @@ public class AdminConfigController {
 
             if (cardHotlistDetails == null) {
                 enableControls(downloadBtn);
-                updateUi("Connection timeout or received a null value.");
+                updateUi("Connection timeout or received an unexpected value from server.");
                 return;
             }
             try {
@@ -170,8 +180,8 @@ public class AdminConfigController {
 
     @FXML
     public void closeApp() {
-        Platform.exit();
         LOGGER.log(Level.INFO, "Application Close Call made");
+        Platform.exit();
     }
 
     @FXML
@@ -191,8 +201,8 @@ public class AdminConfigController {
 
 
     @FXML
-    public void logOut() throws IOException {
-        App.setRoot("admin_auth");
+    public void backBtnAction() throws IOException {
+        App.setRoot("main_screen");
 
     }
 

@@ -202,7 +202,6 @@ public class BiometricCaptureCompleteController {
     }
 
     private void startEncryptionProcess(String arcNumber, String jsonData) {
-        enableControls(homeBtn, fetchArcBtn, submitBtn); // enable all controls regardless of operation result
         try {
             encryptAndSaveLocally(arcNumber, jsonData);
             updateUiIconOnServerResponse(true, "Record saved successfully.");

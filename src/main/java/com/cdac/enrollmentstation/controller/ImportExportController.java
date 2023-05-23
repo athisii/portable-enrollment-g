@@ -340,6 +340,7 @@ public class ImportExportController {
         }
 
         if (arcDetailsList.isEmpty()) {
+            enableControls(importUnitBtn);
             updateUI("No e-ARC found for imported unit.");
             return;
         }
@@ -356,6 +357,7 @@ public class ImportExportController {
         } catch (JsonProcessingException e) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             updateUI(GENERIC_ERR_MSG);
+            enableControls(importUnitBtn);
             return;
         }
 
@@ -363,14 +365,13 @@ public class ImportExportController {
         try {
             // throws exception
             Files.writeString(Path.of(filePath), jsonArcList, StandardCharsets.UTF_8);
-            enableControls(importUnitBtn);
-            updateUI("");
             updateImportedListView();
+            updateUI("Unit imported successfully.");
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             updateUI(GENERIC_ERR_MSG);
         }
-        updateUI("Unit imported successfully.");
+        enableControls(importUnitBtn);
 
     }
 

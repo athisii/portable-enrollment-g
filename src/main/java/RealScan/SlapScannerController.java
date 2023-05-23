@@ -39,7 +39,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static RealScan.RealScan_JNI.*;
-import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_RS_ERR_MSG;
 import static com.cdac.enrollmentstation.model.ARCDetailsHolder.getArcDetailsHolder;
 
@@ -549,8 +548,8 @@ public class SlapScannerController {
             throw new GenericException("Unsupported finger set type: ");
         }
         if (mFingersToScanSeqMap.size() != rsLfdResult.nNumofFinger) {
-            LOGGER.log(Level.SEVERE, () -> "Finger counts doesn't matched.");
-            throw new GenericException(GENERIC_ERR_MSG);
+            LOGGER.log(Level.SEVERE, () -> "The finger count doesn't match.");
+            throw new GenericException("The finger count doesn't match.");
         }
         for (int i = 0; i < mFingersToScanSeqMap.size(); i++) {
             // exit immediately if fake fingerprint captured.

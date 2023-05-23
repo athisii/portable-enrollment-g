@@ -4,7 +4,6 @@ import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.api.MafisServerApi;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
-import com.cdac.enrollmentstation.dto.SaveEnrollmentResDto;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.*;
@@ -165,40 +164,8 @@ public class BiometricCaptureCompleteController {
             onErrorUpdateUiControls();
             return;
         }
-
-        // saves locally on card login.
-        if (!App.isNudLogin()) {
-            App.getThreadPool().execute(() -> startEncryptionProcess(arcDetails.getArcNo(), jsonData));
-            return;
-        }
-
-        SaveEnrollmentResDto saveEnrollmentResDto;
-        // try submitting to the server.
-        try {
-            saveEnrollmentResDto = MafisServerApi.postEnrollment(jsonData);
-        } catch (GenericException ex) {
-            updateUiIconOnServerResponse(false, ex.getMessage());
-            return;
-        }
-        //connection timeout
-        if (saveEnrollmentResDto == null) {
-            App.getThreadPool().execute(() -> startEncryptionProcess(arcDetails.getArcNo(), jsonData));
-            return;
-        }
-        // checks for error response
-        if (!"0".equals(saveEnrollmentResDto.getErrorCode())) {
-            LOGGER.log(Level.SEVERE, () -> "Server desc: " + saveEnrollmentResDto.getDesc());
-            updateUiIconOnServerResponse(false, saveEnrollmentResDto.getDesc());
-        } else {
-            updateUiIconOnServerResponse(true, "Record submitted to server successfully.");
-        }
-        // time for cleanup
-        try {
-            SaveEnrollmentDetailsUtil.delete();
-        } catch (GenericException ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage());
-            onErrorUpdateUiControls();
-        }
+        // saves locally
+        startEncryptionProcess(arcDetails.getArcNo(), jsonData);
     }
 
     private void startEncryptionProcess(String arcNumber, String jsonData) {

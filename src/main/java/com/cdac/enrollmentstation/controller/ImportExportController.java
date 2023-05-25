@@ -349,7 +349,7 @@ public class ImportExportController {
         unitId = firstArcDetails.getArcNo().split("-")[0];
         unitCaption = firstArcDetails.getUnit();
 
-
+        unitCode = unitCode.replaceAll("[^a-zA-Z0-9]", "");
         String jsonArcList;
         try {
             // throws exception
@@ -372,7 +372,6 @@ public class ImportExportController {
             updateUI(GENERIC_ERR_MSG);
         }
         enableControls(importUnitBtn);
-
     }
 
     private void updateImportedListView() {

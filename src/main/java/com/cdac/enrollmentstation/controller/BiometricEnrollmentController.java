@@ -226,7 +226,7 @@ public class BiometricEnrollmentController {
             return;
         }
 
-        if (arcDetails.getBiometricOptions() == null || arcDetails.getBiometricOptions().isBlank() || arcDetails.getBiometricOptions().trim().equalsIgnoreCase("none")) {
+        if (arcDetails.getBiometricOptions() == null || arcDetails.getBiometricOptions().isBlank() || arcDetails.getBiometricOptions().trim().equalsIgnoreCase("none") || arcDetails.getBiometricOptions().trim().equalsIgnoreCase("no")) {
             LOGGER.log(Level.INFO, () -> "Biometric capturing not required for e-ARC: " + tempArc);
             enableControls(backBtn, showArcBtn);
             updateUiDynamicLabelText(arcDetails);

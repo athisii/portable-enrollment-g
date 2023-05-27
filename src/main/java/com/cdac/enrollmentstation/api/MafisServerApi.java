@@ -194,8 +194,10 @@ public class MafisServerApi {
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
         if (arcDetailsList.getErrorCode() != 0) {
-            LOGGER.log(Level.INFO, () -> ApplicationConstant.GENERIC_SERVER_ERR_MSG + arcDetailsList.getDesc());
-            throw new GenericException(arcDetailsList.getDesc());
+            String desc = arcDetailsList.getDesc();
+            desc = desc.replace("ARC", "e-ARC");
+            LOGGER.log(Level.INFO, desc);
+            throw new GenericException(desc);
         }
         return arcDetailsList.getArcDetails();
     }

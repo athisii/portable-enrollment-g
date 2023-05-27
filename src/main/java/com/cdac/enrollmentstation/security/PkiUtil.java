@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.cert.Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,8 +30,10 @@ public class PkiUtil {
     private static final KeyStore keyStore;
     private static final InputStream inputStream;
     private static final String PASSWORD;
-    private static final String ALIAS;
-    private static final KeyPair keyPair;
+    private static final String ALIAS_MANTRA;
+    private static final String ALIAS_TECHM;
+    private static final KeyPair mantraKeyPair;
+    private static final PublicKey techmPublicKey;
 
     private static final ThreadLocal<Cipher> CIPHER_THREAD_LOCAL = ThreadLocal.withInitial(() -> {
         try {
@@ -46,17 +47,16 @@ public class PkiUtil {
     static {
         try {
             PASSWORD = PropertyFile.getProperty(PropertyName.JKS_PASSWORD);
-            ALIAS = PropertyFile.getProperty(PropertyName.JKS_ALIAS);
+            ALIAS_MANTRA = PropertyFile.getProperty(PropertyName.JKS_ALIAS_MANTRA);
+            ALIAS_TECHM = PropertyFile.getProperty(PropertyName.JKS_ALIAS_TECHM);
             inputStream = new FileInputStream(PropertyFile.getProperty(PropertyName.JKS_CERT_FILE));
             keyStore = KeyStore.getInstance("PKCS12");
             keyStore.load(inputStream, PASSWORD.toCharArray());
-            if (!keyStore.containsAlias(ALIAS)) {
-                throw new GenericException("Not found for key with alias: " + ALIAS);
-            }
-            PrivateKey privateKey = (PrivateKey) keyStore.getKey(ALIAS, PASSWORD.toCharArray());
-            Certificate certificate = keyStore.getCertificate(ALIAS);
-            PublicKey publicKey = certificate.getPublicKey();
-            keyPair = new KeyPair(publicKey, privateKey);
+            techmPublicKey = keyStore.getCertificate(ALIAS_TECHM).getPublicKey();
+            // Mantra key
+            PrivateKey mantraPrivateKey = (PrivateKey) keyStore.getKey(ALIAS_MANTRA, PASSWORD.toCharArray());
+            PublicKey mantraPublicKey = keyStore.getCertificate(ALIAS_MANTRA).getPublicKey();
+            mantraKeyPair = new KeyPair(mantraPublicKey, mantraPrivateKey);
         } catch (GeneralSecurityException | IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
@@ -67,7 +67,7 @@ public class PkiUtil {
     // return encrypted bytes
     public static synchronized byte[] encrypt(String data) {
         try {
-            CIPHER_THREAD_LOCAL.get().init(Cipher.ENCRYPT_MODE, keyPair.getPublic());
+            CIPHER_THREAD_LOCAL.get().init(Cipher.ENCRYPT_MODE, techmPublicKey);
             return CIPHER_THREAD_LOCAL.get().doFinal(data.getBytes(StandardCharsets.UTF_8));
         } catch (GeneralSecurityException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
@@ -79,7 +79,7 @@ public class PkiUtil {
     // return decrypted String
     public static synchronized String decrypt(byte[] encryptedData) {
         try {
-            CIPHER_THREAD_LOCAL.get().init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
+            CIPHER_THREAD_LOCAL.get().init(Cipher.DECRYPT_MODE, mantraKeyPair.getPrivate());
             byte[] decryptedInput = CIPHER_THREAD_LOCAL.get().doFinal(encryptedData);
             return new String(decryptedInput, StandardCharsets.UTF_8);
         } catch (GeneralSecurityException ex) {

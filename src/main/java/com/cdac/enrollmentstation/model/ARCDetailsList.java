@@ -31,8 +31,4 @@ public class ARCDetailsList {
 
     @JsonProperty("arcDetails")
     List<ARCDetails> arcDetails;
-
-    @JsonIgnore
-    Map<String, Object> additionalProperties = new HashMap<>();
-
 }

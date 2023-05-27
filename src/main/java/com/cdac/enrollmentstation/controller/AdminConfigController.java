@@ -160,7 +160,7 @@ public class AdminConfigController {
             try {
                 number = Integer.parseInt(inputValue);
                 if (number < FINGERPRINT_LIVENESS_MIN || number > FINGERPRINT_LIVENESS_MAX) {
-                    throw new NumberFormatException("Invalid fingerprint value");
+                    throw new NumberFormatException("Invalid fingerprint value.");
                 }
             } catch (NumberFormatException ex) {
                 liveFpTextField.setText("");

@@ -16,16 +16,16 @@
 
                 <Button fx:id="capturePhotoBtn" disable="true" layoutX="804.0" layoutY="666.0" maxHeight="36.0"
                         maxWidth="163.0" minHeight="36.0" minWidth="150.0" mnemonicParsing="false"
-                        onAction="#cameraCapture" onTouchPressed="#cameraCapture" prefHeight="36.0" prefWidth="163.0"
+                        onAction="#capturePhotoBtnAction" onTouchPressed="#capturePhotoBtnAction" prefHeight="36.0" prefWidth="163.0"
                         style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="CAPTURE PHOTO"
                         textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <Button fx:id="captureIrisBtn" layoutX="630.0" layoutY="666.0" maxHeight="36.0" maxWidth="150.0"
-                        minHeight="36.0" minWidth="150.0" mnemonicParsing="false" onAction="#captureIrisBtnAction"
-                        onTouchPressed="#captureIrisBtnAction" prefHeight="36.0" prefWidth="150.0"
+                <Button fx:id="scanBtn" layoutX="630.0" layoutY="666.0" maxHeight="36.0" maxWidth="150.0"
+                        minHeight="36.0" minWidth="150.0" mnemonicParsing="false" onAction="#scanBtnAction"
+                        onTouchPressed="#scanBtnAction" prefHeight="36.0" prefWidth="150.0"
                         style="-fx-background-color: #3eb650; -fx-background-radius: 20 20 20 20;" text="SCAN"
                         textFill="WHITE">
                     <font>

@@ -161,8 +161,16 @@ public class ImportExportController {
             updateUI("Exporting e-ARC: " + arcNumber);
             try {
                 decryptedJsonData = AesFileUtil.decrypt(path);
-            } catch (GenericException ex) {
+            } catch (GenericException ignored) {
                 LOGGER.log(Level.SEVERE, () -> "Error decrypting arc: " + arcNumber);
+                try {
+                    Files.delete(path);
+                } catch (IOException ex) {
+                    LOGGER.log(Level.SEVERE, ex.getMessage());
+                    updateUI(GENERIC_ERR_MSG);
+                    enableControls(importUnitBtn, backBtn, homeBtn, clearImportBtn, clearAllImportBtn, exportBtn);
+                    return;
+                }
                 continue;
             }
 

@@ -14,7 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class LoginController {
-    private static final Logger LOGGER = ApplicationLog.getLogger(PrimaryController.class);
+    private static final Logger LOGGER = ApplicationLog.getLogger(LoginController.class);
 
     @FXML
     private Label version;

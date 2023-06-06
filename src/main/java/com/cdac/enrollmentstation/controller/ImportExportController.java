@@ -122,6 +122,7 @@ public class ImportExportController {
         }
         if (encryptedArcPaths.isEmpty()) {
             updateUI("No e-ARC to be exported.");
+            enableControls(importUnitBtn, backBtn, homeBtn, clearImportBtn, clearAllImportBtn, exportBtn);
             return;
         }
         decryptAndSendToServer(encryptedArcPaths);

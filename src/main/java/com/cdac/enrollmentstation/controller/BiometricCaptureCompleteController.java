@@ -171,7 +171,7 @@ public class BiometricCaptureCompleteController {
     private void startEncryptionProcess(String arcNumber, String jsonData) {
         try {
             encryptAndSaveLocally(arcNumber, jsonData);
-            updateUiIconOnServerResponse(true, "Record saved successfully.");
+            updateUiIconOnServerResponse(true, "Applicant's Biometric Captured Successfully.");
         } catch (GenericException ex) {
             updateUiIconOnServerResponse(false, ex.getMessage());
         }

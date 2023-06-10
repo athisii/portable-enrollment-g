@@ -41,6 +41,8 @@ public class App extends Application {
         scene = new Scene(loadFXML("login"), 1366, 768);
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             LOGGER.log(Level.INFO, () -> "Caught by default Uncaught Exception Handler. Will exit now");
+            LOGGER.log(Level.INFO, () -> "Caused: " + throwable.getCause());
+            LOGGER.log(Level.INFO, () -> "Message: " + throwable.getMessage());
             throwable.printStackTrace();
         });
         primaryStage.initStyle(StageStyle.UNDECORATED);

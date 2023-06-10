@@ -16,6 +16,7 @@ import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -23,6 +24,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 
 import java.io.IOException;
@@ -102,7 +104,7 @@ public class ImportExportController {
         App.getThreadPool().execute(this::fetchAllUnits);
         App.getThreadPool().execute(this::updateImportedListView);
         App.getThreadPool().execute(this::updateCapturedBiometric);
-
+        capturedArcListView.addEventFilter(MouseEvent.MOUSE_PRESSED, Event::consume);
     }
 
     private void exportBtnAction() {

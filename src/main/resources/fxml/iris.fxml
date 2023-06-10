@@ -23,9 +23,9 @@
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
-                <Pane layoutX="744.0" layoutY="367.0" prefHeight="184.0" prefWidth="200.0" style="-fx-border-color: #000000; -fx-border-width: 2px;">
+                <Pane layoutX="744.0" layoutY="367.0" prefHeight="183.0" prefWidth="200.0" style="-fx-border-color: #000000; -fx-border-width: 2px;">
 
-                    <ImageView fx:id="rightIrisImageView" fitHeight="179.0" fitWidth="184.0" layoutX="2.0" layoutY="2.0" pickOnBounds="true" preserveRatio="true">
+                    <ImageView fx:id="rightIrisImageView" fitHeight="177.0" fitWidth="188.0" layoutX="12.0" layoutY="1.0" pickOnBounds="true" preserveRatio="true">
 
                         <Image url="@../img/iris.jpg" />
                     </ImageView>
@@ -33,7 +33,7 @@
                 </Pane>
                 <Pane layoutX="466.0" layoutY="368.0" prefHeight="183.0" prefWidth="200.0" style="-fx-border-width: 2px; -fx-border-color: #000000;">
 
-                    <ImageView fx:id="leftIrisImageView" fitHeight="178.0" fitWidth="185.0" layoutX="2.0" layoutY="2.0" pickOnBounds="true" preserveRatio="true">
+                    <ImageView fx:id="leftIrisImageView" fitHeight="177.0" fitWidth="188.0" layoutX="11.0" layoutY="1.0" pickOnBounds="true" preserveRatio="true">
 
                         <Image url="@../img/iris.jpg" />
                     </ImageView>
@@ -89,12 +89,12 @@
                     <Label layoutX="906.0" layoutY="24.0" prefHeight="16.0" prefWidth="22.0" text="5" />
 
                 </AnchorPane>
-                <Label alignment="CENTER" layoutX="320.0" layoutY="322.0" prefHeight="20.0" prefWidth="649.0" text="Hold the IRIS scanner correctly, keep eyes wide open and press scan button" textAlignment="CENTER">
+                <Label alignment="CENTER" layoutX="360.0" layoutY="322.0" prefHeight="20.0" prefWidth="660.0" text="Press SCAN button, hold the IRIS scanner correctly and keep eyes wide open" textAlignment="CENTER">
                     <font>
                         <Font name="System Bold" size="15.0" />
                     </font>
                 </Label>
-                <ImageView fitHeight="108.0" fitWidth="122.0" layoutX="997.0" layoutY="278.0" pickOnBounds="true" preserveRatio="true">
+                <ImageView fitHeight="108.0" fitWidth="122.0" layoutX="1046.0" layoutY="281.0" pickOnBounds="true" preserveRatio="true">
                     <Image url="@../img/iris_image.png" />
 
                 </ImageView>

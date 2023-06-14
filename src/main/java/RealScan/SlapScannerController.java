@@ -24,6 +24,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.text.Text;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -39,6 +40,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static RealScan.RealScan_JNI.*;
+import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_RS_ERR_MSG;
 import static com.cdac.enrollmentstation.model.ARCDetailsHolder.getArcDetailsHolder;
 
@@ -146,6 +148,10 @@ public class SlapScannerController {
     private Button confirmYesBtn;
     @FXML
     private Button confirmNoBtn;
+    @FXML
+    private Text confirmText;
+    private Button currentEnabledButton;
+
 
     @FXML
     private ImageView rawFingerprintImageView;
@@ -177,7 +183,7 @@ public class SlapScannerController {
         leftScanBtn.setOnAction(event -> leftScanBtnAction());
         rightScanBtn.setOnAction(event -> rightScanBtnAction());
         thumbScanBtn.setOnAction(event -> thumbScanBtnAction());
-        backBtn.setOnAction(event -> back());
+        backBtn.setOnAction(event -> backBtnAction());
         captureIrisBtn.setOnAction(event -> showIris());
         confirmNoBtn.setOnAction(event -> confirmStay());
         confirmYesBtn.setOnAction(event -> confirmBack());
@@ -315,6 +321,8 @@ public class SlapScannerController {
     }
 
     private void startLeftScan() {
+        fingerSetTypeToScan = FingerSetType.LEFT;
+        Platform.runLater(this::clearFingerprintOnUI);
         // display the message for 2 seconds.
         if (isSequenceCheckFailed) {
             try {
@@ -324,7 +332,6 @@ public class SlapScannerController {
             }
         }
         isSequenceCheckFailed = false;
-        fingerSetTypeToScan = FingerSetType.LEFT;
         if (!isDeviceInitialised) {
             LOGGER.log(Level.SEVERE, "Device is not initialised. Status of isDeviceInitialised is 'false'.");
             updateUI(GENERIC_RS_ERR_MSG);
@@ -917,10 +924,21 @@ public class SlapScannerController {
         return mFingerTypeRsImageInfoMap;
     }
 
-    private void back() {
+    private void backBtnAction() {
         confirmPane.setVisible(true);
-        backBtn.setDisable(true);
-        scanBtn.setDisable(true);
+        if (!scanBtn.isDisable()) {
+            currentEnabledButton = scanBtn;
+        } else if (!leftScanBtn.isDisable()) {
+            currentEnabledButton = leftScanBtn;
+        } else if (!rightScanBtn.isDisable()) {
+            currentEnabledButton = rightScanBtn;
+        } else if (!thumbScanBtn.isDisable()) {
+            currentEnabledButton = thumbScanBtn;
+        } else {
+            LOGGER.log(Level.SEVERE, "No button is enabled.");
+            throw new GenericException("At least one button should be enabled.");
+        }
+        disableControls(backBtn, scanBtn, leftScanBtn, rightScanBtn, thumbScanBtn, captureIrisBtn);
     }
 
     private void showIris() {
@@ -933,26 +951,32 @@ public class SlapScannerController {
     }
 
     private void confirmBack() {
-        try {
-            if (isDeviceInitialised) {
-                releaseDevice();
+        App.getThreadPool().execute(() -> {
+            try {
+                disableControls(confirmNoBtn, confirmYesBtn);
+                Platform.runLater(() -> confirmText.setText("Please Wait...."));
+                if (isDeviceInitialised) {
+                    Thread.sleep(1000);
+                    releaseDevice();
+                }
+                App.setRoot("biometric_enrollment");
+            } catch (IOException | InterruptedException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage());
+                if (ex instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
+                messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
+                confirmText.setText(GENERIC_ERR_MSG);
+                enableControls(confirmNoBtn, confirmYesBtn);
             }
-            App.setRoot("biometric_enrollment");
-        } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage());
-            messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
-        }
+        });
     }
 
     private void confirmStay() {
         backBtn.setDisable(false);
         confirmPane.setVisible(false);
         captureIrisBtn.setDisable(!isFpScanCompleted);
-        if (leftScanBtn.isDisable() && rightScanBtn.isDisable() && thumbScanBtn.isDisable()) {
-            scanBtn.setDisable(false);
-            return;
-        }
-        scanBtn.setDisable(true);
+        currentEnabledButton.setDisable(false);
     }
 
 

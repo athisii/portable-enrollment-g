@@ -41,13 +41,14 @@ import static com.cdac.enrollmentstation.model.ARCDetailsHolder.getArcDetailsHol
  */
 public class CameraController {
     private static final Logger LOGGER = ApplicationLog.getLogger(CameraController.class);
-    private static final int COUNTDOWN = 5;
+    private static final int COUNTDOWN_IN_SEC = 5;
+    private static final AtomicInteger COUNTDOWN = new AtomicInteger(COUNTDOWN_IN_SEC);
+
     private static final int FIXED_DELAY_TIME_IN_MILLIS = 5; // in milliseconds
     private static final int EXECUTOR_SHUTDOWN_WAIT_TIME_IN_MILLIS = 50; // in milliseconds
-    private static final int THRESHOLD_FOR_RED_BOX = 10;
     private static final int IMAGE_CAPTURE_LIMIT = 30;
     private static final String INPUT_FILE;
-    private static final String WEBCAM_COMMAND;
+    private static final String PYTHON_IMAGE_PROCESSOR_COMMAND;
     private static final String SUB_FILE;
 
     private static final Image OUT_OF_FRAME_IMAGE;
@@ -64,7 +65,7 @@ public class CameraController {
     static {
         try {
             INPUT_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.IMG_INPUT_FILE));
-            WEBCAM_COMMAND = requireNonBlank(PropertyFile.getProperty(PropertyName.PYTHON_WEBCAM_COMMAND));
+            PYTHON_IMAGE_PROCESSOR_COMMAND = requireNonBlank(PropertyFile.getProperty(PropertyName.PYTHON_IMAGE_PROCESSOR_COMMAND));
             SUB_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.IMG_SUB_FILE));
             // loads --> /img/
             NO_MASK_IMAGE = loadFileFromImgDirectory("no_mask.png");
@@ -237,12 +238,13 @@ public class CameraController {
     private void capturePhotoThread() {
         // Display count down on UI
         // should run on worker thread
-        final AtomicInteger countdown = new AtomicInteger(COUNTDOWN);
-        while (countdown.get() > 0) {
+        COUNTDOWN.set(COUNTDOWN_IN_SEC);
+
+        while (COUNTDOWN.get() > 0) {
             try {
-                Platform.runLater(() -> message.setText(countdown.get() + ""));
+                Platform.runLater(() -> message.setText("(" + COUNTDOWN.get() + ") Move your body to fit in red box"));
                 Thread.sleep(TimeUnit.SECONDS.toMillis(1));
-                countdown.decrementAndGet();
+                COUNTDOWN.decrementAndGet();
             } catch (InterruptedException ignored) {
                 Thread.currentThread().interrupt();
             }
@@ -254,6 +256,7 @@ public class CameraController {
             message.setText("");
         });
         scheduledExecutorService.scheduleWithFixedDelay(this::grabFrame, 0, FIXED_DELAY_TIME_IN_MILLIS, TimeUnit.MILLISECONDS);
+
     }
 
     private void liveImageThread() {
@@ -267,15 +270,13 @@ public class CameraController {
                 }
                 return;
             }
-            if (imageCaptureCount.get() > THRESHOLD_FOR_RED_BOX) {
-                Imgproc.rectangle(matrix,                   //Matrix obj of the image
-                        new Point(150, 100),           //p1
-                        new Point(450, 450),           //p2
-                        new Scalar(0, 0, 255),              //Scalar object for color
-                        5                                   //Thickness of the line
-                );
-                Platform.runLater(() -> message.setText("Move your face to fit in REDBOX"));
-            }
+
+            Imgproc.rectangle(matrix,                   //Matrix obj of the image
+                    new Point(120, 30),           //p1
+                    new Point(530, 450),           //p2
+                    new Scalar(0, 0, 255),              //Scalar object for color
+                    5                                   //Thickness of the line
+            );
 
             updateImageView(liveImageView, mat2Image(matrix));
         }
@@ -287,7 +288,7 @@ public class CameraController {
 
     public Image mat2Image(Mat mat) {
         MatOfByte buffer = new MatOfByte();
-        Imgcodecs.imencode(".jpg", mat, buffer);
+        Imgcodecs.imencode(".png", mat, buffer);
         return new Image(new ByteArrayInputStream(buffer.toArray()));
     }
 
@@ -328,7 +329,7 @@ public class CameraController {
         }
         try {
             //WEBCAM_COMMAND = "python3 /usr/share/enrollment/python/webcam.py"
-            Process pr = Runtime.getRuntime().exec(WEBCAM_COMMAND);
+            Process pr = Runtime.getRuntime().exec(PYTHON_IMAGE_PROCESSOR_COMMAND);
             BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
             BufferedReader error = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
             String eline;

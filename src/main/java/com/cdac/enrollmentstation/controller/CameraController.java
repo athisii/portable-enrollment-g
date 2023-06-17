@@ -328,7 +328,6 @@ public class CameraController {
             return;
         }
         try {
-            //WEBCAM_COMMAND = "python3 /usr/share/enrollment/python/webcam.py"
             Process pr = Runtime.getRuntime().exec(PYTHON_IMAGE_PROCESSOR_COMMAND);
             BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
             BufferedReader error = new BufferedReader(new InputStreamReader(pr.getErrorStream()));

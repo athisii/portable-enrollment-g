@@ -37,11 +37,7 @@ public class CardHotlistApi {
      */
 
     public static List<CardHotlistDetail> fetchHotlistedCard() {
-        String cardHotlistUrl = PropertyFile.getProperty(PropertyName.CARD_API_HOTLISTED_URL);
-        if (cardHotlistUrl == null || cardHotlistUrl.isBlank()) {
-            throw new GenericException("'" + PropertyName.CARD_API_HOTLISTED_URL + "' not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
-        }
-        HttpResponse<String> response = HttpUtil.sendHttpRequest(HttpUtil.createGetHttpRequest(cardHotlistUrl));
+        HttpResponse<String> response = HttpUtil.sendHttpRequest(HttpUtil.createGetHttpRequest(hotlistedCardApiUrl()));
         // connection timeout
         if (response == null) {
             return null;
@@ -56,5 +52,17 @@ public class CardHotlistApi {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
+    }
+
+    public static String hotlistedCardApiUrl() {
+        String hotlistedCardApiUrl = PropertyFile.getProperty(PropertyName.CARD_API_HOTLISTED_URL);
+        if (hotlistedCardApiUrl == null || hotlistedCardApiUrl.isBlank()) {
+            throw new GenericException("'" + PropertyName.CARD_API_HOTLISTED_URL + "' not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+        }
+
+        if (hotlistedCardApiUrl.endsWith("/")) {
+            return hotlistedCardApiUrl + "AFSACSERVICE/service/cardHotlistDetails";
+        }
+        return hotlistedCardApiUrl + "/AFSACSERVICE/service/cardHotlistDetails";
     }
 }

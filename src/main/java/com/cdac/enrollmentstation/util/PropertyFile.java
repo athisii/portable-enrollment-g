@@ -54,6 +54,5 @@ public class PropertyFile {
             throw new GenericException("Error occurred while writing properties file");
         }
         reloadProperty();
-
     }
 }

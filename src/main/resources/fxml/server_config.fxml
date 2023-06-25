@@ -1,109 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.ServerConfigController">
+
+<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.ServerConfigController">
 
     <BorderPane prefHeight="778.0" prefWidth="1024.0">
         <center>
-            <AnchorPane prefHeight="607.0" prefWidth="1024.0" style="-fx-background-color: #fff;"
-                        BorderPane.alignment="CENTER">
+            <AnchorPane prefHeight="607.0" prefWidth="1024.0" style="-fx-background-color: #fff;" BorderPane.alignment="CENTER">
                 <AnchorPane prefHeight="100.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
 
-                    <ImageView fitHeight="91.0" fitWidth="363.0" focusTraversable="true" layoutX="20.0" layoutY="10.0"
-                               pickOnBounds="true"
-                               preserveRatio="true">
+                    <ImageView fitHeight="91.0" fitWidth="363.0" focusTraversable="true" layoutX="20.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true">
 
-                        <Image url="@../img/navy_logo.png"/>
+                        <Image url="@../img/navy_logo.png" />
 
                     </ImageView>
-                    <Label alignment="CENTER" layoutX="876.0" layoutY="42.0" prefHeight="31.0" prefWidth="108.0"
-                           style="-fx-background-color: #fff; -fx-background-radius: 0 20 20 0; -fx-border-width: 1; -fx-border-color: #00aaff; -fx-border-radius: 0 20 20 0;"
-                           text="INS INDIA" textAlignment="CENTER" visible="false"/>
+                    <Label alignment="CENTER" layoutX="876.0" layoutY="42.0" prefHeight="31.0" prefWidth="108.0" style="-fx-background-color: #fff; -fx-background-radius: 0 20 20 0; -fx-border-width: 1; -fx-border-color: #00aaff; -fx-border-radius: 0 20 20 0;" text="INS INDIA" textAlignment="CENTER" visible="false" />
 
                 </AnchorPane>
-                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="14.0" layoutY="106.0" pickOnBounds="true"
-                           preserveRatio="true">
+                <ImageView fitHeight="40.0" fitWidth="42.0" layoutX="14.0" layoutY="106.0" pickOnBounds="true" preserveRatio="true">
 
-                    <Image url="@../img/settings_jpg.jpg"/>
+                    <Image url="@../img/settings_jpg.jpg" />
 
                 </ImageView>
-                <Label layoutX="67.0" layoutY="105.0" prefHeight="45.0" prefWidth="417.0" text="SERVER CONFIGURATION"
-                       textFill="#04127b">
+                <Label layoutX="67.0" layoutY="105.0" prefHeight="45.0" prefWidth="417.0" text="SERVER CONFIGURATION" textFill="#04127b">
                     <font>
-                        <Font size="22.0"/>
+                        <Font size="22.0" />
+                    </font>
+                </Label>
+                <Label fx:id="messageLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="326.0" layoutY="223.0" prefHeight="25.0" prefWidth="705.0">
+                    <font>
+                        <Font name="System Bold" size="17.0" />
                     </font>
                 </Label>
 
-                <AnchorPane layoutX="430.0" layoutY="260.0" prefHeight="230.0" prefWidth="549.0"
-                            style="-fx-border-color: #04127b;"/>
-                <Text fill="#04127b" layoutX="456.0" layoutY="340.0" strokeType="OUTSIDE" strokeWidth="0.0"
-                      text="Mafis API Server URL :"/>
-                <TextField fx:id="mafisUrlTextField" disable="true" layoutX="647.0" layoutY="322.0" prefHeight="26.0"
-                           prefWidth="205.0"/>
+                <AnchorPane layoutX="330.0" layoutY="269.0" prefHeight="217.0" prefWidth="700.0" style="-fx-border-color: #04127b;">
+                    <Text fill="#04127b" layoutX="24.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Hotlisted Card API URL:" />
+                    <TextField fx:id="hotlistedCardUrlTextField" layoutX="221.0" layoutY="23.0" prefHeight="26.0" prefWidth="205.0" />
+                    <Button fx:id="downloadHotlistedCardBtn" layoutX="443.0" layoutY="19.0" maxHeight="35.0" maxWidth="249.0" minHeight="35.0" minWidth="86.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="249.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="Download Hotlisted Cards" textFill="WHITE">
+                        <font>
+                            <Font name="System Bold" size="14.0" />
+                        </font>
+                    </Button>
 
-                <Text fill="#04127b" layoutX="456.0" layoutY="390.0" strokeType="OUTSIDE" strokeWidth="0.0"
-                      text="Enrolment Station ID :"/>
-                <TextField fx:id="enrollmentStationIdTextField" disable="true" layoutX="647.0" layoutY="372.0"
-                           prefHeight="26.0" prefWidth="203.0"/>
+                    <Text fill="#04127b" layoutX="24.0" layoutY="87.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Mafis API Server URL :" />
+                    <TextField fx:id="mafisUrlTextField" layoutX="221.0" layoutY="69.0" prefHeight="26.0" prefWidth="205.0" />
 
-                <Text fill="#04127b" layoutX="456.0" layoutY="437.0" strokeType="OUTSIDE" strokeWidth="0.0"
-                      text="Enrolment Station Unit ID :"/>
-                <ComboBox fx:id="enrollmentStationUnitIdsComboBox" disable="true" layoutX="648.0" layoutY="419.0"
-                          prefHeight="26.0" prefWidth="201.0"/>
-                <Button fx:id="fetchUnitsBtn" disable="true" layoutX="873.0" layoutY="415.0" maxHeight="35.0"
-                        maxWidth="150.0" minHeight="35.0" minWidth="86.0" mnemonicParsing="false"
-                        onAction="#fetchBtnAction" prefHeight="35.0" prefWidth="86.0"
-                        style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="FETCH"
-                        textFill="WHITE">
+                    <Text fill="#04127b" layoutX="24.0" layoutY="135.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Enrolment Station ID :" />
+                    <TextField fx:id="enrollmentStationIdTextField" layoutX="222.0" layoutY="119.0" prefHeight="26.0" prefWidth="203.0" />
+
+                    <Text fill="#04127b" layoutX="24.0" layoutY="184.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Enrolment Station Unit ID :" />
+                    <ComboBox fx:id="enrollmentStationUnitIdsComboBox" layoutX="221.0" layoutY="166.0" prefHeight="26.0" prefWidth="201.0" />
+                    <Button fx:id="fetchUnitsBtn" layoutX="454.0" layoutY="162.0" maxHeight="35.0" maxWidth="236.0" minHeight="35.0" minWidth="86.0" mnemonicParsing="false" onAction="#fetchBtnAction" prefHeight="35.0" prefWidth="236.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="FETCH UNITS" textFill="WHITE">
+                        <font>
+                            <Font name="System Bold" size="14.0" />
+                        </font>
+                    </Button>
+
+                </AnchorPane>
+
+                <Button fx:id="backBtn" layoutX="513.0" layoutY="503.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0" minWidth="142.0" mnemonicParsing="false" onAction="#backBtnAction" prefHeight="35.0" prefWidth="142.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="BACK" textFill="WHITE">
                     <font>
-                        <Font name="System Bold" size="14.0"/>
+                        <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
 
-
-                <Label fx:id="messageLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="428.0" layoutY="487.0"
-                       prefHeight="25.0" prefWidth="553.0">
+                <Button fx:id="homeBtn" layoutX="697.0" layoutY="503.0" maxHeight="35.0" maxWidth="150.0" minHeight="35.0" minWidth="140.0" mnemonicParsing="false" onAction="#homeBtnAction" prefHeight="35.0" prefWidth="140.0" style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;" text="HOME" textFill="WHITE">
                     <font>
-                        <Font name="System Bold" size="17.0"/>
-                    </font>
-                </Label>
-
-
-                <Button fx:id="backBtn" layoutX="480.0" layoutY="522.0" maxHeight="35.0" maxWidth="150.0"
-                        minHeight="35.0" minWidth="142.0" mnemonicParsing="false" onAction="#backBtnAction"
-                        prefHeight="35.0" prefWidth="142.0"
-                        style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="BACK"
-                        textFill="WHITE">
-                    <font>
-                        <Font name="System Bold" size="14.0"/>
+                        <Font name="System Bold" size="14.0" />
                     </font>
                 </Button>
-                <Button fx:id="editBtn" layoutX="657.0" layoutY="522.0" maxHeight="35.0" maxWidth="150.0"
-                        minHeight="35.0" minWidth="86.0" mnemonicParsing="false" onAction="#editBtnAction"
-                        prefHeight="35.0" prefWidth="125.0"
-                        style="-fx-background-color: #3eb650; -fx-background-radius: 20 20 20 20;" text="EDIT"
-                        textFill="WHITE">
-                    <font>
-                        <Font name="System Bold" size="14.0"/>
-                    </font>
-                </Button>
-
-                <Button fx:id="homeBtn" layoutX="810.0" layoutY="522.0" maxHeight="35.0" maxWidth="150.0"
-                        minHeight="35.0" minWidth="140.0" mnemonicParsing="false" onAction="#homeBtnAction"
-                        prefHeight="35.0" prefWidth="140.0"
-                        style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;" text="HOME"
-                        textFill="WHITE">
-                    <font>
-                        <Font name="System Bold" size="14.0"/>
-                    </font>
-                </Button>
-                <AnchorPane layoutY="729.0" prefHeight="40.0" prefWidth="1366.0"
-                            style="-fx-background-color: #1990ea;"/>
+                <AnchorPane layoutY="729.0" prefHeight="40.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;" />
             </AnchorPane>
         </center>
     </BorderPane>

@@ -8,7 +8,7 @@
 
 <VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.AdminConfigController">
     <BorderPane prefHeight="778.0" prefWidth="1024.0">
-      <bottom>
+      <center>
             <AnchorPane prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: #fff;" BorderPane.alignment="CENTER">
                 <AnchorPane prefHeight="100.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
 
@@ -50,7 +50,7 @@
 
                 </AnchorPane>
 
-                <AnchorPane layoutX="110.0" layoutY="408.0" prefHeight="231.0" prefWidth="205.0" style="-fx-background-color: #fff;">
+                <AnchorPane layoutX="550.0" layoutY="170.0" prefHeight="231.0" prefWidth="205.0" style="-fx-background-color: #fff;">
 
                     <ImageView fitHeight="125.0" fitWidth="100.0" layoutX="46.0" layoutY="39.0" pickOnBounds="true" preserveRatio="true">
 
@@ -64,7 +64,7 @@
                     </Button>
 
                 </AnchorPane>
-                <AnchorPane layoutX="541.0" layoutY="408.0" prefHeight="231.0" prefWidth="205.0" style="-fx-background-color: #fff;">
+                <AnchorPane layoutX="346.0" layoutY="408.0" prefHeight="231.0" prefWidth="205.0" style="-fx-background-color: #fff;">
 
                     <ImageView fitHeight="86.0" fitWidth="98.0" layoutX="60.0" layoutY="52.0" pickOnBounds="true" preserveRatio="true">
 
@@ -83,7 +83,7 @@
                         <Font name="System Bold" size="15.0" />
                     </font>
                 </Label>
-                <AnchorPane layoutX="306.0" layoutY="406.0" prefHeight="231.0" prefWidth="205.0" style="-fx-background-color: #fff;">
+                <AnchorPane layoutX="111.0" layoutY="406.0" prefHeight="231.0" prefWidth="205.0" style="-fx-background-color: #fff;">
 
                     <ImageView fitHeight="125.0" fitWidth="100.0" layoutX="56.0" layoutY="49.0" pickOnBounds="true" preserveRatio="true">
 
@@ -97,7 +97,7 @@
                     </Button>
 
                 </AnchorPane>
-                <AnchorPane layoutX="787.0" layoutY="406.0" prefHeight="231.0" prefWidth="205.0" style="-fx-background-color: #fff;">
+                <AnchorPane layoutX="592.0" layoutY="406.0" prefHeight="231.0" prefWidth="205.0" style="-fx-background-color: #fff;">
 
                     <ImageView fitHeight="86.0" fitWidth="98.0" layoutX="70.0" layoutY="52.0" pickOnBounds="true" preserveRatio="true">
 
@@ -137,7 +137,7 @@
                         <Insets top="-10.0" />
                     </opaqueInsets>
                 </AnchorPane>
-                <AnchorPane layoutX="794.0" layoutY="164.0" prefHeight="231.0" prefWidth="190.0" style="-fx-background-color: #fff;">
+                <AnchorPane layoutX="794.0" layoutY="170.0" prefHeight="231.0" prefWidth="190.0" style="-fx-background-color: #fff;">
 
                     <AnchorPane layoutX="24.0" layoutY="73.0" prefHeight="56.0" prefWidth="139.0" style="-fx-background-color: #9999ff; -fx-background-radius: 20 20 20 20;">
 
@@ -153,7 +153,7 @@
                 </AnchorPane>
 
 
-                <AnchorPane layoutX="1014.0" layoutY="162.0" prefHeight="231.0" prefWidth="190.0" style="-fx-background-color: #fff;">
+                <AnchorPane layoutX="1014.0" layoutY="170.0" prefHeight="231.0" prefWidth="190.0" style="-fx-background-color: #fff;">
 
                     <Label layoutX="40.0" layoutY="80.0" maxHeight="35.0" maxWidth="150.0" text="FP LIVENESS">
                         <font>
@@ -173,23 +173,8 @@
                     </Button>
                 </AnchorPane>
                 <AnchorPane layoutY="729.0" prefHeight="40.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;" />
-
-                   <AnchorPane layoutX="541.0" layoutY="170.0" prefHeight="231.0" prefWidth="205.0" style="-fx-background-color: #fff;">
-
-                       <ImageView fitHeight="86.0" fitWidth="98.0" layoutX="61.0" layoutY="52.0" pickOnBounds="true" preserveRatio="true">
-
-                           <Image url="@../img/download.png" />
-
-                       </ImageView>
-                    <Button fx:id="downloadBtn" layoutX="17.0" layoutY="162.0" maxHeight="35.0" maxWidth="181.0" minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#closeApp" prefHeight="35.0" prefWidth="181.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="Download Hotlisted" textFill="WHITE">
-                        <font>
-                            <Font name="System Bold" size="14.0" />
-                        </font>
-                    </Button>
-
-                   </AnchorPane>
             </AnchorPane>
-      </bottom>
+      </center>
     </BorderPane>
 
 </VBox>

@@ -221,7 +221,7 @@ public class MafisServerApi {
         }
 
         if (mafisServerApi.endsWith("/")) {
-            mafisServerApi = mafisServerApi.substring(0, mafisServerApi.lastIndexOf("/"));
+            return mafisServerApi + "api/EnrollmentStation";
         }
         return mafisServerApi + "/api/EnrollmentStation";
     }

@@ -38,10 +38,14 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.EnumMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
 import static com.cdac.enrollmentstation.security.Asn1EncodedHexUtil.CardDataIndex;
@@ -84,7 +88,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     @FXML
     private Label cardPinLabel;
     @FXML
-    private PasswordField pinNoPasswordField;
+    private PasswordField pNoPasswordField;
     @FXML
     private ImageView iconOrFpImageView;
     @FXML
@@ -112,13 +116,13 @@ public class CardLoginController implements MIDFingerAuth_Callback {
 
     public void initialize() {
         /* adds changeListener to restrict the text length */
-        pinNoPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
+        pNoPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.isBlank()) {
                 messageLabel.setText("");
             }
-            limitCharacters(pinNoPasswordField, oldValue, newValue);
+            limitCharacters(pNoPasswordField, oldValue, newValue);
         });
-        pinNoPasswordField.setOnKeyPressed(event -> {
+        pNoPasswordField.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
                 loginBtnAction();
             }
@@ -169,7 +173,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
 
     @FXML
     public void loginBtnAction() throws IllegalStateException {
-        if (pinNoPasswordField.getText().isBlank() || pinNoPasswordField.getText().length() < 4) {
+        if (pNoPasswordField.getText().isBlank() || pNoPasswordField.getText().length() < 4) {
             messageLabel.setText("Please enter valid card pin.");
             return;
         }
@@ -179,7 +183,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         try {
             asn1EncodedHexByteArrayMap = startProcedureCall();
         } catch (GenericException ex) {
-            pinNoPasswordField.clear();
+            pNoPasswordField.clear();
             messageLabel.setText(ex.getMessage());
             enableControls(backBtn, loginBtn);
             return;
@@ -200,7 +204,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
                     LOGGER.log(Level.SEVERE, ex.getMessage());
                     throw new GenericException(GENERIC_ERR_MSG);
                 }
-                pinNoPasswordField.clear();
+                pNoPasswordField.clear();
                 messageLabel.setText(ex.getMessage());
                 enableControls(backBtn, loginBtn);
             }
@@ -213,11 +217,11 @@ public class CardLoginController implements MIDFingerAuth_Callback {
                 isPinAuthCompleted = true;
             }
             cardPinLabel.setVisible(false);
-            pinNoPasswordField.setVisible(false);
+            pNoPasswordField.setVisible(false);
             // loads next page by OnComplete callback if authenticated successfully.
             captureFingerprint();
         } catch (GenericException ex) {
-            pinNoPasswordField.clear();
+            pNoPasswordField.clear();
             messageLabel.setText(ex.getMessage());
             enableControls(backBtn, loginBtn);
         }
@@ -238,26 +242,39 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         if (cardHotlistedFilePathString == null || cardHotlistedFilePathString.isBlank()) {
             throw new GenericException("'+" + PropertyName.CARD_HOTLISTED_FILE + "' is empty or not found in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
         }
-        List<CardHotlistDetail> cardHotlistDetails;
+        List<CardHotlistDetail> allCardHotlistDetails;
         Path path = Paths.get(cardHotlistedFilePathString);
         try {
-            cardHotlistDetails = Singleton.getObjectMapper().readValue(Files.readAllBytes(path), new TypeReference<>() {
+            allCardHotlistDetails = Singleton.getObjectMapper().readValue(Files.readAllBytes(path), new TypeReference<>() {
             });
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             try {
                 Files.writeString(path, "[]");
-                cardHotlistDetails = new ArrayList<>();
+                allCardHotlistDetails = new ArrayList<>();
             } catch (IOException ex1) {
                 throw new GenericException(ex1.getMessage());
             }
         }
-        Optional<CardHotlistDetail> optionalCardHotlistDetail = cardHotlistDetails.stream().filter(cardHotlistDetail -> cardHotlistDetail.getCardNo() != null && cardHotlistDetail.getPNo() != null && (cardHotlistDetail.getCardNo().trim().equals(cardNumber.trim()) || cardHotlistDetail.getPNo().trim().equals(pNumber.trim()))).findAny();
-        if (optionalCardHotlistDetail.isPresent()) {
-            LOGGER.log(Level.INFO, () -> "Hotlisted card or pn used. CN: " + optionalCardHotlistDetail.get().getCardNo() + " PN: " + optionalCardHotlistDetail.get().getPNo());
-            throw new GenericException("The Personal Number/Card Number is already hotlisted.");
+
+        List<CardHotlistDetail> cardHotlistDetails = allCardHotlistDetails.stream().filter(cardHotlistDetail -> pNumber.equals(cardHotlistDetail.getPNo())).collect(Collectors.toList());
+        if (cardHotlistDetails.isEmpty()) {
+            LOGGER.log(Level.INFO, "No Personal/Card Number found in the downloaded list.");
+            throw new GenericException("You are unauthorized to access the system.");
         }
-        if (!pNumber.equals(pinNoPasswordField.getText())) {
+        boolean hotlisted = true;
+        for (CardHotlistDetail cardHotlistDetail : cardHotlistDetails) {
+            if (cardHotlistDetail.isCardStatus()) {
+                hotlisted = false;
+                break;
+            }
+        }
+        if (hotlisted) {
+            LOGGER.log(Level.INFO, "The Card Number is already hotlisted.");
+            throw new GenericException("The Card Number is already hotlisted.");
+        }
+
+        if (!pNumber.equals(pNoPasswordField.getText())) {
             LOGGER.log(Level.INFO, "Personal Number and user input number does not matched.");
             throw new GenericException("Invalid Personal Number.");
         }

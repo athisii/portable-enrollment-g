@@ -14,10 +14,15 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@ToString
 public class CardHotlistDetail {
-    @JsonProperty("PNo")
+    @JsonProperty("pno")
     String pNo;
-    @JsonProperty("CardNo")
+    @JsonProperty("cardStatus")
+    boolean cardStatus;
+    @JsonProperty("cardNo")
     String cardNo;
+    @JsonProperty("roleId")
+    String roleId;
+    @JsonProperty("roleName")
+    String roleName;
 }

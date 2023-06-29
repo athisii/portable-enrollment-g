@@ -40,7 +40,7 @@
                         </font>
                     </Label>
 
-                    <PasswordField fx:id="pinNoPasswordField" layoutX="184.0" layoutY="155.0" prefHeight="26.0" prefWidth="189.0" promptText="Personal Number" />
+                    <PasswordField fx:id="pNoPasswordField" layoutX="184.0" layoutY="155.0" prefHeight="26.0" prefWidth="189.0" promptText="Personal Number" />
 
                 </AnchorPane>
 

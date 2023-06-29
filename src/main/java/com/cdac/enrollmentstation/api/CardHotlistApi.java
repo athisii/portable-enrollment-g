@@ -9,7 +9,6 @@ import com.cdac.enrollmentstation.model.CardHotlistDetail;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.net.http.HttpResponse;
 import java.util.List;
@@ -42,12 +41,8 @@ public class CardHotlistApi {
         if (response == null) {
             return null;
         }
-
-        CardHotlistResDto cardHotlistResDto;
         try {
-            cardHotlistResDto = Singleton.getObjectMapper().readValue(response.body(), CardHotlistResDto.class);
-            return Singleton.getObjectMapper().readValue(cardHotlistResDto.getCardHotlistDetails(), new TypeReference<>() {
-            });
+            return Singleton.getObjectMapper().readValue(response.body(), CardHotlistResDto.class).getCardHotlistDetails();
         } catch (JsonProcessingException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);

@@ -130,9 +130,10 @@ public class ServerConfigController {
             LOGGER.log(Level.SEVERE, () -> PropertyName.CARD_HOTLISTED_FILE + " is empty or no entry found in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
             throw new GenericException(PropertyName.CARD_HOTLISTED_FILE + " is empty or no entry found in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
         }
-        messageLabel.setText("Downloading hotlisted cards.");
+        messageLabel.setText("Downloading operators card.");
         homeBtn.requestFocus();
         disableControls(backBtn, homeBtn, downloadHotlistedCardBtn, fetchUnitsBtn);
+        // should only download allowed personal number.
         App.getThreadPool().execute(() -> {
             List<CardHotlistDetail> cardHotlistDetails;
             try {
@@ -157,7 +158,7 @@ public class ServerConfigController {
                 updateUI(GENERIC_ERR_MSG);
                 enableControls(backBtn, homeBtn, downloadHotlistedCardBtn, fetchUnitsBtn);
             }
-            updateUI("Downloaded hotlisted cards successfully.");
+            updateUI("Operators card downloaded successfully.");
             enableControls(backBtn, homeBtn, downloadHotlistedCardBtn, fetchUnitsBtn);
         });
     }

@@ -1,8 +1,11 @@
 package com.cdac.enrollmentstation.dto;
 
+import com.cdac.enrollmentstation.model.CardHotlistDetail;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 /**
  * @author athisii, CDAC
@@ -17,5 +20,5 @@ import lombok.experimental.FieldDefaults;
 @ToString
 public class CardHotlistResDto {
     @JsonProperty("cardHotlistDetails")
-    String cardHotlistDetails;
+    List<CardHotlistDetail> cardHotlistDetails;
 }

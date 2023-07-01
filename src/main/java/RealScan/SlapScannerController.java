@@ -957,8 +957,7 @@ public class SlapScannerController {
                 if (ex instanceof InterruptedException) {
                     Thread.currentThread().interrupt();
                 }
-                messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
-                confirmText.setText(GENERIC_ERR_MSG);
+                Platform.runLater(() -> confirmText.setText(GENERIC_ERR_MSG));
                 enableControls(confirmNoBtn, confirmYesBtn);
             }
         });

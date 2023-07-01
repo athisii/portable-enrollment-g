@@ -7,7 +7,7 @@ import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.*;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.CardHotlistDetail;
+import com.cdac.enrollmentstation.model.CardWhitelistDetail;
 import com.cdac.enrollmentstation.security.Asn1EncodedHexUtil;
 import com.cdac.enrollmentstation.util.LocalCardReaderErrMsgUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
@@ -38,14 +38,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.EnumMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
 import static com.cdac.enrollmentstation.security.Asn1EncodedHexUtil.CardDataIndex;
@@ -238,40 +234,41 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             LOGGER.log(Level.SEVERE, "Received a null or empty value for PN or Card Number from card.");
             throw new GenericException(GENERIC_ERR_MSG);
         }
-        String cardHotlistedFilePathString = PropertyFile.getProperty(PropertyName.CARD_HOTLISTED_FILE);
+        String cardHotlistedFilePathString = PropertyFile.getProperty(PropertyName.CARD_WHITELISTED_FILE);
         if (cardHotlistedFilePathString == null || cardHotlistedFilePathString.isBlank()) {
-            throw new GenericException("'+" + PropertyName.CARD_HOTLISTED_FILE + "' is empty or not found in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+            throw new GenericException("'+" + PropertyName.CARD_WHITELISTED_FILE + "' is empty or not found in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
         }
-        List<CardHotlistDetail> allCardHotlistDetails;
+        List<CardWhitelistDetail> cardWhitelistDetails;
         Path path = Paths.get(cardHotlistedFilePathString);
         try {
-            allCardHotlistDetails = Singleton.getObjectMapper().readValue(Files.readAllBytes(path), new TypeReference<>() {
+            cardWhitelistDetails = Singleton.getObjectMapper().readValue(Files.readAllBytes(path), new TypeReference<>() {
             });
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             try {
                 Files.writeString(path, "[]");
-                allCardHotlistDetails = new ArrayList<>();
+                cardWhitelistDetails = new ArrayList<>();
             } catch (IOException ex1) {
                 throw new GenericException(ex1.getMessage());
             }
         }
 
-        List<CardHotlistDetail> cardHotlistDetails = allCardHotlistDetails.stream().filter(cardHotlistDetail -> pNumber.equals(cardHotlistDetail.getPNo())).collect(Collectors.toList());
-        if (cardHotlistDetails.isEmpty()) {
+        Optional<CardWhitelistDetail> whitelistedCardDetailOptional = cardWhitelistDetails.stream().filter(ele -> pNumber.equals(ele.getPNo())).findFirst();
+
+        String unauthorizedMessage = "You are unauthorized to access the system.";
+        CardWhitelistDetail whitelistedCardDetail = whitelistedCardDetailOptional.orElseGet(() -> {
             LOGGER.log(Level.INFO, "No Personal/Card Number found in the downloaded list.");
-            throw new GenericException("You are unauthorized to access the system.");
+            throw new GenericException(unauthorizedMessage);
+        });
+
+        if (whitelistedCardDetail.getCardNo() == null) {
+            LOGGER.log(Level.INFO, "Found null card number in downloaded cards.");
+            throw new GenericException(unauthorizedMessage);
         }
-        boolean hotlisted = true;
-        for (CardHotlistDetail cardHotlistDetail : cardHotlistDetails) {
-            if (cardHotlistDetail.isCardStatus()) {
-                hotlisted = false;
-                break;
-            }
-        }
-        if (hotlisted) {
-            LOGGER.log(Level.INFO, "The Card Number is already hotlisted.");
-            throw new GenericException("The Card Number is already hotlisted.");
+
+        if (!whitelistedCardDetail.getCardNo().equals(cardNumber)) {
+            LOGGER.log(Level.INFO, "Card number not matched with the downloaded card.");
+            throw new GenericException(unauthorizedMessage);
         }
 
         if (!pNumber.equals(pNoPasswordField.getText())) {

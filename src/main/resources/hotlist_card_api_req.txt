@@ -1,0 +1,75 @@
+                     
+
+
+
+
+                     HOTLISTED CARDS
+
+1. One PNo can have multiple cards.
+2. Only PNo in the list(downloaded ones) will be allowed to login if card status is `true`.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{
+    "cardWhitelistDetails": [
+        {
+            "pno": "225991T",
+            "cardStatus": false,
+            "cardNo": "776",
+            "roleId": "9",
+            "roleName": "Operator"
+        },
+        {
+            "pno": "225991T",
+            "cardStatus": false,
+            "cardNo": "80",
+            "roleId": "9",
+            "roleName": "Operator"
+        },
+
+        {
+            "pno": "226013T",
+            "cardStatus": true,
+            "cardNo": "null",
+            "roleId": "9",
+            "roleName": "Operator"
+        }
+
+         // if PN is valid but card number is not same --> allowed. since cardStatus is true, and cardNumber is null.
+    ]
+
+
+Possibilities of card status and card number for one PNO:
+			 1. card status = true
+			 	card number = null
+
+			 2. card status = true
+			 	card number = 1111
+
+			 3. card status = false
+			 	card number = null
+
+			 4. card status = false
+			 	card number = 1111

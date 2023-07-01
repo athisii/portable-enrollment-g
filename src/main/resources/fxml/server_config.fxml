@@ -37,9 +37,9 @@
                 </Label>
 
                 <AnchorPane layoutX="330.0" layoutY="269.0" prefHeight="217.0" prefWidth="700.0" style="-fx-border-color: #04127b;">
-                    <Text fill="#04127b" layoutX="24.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Hotlisted Card API URL:" />
-                    <TextField fx:id="hotlistedCardUrlTextField" layoutX="221.0" layoutY="23.0" prefHeight="26.0" prefWidth="205.0" />
-                    <Button fx:id="downloadHotlistedCardBtn" layoutX="443.0" layoutY="19.0" maxHeight="35.0" maxWidth="249.0" minHeight="35.0" minWidth="86.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="249.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="Download Hotlisted Cards" textFill="WHITE">
+                    <Text fill="#04127b" layoutX="24.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Whitelisted Card API URL:" />
+                    <TextField fx:id="whitelistedCardUrlTextField" layoutX="221.0" layoutY="23.0" prefHeight="26.0" prefWidth="205.0" />
+                    <Button fx:id="downloadWhitelistedCardBtn" layoutX="443.0" layoutY="19.0" maxHeight="35.0" maxWidth="249.0" minHeight="35.0" minWidth="86.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="249.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="Download Whitelisted Cards" textFill="WHITE">
                         <font>
                             <Font name="System Bold" size="14.0" />
                         </font>

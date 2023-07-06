@@ -54,14 +54,15 @@ import static com.cdac.enrollmentstation.security.Asn1EncodedHexUtil.CardDataInd
  */
 public class CardLoginController implements MIDFingerAuth_Callback {
     private static final Logger LOGGER = ApplicationLog.getLogger(CardLoginController.class);
-    private static final String ERROR_MESSAGE = "Kindly place a valid card and try again.";
     private boolean twoFactorAuthEnabled;
-    private static final String MANTRA_CARD_READER_NAME = "Mantra Reader (1.00) 00 00";
+    private static final String MANTRA_CARD_READER_NAME;
+    private static final String CARD_API_SERVICE_RESTART_COMMAND;
     private static final byte CARD_TYPE = 4; // Naval ID/Contractor Card value is 4
     private static final byte STATIC_TYPE = 21; // Static file -> 21
     private static final byte FINGERPRINT_TYPE = 25; // Fingerprint file -> 25
     private static final int CARD_READER_MAX_BUFFER_SIZE = 1024; // Max bytes card can handle
     private static final int MAX_LENGTH = 30;
+    private static final int SLEEP_TIME_IN_MIL_SEC = 500;
     private int jniErrorCode;
     private EnumMap<DataType, byte[]> asn1EncodedHexByteArrayMap; // GLOBAL data store.
 
@@ -104,6 +105,17 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     //***********************Fingerprint***************************//
 
 
+    static {
+        try {
+            MANTRA_CARD_READER_NAME = PropertyFile.getProperty(PropertyName.CARD_API_CARD_READER_NAME).trim();
+            CARD_API_SERVICE_RESTART_COMMAND = PropertyFile.getProperty(PropertyName.CARD_API_SERVICE_RESTART_COMMAND).trim();
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, () -> "No entry for '" + PropertyName.CARD_API_CARD_READER_NAME + "/" + PropertyName.CARD_API_SERVICE_RESTART_COMMAND + "' in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+            throw new GenericException(ex.getMessage());
+        }
+    }
+
+
     private void limitCharacters(TextField textField, String oldValue, String newValue) {
         if (newValue.length() > MAX_LENGTH) {
             textField.setText(oldValue);
@@ -126,9 +138,9 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         });
         try {
             twoFactorAuthEnabled = Boolean.parseBoolean(PropertyFile.getProperty(PropertyName.TWO_FACTOR_AUTH_ENABLED).trim());
-        } catch (GenericException ex) {
-            LOGGER.log(Level.SEVERE, () -> "No entry for '" + PropertyName.TWO_FACTOR_AUTH_ENABLED + "' in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
-            throw new GenericException(GENERIC_ERR_MSG);
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, () -> "Not a number or no entry for '" + PropertyName.TWO_FACTOR_AUTH_ENABLED + "' in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+            throw new GenericException(ex.getMessage());
         }
         if (twoFactorAuthEnabled) {
             midFingerAuth = new MIDFingerAuth(this);
@@ -142,12 +154,12 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         jniErrorCode = midFingerAuth.GetConnectedDevices(devices);
         if (jniErrorCode != 0 || devices.isEmpty()) {
             LOGGER.log(Level.INFO, () -> midFingerAuth.GetErrorMessage(jniErrorCode));
-            messageLabel.setText("Single fingerprint reader not connected.");
+            updateUI("Single fingerprint reader not connected.");
             return false;
         }
         if (!midFingerAuth.IsDeviceConnected(DeviceModel.valueFor(devices.get(0)))) {
             LOGGER.log(Level.INFO, "Fingerprint reader not connected");
-            messageLabel.setText("Device not connected. Please connect and try again.");
+            updateUI("Device not connected. Please connect and try again.");
             return false;
         }
 
@@ -155,7 +167,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         jniErrorCode = midFingerAuth.Init(DeviceModel.valueFor(devices.get(0)), deviceInfo);
         if (jniErrorCode != 0) {
             LOGGER.log(Level.INFO, () -> midFingerAuth.GetErrorMessage(jniErrorCode));
-            messageLabel.setText("Single fingerprint reader not initialized.");
+            updateUI("Single fingerprint reader not initialized.");
             return false;
         }
         isDeviceInitialized = true;
@@ -167,27 +179,21 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         App.setRoot("login");
     }
 
-    @FXML
-    public void loginBtnAction() throws IllegalStateException {
-        if (pNoPasswordField.getText().isBlank() || pNoPasswordField.getText().length() < 4) {
-            messageLabel.setText("Please enter valid card pin.");
-            return;
-        }
-        disableControls(backBtn, loginBtn);
+    private void startAuthentication() {
         // required to follow the procedure calls to read data from card.
         // deInitialize -> initialize ->[waitForConnect -> selectApp] -> readData
         try {
             asn1EncodedHexByteArrayMap = startProcedureCall();
         } catch (GenericException ex) {
             pNoPasswordField.clear();
-            messageLabel.setText(ex.getMessage());
+            updateUI(ex.getMessage());
             enableControls(backBtn, loginBtn);
             return;
         }
 
         // connection timeout
         if (asn1EncodedHexByteArrayMap == null) {
-            messageLabel.setText("Something went wrong. Kindly check Card API service.");
+            updateUI("Something went wrong. Kindly check Card API service.");
             enableControls(backBtn, loginBtn);
             return;
         }
@@ -201,7 +207,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
                     throw new GenericException(GENERIC_ERR_MSG);
                 }
                 pNoPasswordField.clear();
-                messageLabel.setText(ex.getMessage());
+                updateUI(ex.getMessage());
                 enableControls(backBtn, loginBtn);
             }
             return;
@@ -218,9 +224,19 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             captureFingerprint();
         } catch (GenericException ex) {
             pNoPasswordField.clear();
-            messageLabel.setText(ex.getMessage());
+            updateUI(ex.getMessage());
             enableControls(backBtn, loginBtn);
         }
+    }
+
+    @FXML
+    public void loginBtnAction() throws IllegalStateException {
+        if (pNoPasswordField.getText().isBlank() || pNoPasswordField.getText().length() < 4) {
+            messageLabel.setText("Please enter valid card pin.");
+            return;
+        }
+        disableControls(backBtn, loginBtn);
+        App.getThreadPool().execute(this::startAuthentication);
     }
 
 
@@ -253,7 +269,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             }
         }
 
-        Optional<CardWhitelistDetail> whitelistedCardDetailOptional = cardWhitelistDetails.stream().filter(ele -> pNumber.equals(ele.getPNo())).findFirst();
+        Optional<CardWhitelistDetail> whitelistedCardDetailOptional = cardWhitelistDetails.stream().filter(ele -> pNumber.equalsIgnoreCase(ele.getPNo())).findFirst();
 
         String unauthorizedMessage = "You are unauthorized to access the system.";
         CardWhitelistDetail whitelistedCardDetail = whitelistedCardDetailOptional.orElseGet(() -> {
@@ -266,15 +282,31 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             throw new GenericException(unauthorizedMessage);
         }
 
-        if (!whitelistedCardDetail.getCardNo().equals(cardNumber)) {
+        if (!whitelistedCardDetail.getCardNo().equalsIgnoreCase(cardNumber)) {
             LOGGER.log(Level.INFO, "Card number not matched with the downloaded card.");
             throw new GenericException(unauthorizedMessage);
         }
 
-        if (!pNumber.equals(pNoPasswordField.getText())) {
+        if (!pNumber.equalsIgnoreCase(pNoPasswordField.getText())) {
             LOGGER.log(Level.INFO, "Personal Number and user input number does not matched.");
             throw new GenericException("Invalid Personal Number.");
         }
+    }
+
+    private boolean restartApiService() {
+        try {
+            Process pr = Runtime.getRuntime().exec(CARD_API_SERVICE_RESTART_COMMAND);
+            int exitCode = pr.waitFor();
+            LOGGER.log(Level.INFO, () -> "****Naval_WebServices restart exit code: " + exitCode);
+            return exitCode == 0;
+        } catch (IOException | InterruptedException ex) {
+            LOGGER.log(Level.SEVERE, ex::getMessage);
+            if (ex instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            throw new GenericException(GENERIC_ERR_MSG);
+        }
+
     }
 
     // throws GenericException
@@ -282,52 +314,85 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     private EnumMap<DataType, byte[]> startProcedureCall() {
         // required to follow the procedure calls
         // deInitialize -> initialize ->[waitForConnect -> selectApp] -> readData
-        CRDeInitializeResDto crDeInitializeResDto = LocalCardReaderApi.getDeInitialize();
-        // connection timeout
-        if (crDeInitializeResDto == null) {
-            return null;
-        }
-        jniErrorCode = crDeInitializeResDto.getRetVal();
-        // -1409286131 -> prerequisites failed error
-        if (jniErrorCode != 0 && jniErrorCode != -1409286131) {
-            LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
-            throw new GenericException(ERROR_MESSAGE);
-        }
-        CRInitializeResDto crInitializeResDto = LocalCardReaderApi.getInitialize();
-        // connection timeout
-        if (crInitializeResDto == null) {
-            return null;
-        }
-        jniErrorCode = crInitializeResDto.getRetVal();
-        if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
-            throw new GenericException(ERROR_MESSAGE);
-        }
-        String reqData;
-        try {
-            reqData = Singleton.getObjectMapper().writeValueAsString(new CRWaitForConnectReqDto(MANTRA_CARD_READER_NAME));
-        } catch (JsonProcessingException ex) {
-            LOGGER.log(Level.SEVERE, ex::getMessage);
-            throw new GenericException(GENERIC_ERR_MSG);
+        String reqData = null;
+        CRWaitForConnectResDto crWaitForConnectResDto = null;
+        int counter = 1;
+        // restart Naval_WebServices if failed on the first WaitForConnect call.
+        while (true) {
+            counter--;
+            CRDeInitializeResDto crDeInitializeResDto = LocalCardReaderApi.getDeInitialize();
+            // connection timeout
+            if (crDeInitializeResDto == null) {
+                return null;
+            }
+            jniErrorCode = crDeInitializeResDto.getRetVal();
+            // -1409286131 -> prerequisites failed error
+            if (jniErrorCode != 0 && jniErrorCode != -1409286131) {
+                LOGGER.log(Level.SEVERE, () -> "****DeInitializeErrorCode: " + jniErrorCode);
+                throw new GenericException(LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
+            }
+            CRInitializeResDto crInitializeResDto = LocalCardReaderApi.getInitialize();
+            // connection timeout
+            if (crInitializeResDto == null) {
+                return null;
+            }
+            jniErrorCode = crInitializeResDto.getRetVal();
+            if (jniErrorCode != 0) {
+                LOGGER.log(Level.SEVERE, () -> "****InitializeErrorCode: " + jniErrorCode);
+                throw new GenericException(LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
+            }
+            try {
+                Thread.sleep(SLEEP_TIME_IN_MIL_SEC);
+            } catch (InterruptedException e) {
+                LOGGER.log(Level.SEVERE, "Interrupted while sleeping.");
+                Thread.currentThread().interrupt();
+            }
+
+            try {
+                reqData = Singleton.getObjectMapper().writeValueAsString(new CRWaitForConnectReqDto(MANTRA_CARD_READER_NAME));
+            } catch (JsonProcessingException ex) {
+                LOGGER.log(Level.SEVERE, ex::getMessage);
+                throw new GenericException(GENERIC_ERR_MSG);
+            }
+
+            crWaitForConnectResDto = LocalCardReaderApi.postWaitForConnect(reqData);
+            // connection timeout
+            if (crWaitForConnectResDto == null) {
+                return null;
+            }
+            jniErrorCode = crWaitForConnectResDto.getRetVal();
+
+            if (jniErrorCode != 0) {
+                LOGGER.log(Level.SEVERE, () -> "****WaitForConnectErrorCode: " + jniErrorCode);
+                if (jniErrorCode == -1090519029) { // custom message when press 'login' without reader connected
+                    throw new GenericException("No card reader detected or unsupported reader name.");
+                }
+                if (counter == 0) {
+                    LOGGER.log(Level.INFO, () -> "****Communication error occurred. Restarting Naval_WebServices.");
+                    if (restartApiService()) {
+                        try {
+                            Thread.sleep(1000); // needed to sleep after restarting
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                        continue; // starts from DeInitialize again.
+                    } // else exit code is not zero
+                }
+                throw new GenericException(LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
+            }
+            try {
+                reqData = Singleton.getObjectMapper().writeValueAsString(new CRSelectAppReqDto(CARD_TYPE, crWaitForConnectResDto.getHandle()));
+            } catch (JsonProcessingException ex) {
+                LOGGER.log(Level.SEVERE, ex::getMessage);
+                throw new GenericException(GENERIC_ERR_MSG);
+            }
+            break;
         }
 
-        CRWaitForConnectResDto crWaitForConnectResDto = LocalCardReaderApi.postWaitForConnect(reqData);
-        // connection timeout
-        if (crWaitForConnectResDto == null) {
-            return null;
-        }
-        jniErrorCode = crWaitForConnectResDto.getRetVal();
-        if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
-            throw new GenericException(ERROR_MESSAGE);
+        if (crWaitForConnectResDto.getRetVal() != 0) {
+            throw new GenericException("Kindly reconnect the reader and place card correctly.");
         }
 
-        try {
-            reqData = Singleton.getObjectMapper().writeValueAsString(new CRSelectAppReqDto(CARD_TYPE, crWaitForConnectResDto.getHandle()));
-        } catch (JsonProcessingException ex) {
-            LOGGER.log(Level.SEVERE, ex::getMessage);
-            throw new GenericException(GENERIC_ERR_MSG);
-        }
         CRSelectAppResDto crSelectAppResDto = LocalCardReaderApi.postSelectApp(reqData);
         // connection timeout
         if (crSelectAppResDto == null) {
@@ -335,8 +400,8 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         }
         jniErrorCode = crSelectAppResDto.getRetVal();
         if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
-            throw new GenericException(ERROR_MESSAGE);
+            LOGGER.log(Level.SEVERE, () -> "****SelectAppErrorCode: " + jniErrorCode);
+            throw new GenericException(LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
         }
         EnumMap<DataType, byte[]> ans1EncodedHexByteArrayMap = new EnumMap<>(DataType.class);
         ans1EncodedHexByteArrayMap.put(DataType.STATIC, readDataFromCard(crWaitForConnectResDto.getHandle(), DataType.STATIC));
@@ -362,8 +427,8 @@ public class CardLoginController implements MIDFingerAuth_Callback {
                 jniErrorCode = crReadDataResDto.getRetVal();
                 // if first request failed throw exception
                 if (offset == 0 && jniErrorCode != 0) {
-                    LOGGER.log(Level.SEVERE, () -> LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
-                    throw new GenericException(ERROR_MESSAGE);
+                    LOGGER.log(Level.SEVERE, () -> "****ReadDataErrorCode: " + jniErrorCode);
+                    throw new GenericException(LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
                 }
                 // consider 1st request responseLen  = 1024 bytes
                 // therefore, we assumed more data is left to be read,

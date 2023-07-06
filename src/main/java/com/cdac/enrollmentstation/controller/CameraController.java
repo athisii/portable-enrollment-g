@@ -80,7 +80,7 @@ public class CameraController {
             CHIN_UP_COLOR_IMAGE = loadFileFromFaceCodeDirectory("chin_up_color.png");
             TICK_GREEN_IMAGE = loadFileFromFaceCodeDirectory("tick_green.jpg");
 
-        } catch (GenericException ex) {
+        } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException("Some property values are missing or blank or some files are missing in facecode directory");
         }
@@ -145,8 +145,6 @@ public class CameraController {
         if (getArcDetailsHolder().getArcDetails() != null && getArcDetailsHolder().getArcDetails().getArcNo() != null) {
             arcLbl.setText("e-ARC: " + getArcDetailsHolder().getArcDetails().getArcNo());
         }
-//        camSlider.setVisible(true);
-//        brightness.setVisible(true);
     }
 
     private void confirmYes(ActionEvent actionEvent) {
@@ -446,27 +444,6 @@ public class CameraController {
         }
         isCameraActive = false;
     }
-
-//    @FXML
-//    private void camSlider() {
-//        System.out.println("inside Cam Slider");
-//        System.out.println("CAm Slider Value:" + (int) camSlider.getValue());
-//        String sliderdec = new DecimalFormat("##.#").format((float) camSlider.getValue());
-//        System.out.println("CAm Slider Value2:" + sliderdec);
-//        try {
-//            System.out.println("905");
-//            File file = new File(SUB_FILE);
-//            RescaleOp rescaleOp = new RescaleOp(Float.valueOf(sliderdec), 15 * Float.valueOf(sliderdec), null);
-//            BufferedImage bimag = ImageIO.read(file);
-//            rescaleOp.filter(bimag, bimag);
-//            ImageIO.write(bimag, SUB_FILE, file);
-//            Image image = new Image(file.toURI().toString());
-//            resultImageView.setImage(image);
-//            System.out.println("914");
-//        } catch (Exception ex) {
-//            LOGGER.log(Level.SEVERE, ex::getMessage);
-//        }
-//    }
 
     private void disableControls(Node... nodes) {
         for (Node node : nodes) {

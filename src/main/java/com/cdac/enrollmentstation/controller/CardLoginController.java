@@ -248,7 +248,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
         String cardNumber = Asn1EncodedHexUtil.extractFromStaticAns1EncodedHex(asn1EncodedHexByteArrayMap.get(DataType.STATIC), CardDataIndex.CARD_NUMBER);
         if (pNumber == null || pNumber.isBlank() || cardNumber == null || cardNumber.isBlank()) {
             LOGGER.log(Level.SEVERE, "Received a null or empty value for PN or Card Number from card.");
-            throw new GenericException(GENERIC_ERR_MSG);
+            throw new GenericException("Kindly place a valid card and try again.");
         }
         String cardHotlistedFilePathString = PropertyFile.getProperty(PropertyName.CARD_WHITELISTED_FILE);
         if (cardHotlistedFilePathString == null || cardHotlistedFilePathString.isBlank()) {

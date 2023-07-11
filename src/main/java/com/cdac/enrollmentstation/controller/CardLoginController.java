@@ -314,8 +314,8 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     private EnumMap<DataType, byte[]> startProcedureCall() {
         // required to follow the procedure calls
         // deInitialize -> initialize ->[waitForConnect -> selectApp] -> readData
-        String reqData = null;
-        CRWaitForConnectResDto crWaitForConnectResDto = null;
+        String reqData;
+        CRWaitForConnectResDto crWaitForConnectResDto;
         int counter = 1;
         // restart Naval_WebServices if failed on the first WaitForConnect call.
         while (true) {

@@ -358,8 +358,7 @@ public class ImportExportController {
 
         var firstArcDetails = arcDetailsList.get(0);
         unitId = firstArcDetails.getArcNo().split("-")[0];
-        unitCaption = firstArcDetails.getUnit();
-
+        unitCaption = firstArcDetails.getUnit().replaceAll("[^a-zA-Z0-9]", "");
         unitCode = unitCode.replaceAll("[^a-zA-Z0-9]", "");
         String jsonArcList;
         try {

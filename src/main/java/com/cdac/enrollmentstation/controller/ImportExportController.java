@@ -8,7 +8,7 @@ import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.SaveEnrollmentResDto;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.ARCDetails;
+import com.cdac.enrollmentstation.model.ArcDetails;
 import com.cdac.enrollmentstation.model.Unit;
 import com.cdac.enrollmentstation.security.AesFileUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
@@ -331,7 +331,7 @@ public class ImportExportController {
     private void importUnit(String unitCode) {
         String unitId;
         String unitCaption;
-        List<ARCDetails> arcDetailsList;
+        List<ArcDetails> arcDetailsList;
         try {
             // returns null on connection timeout
             arcDetailsList = MafisServerApi.fetchArcListByUnitCode(unitCode);

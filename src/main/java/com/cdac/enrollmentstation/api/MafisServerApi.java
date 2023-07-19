@@ -8,8 +8,8 @@ import com.cdac.enrollmentstation.dto.SaveEnrollmentResDto;
 import com.cdac.enrollmentstation.dto.UnitCodeReqDto;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.ARCDetails;
-import com.cdac.enrollmentstation.model.ARCDetailsList;
+import com.cdac.enrollmentstation.model.ArcDetails;
+import com.cdac.enrollmentstation.model.ArcDetailsList;
 import com.cdac.enrollmentstation.model.Unit;
 import com.cdac.enrollmentstation.model.UnitListDetails;
 import com.cdac.enrollmentstation.security.Aes256Util;
@@ -52,7 +52,7 @@ public class MafisServerApi {
      * @throws GenericException exception on connection timeout, error, json parsing exception etc.
      */
 
-    public static ARCDetails fetchARCDetails(String url, String arcNo) {
+    public static ArcDetails fetchARCDetails(String url, String arcNo) {
         String jsonRequestData;
         try {
             jsonRequestData = Singleton.getObjectMapper().writeValueAsString(new ArcNoReqDto(arcNo));
@@ -64,9 +64,9 @@ public class MafisServerApi {
         if (response == null) {
             return null;
         }
-        ARCDetails arcDetail;
+        ArcDetails arcDetail;
         try {
-            arcDetail = Singleton.getObjectMapper().readValue(response.body(), ARCDetails.class);
+            arcDetail = Singleton.getObjectMapper().readValue(response.body(), ArcDetails.class);
         } catch (JsonProcessingException ignored) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
@@ -173,7 +173,7 @@ public class MafisServerApi {
      * @throws GenericException exception on error, json parsing exception etc.
      */
 
-    public static List<ARCDetails> fetchArcListByUnitCode(String unitCode) {
+    public static List<ArcDetails> fetchArcListByUnitCode(String unitCode) {
         String jsonRequestData;
         try {
             jsonRequestData = Singleton.getObjectMapper().writeValueAsString(new UnitCodeReqDto(unitCode));
@@ -186,9 +186,9 @@ public class MafisServerApi {
         if (httpResponse == null) {
             return null;
         }
-        ARCDetailsList arcDetailsList;
+        ArcDetailsList arcDetailsList;
         try {
-            arcDetailsList = Singleton.getObjectMapper().readValue(httpResponse.body(), ARCDetailsList.class);
+            arcDetailsList = Singleton.getObjectMapper().readValue(httpResponse.body(), ArcDetailsList.class);
         } catch (JsonProcessingException e) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);

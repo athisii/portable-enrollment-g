@@ -6,8 +6,8 @@ import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.ARCDetails;
-import com.cdac.enrollmentstation.model.ARCDetailsHolder;
+import com.cdac.enrollmentstation.model.ArcDetails;
+import com.cdac.enrollmentstation.model.ArcDetailsHolder;
 import com.cdac.enrollmentstation.model.SaveEnrollmentDetails;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.SaveEnrollmentDetailsUtil;
@@ -98,7 +98,7 @@ public class BiometricEnrollmentController {
     }
 
     private void continueBtnAction() {
-        ARCDetails arcDetails = ARCDetailsHolder.getArcDetailsHolder().getArcDetails();
+        ArcDetails arcDetails = ArcDetailsHolder.getArcDetailsHolder().getArcDetails();
 
         if (arcDetails.getBiometricOptions().trim().equalsIgnoreCase("photo")) {
             try {
@@ -126,7 +126,7 @@ public class BiometricEnrollmentController {
         }
 
         // different e-ARC number is entered.
-        if (saveEnrollmentDetails.getArcNo() == null || !ARCDetailsHolder.getArcDetailsHolder().getArcDetails().getArcNo().equals(saveEnrollmentDetails.getArcNo())) {
+        if (saveEnrollmentDetails.getArcNo() == null || !ArcDetailsHolder.getArcDetailsHolder().getArcDetails().getArcNo().equals(saveEnrollmentDetails.getArcNo())) {
             try {
                 App.setRoot("slap_scanner");
             } catch (IOException ex) {
@@ -134,14 +134,14 @@ public class BiometricEnrollmentController {
             }
         } else {
             // same e-ARC number is entered as the one saved in saveEnrollment.txt file.
-            ARCDetailsHolder.getArcDetailsHolder().setSaveEnrollmentDetails(saveEnrollmentDetails);
+            ArcDetailsHolder.getArcDetailsHolder().setSaveEnrollmentDetails(saveEnrollmentDetails);
             changeScreenBasedOnEnrollmentStatus();
         }
 
     }
 
     private void changeScreenBasedOnEnrollmentStatus() {
-        switch (ARCDetailsHolder.getArcDetailsHolder().getSaveEnrollmentDetails().getEnrollmentStatus()) {
+        switch (ArcDetailsHolder.getArcDetailsHolder().getSaveEnrollmentDetails().getEnrollmentStatus()) {
             case "FingerPrintCompleted":
                 try {
                     App.setRoot("iris");
@@ -186,12 +186,12 @@ public class BiometricEnrollmentController {
 
     private void showArcDetails() {
         boolean alreadyCaptured;
-        ARCDetails arcDetails;
+        ArcDetails arcDetails;
         // check if already captured
         Future<Boolean> alreadyCapturedFuture = App.getThreadPool().submit(this::checkIfAlreadyCaptured);
 
         // check if e-ARC number exists
-        Future<ARCDetails> arcDetailsFuture = App.getThreadPool().submit(this::checkIfArcNumberExist);
+        Future<ArcDetails> arcDetailsFuture = App.getThreadPool().submit(this::checkIfArcNumberExist);
 
         // waits for both the worker threads to finish
         try {
@@ -237,7 +237,7 @@ public class BiometricEnrollmentController {
         updateUI("Details fetched successfully for e-ARC: " + tempArc);
 
 
-        ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
+        ArcDetailsHolder holder = ArcDetailsHolder.getArcDetailsHolder();
         holder.setArcDetails(arcDetails);
         SaveEnrollmentDetails saveEnrollmentDetails = new SaveEnrollmentDetails();
 
@@ -258,7 +258,7 @@ public class BiometricEnrollmentController {
     }
 
 
-    private ARCDetails checkIfArcNumberExist() {
+    private ArcDetails checkIfArcNumberExist() {
         // throws exception
         try (Stream<Path> importFolder = Files.walk(Path.of(PropertyFile.getProperty(PropertyName.IMPORT_JSON_FOLDER)))) {
             Optional<Path> optionalPath = importFolder
@@ -277,10 +277,10 @@ public class BiometricEnrollmentController {
             // throws exception
             String jsonString = Files.readString(optionalPath.get(), StandardCharsets.UTF_8);
             // throws exception
-            List<ARCDetails> arcList = Singleton.getObjectMapper().readValue(jsonString, new TypeReference<>() {
+            List<ArcDetails> arcList = Singleton.getObjectMapper().readValue(jsonString, new TypeReference<>() {
             });
 
-            for (ARCDetails arcDetail : arcList) {
+            for (ArcDetails arcDetail : arcList) {
                 if (arcNumberTextField.getText().equals(arcDetail.getArcNo())) {
                     return arcDetail;
                 }
@@ -312,7 +312,7 @@ public class BiometricEnrollmentController {
         }
     }
 
-    private void updateUiDynamicLabelText(ARCDetails arcDetails) {
+    private void updateUiDynamicLabelText(ArcDetails arcDetails) {
         Platform.runLater(() -> {
             if (arcDetails == null) {
                 messageLabel.setText("Details not found for entered e-ARC number.");

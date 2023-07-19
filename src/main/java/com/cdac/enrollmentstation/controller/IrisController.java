@@ -3,7 +3,7 @@ package com.cdac.enrollmentstation.controller;
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.ARCDetailsHolder;
+import com.cdac.enrollmentstation.model.ArcDetailsHolder;
 import com.cdac.enrollmentstation.model.IRIS;
 import com.cdac.enrollmentstation.model.SaveEnrollmentDetails;
 import com.cdac.enrollmentstation.util.SaveEnrollmentDetailsUtil;
@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_IRIS_ERR_MSG;
-import static com.cdac.enrollmentstation.model.ARCDetailsHolder.getArcDetailsHolder;
+import static com.cdac.enrollmentstation.model.ArcDetailsHolder.getArcDetailsHolder;
 
 /**
  * @author athisii, CDAC
@@ -338,7 +338,7 @@ public class IrisController implements MIDIrisEnrollCallback {
 
     @FXML
     private void capturePhotoBtnAction() {
-        ARCDetailsHolder holder = getArcDetailsHolder();
+        ArcDetailsHolder holder = getArcDetailsHolder();
         SaveEnrollmentDetails saveEnrollmentDetails = holder.getSaveEnrollmentDetails();
         if (IrisType.NONE == irisTypeToCapture) {
             String notAvailable = "Not Available";

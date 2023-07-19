@@ -5,7 +5,7 @@ import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.ARCDetailsHolder;
+import com.cdac.enrollmentstation.model.ArcDetailsHolder;
 import com.cdac.enrollmentstation.model.FP;
 import com.cdac.enrollmentstation.model.SaveEnrollmentDetails;
 import com.cdac.enrollmentstation.util.PropertyFile;
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 import static RealScan.RealScan_JNI.*;
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_RS_ERR_MSG;
-import static com.cdac.enrollmentstation.model.ARCDetailsHolder.getArcDetailsHolder;
+import static com.cdac.enrollmentstation.model.ArcDetailsHolder.getArcDetailsHolder;
 
 /**
  * @author athisii, CDAC
@@ -1154,7 +1154,7 @@ public class SlapScannerController {
             releaseDevice();
         }
 
-        ARCDetailsHolder arcDetailsHolder = ARCDetailsHolder.getArcDetailsHolder();
+        ArcDetailsHolder arcDetailsHolder = ArcDetailsHolder.getArcDetailsHolder();
         SaveEnrollmentDetails saveEnrollmentDetails = arcDetailsHolder.getSaveEnrollmentDetails();
         saveEnrollmentDetails.setLeftFPScannerSerailNo(deviceInfo.deviceID);
         saveEnrollmentDetails.setRightFPScannerSerailNo(deviceInfo.deviceID);

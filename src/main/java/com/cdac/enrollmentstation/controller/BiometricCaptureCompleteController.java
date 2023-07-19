@@ -101,8 +101,8 @@ public class BiometricCaptureCompleteController {
     }
 
     private void submitData() {
-        ARCDetailsHolder holder = ARCDetailsHolder.getArcDetailsHolder();
-        ARCDetails arcDetails = holder.getArcDetails();
+        ArcDetailsHolder holder = ArcDetailsHolder.getArcDetailsHolder();
+        ArcDetails arcDetails = holder.getArcDetails();
         SaveEnrollmentDetails saveEnrollmentDetails = holder.getSaveEnrollmentDetails();
 
         // based on biometricOptions just do the necessary actions

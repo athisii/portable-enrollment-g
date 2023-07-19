@@ -4,7 +4,7 @@ import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.ARCDetailsHolder;
+import com.cdac.enrollmentstation.model.ArcDetailsHolder;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.cdac.enrollmentstation.model.ARCDetailsHolder.getArcDetailsHolder;
+import static com.cdac.enrollmentstation.model.ArcDetailsHolder.getArcDetailsHolder;
 
 /**
  * @author athisii, CDAC
@@ -152,7 +152,7 @@ public class CameraController {
         savePhotoBtn.setDisable(!validImage);
         enableControls(startStopCameraBtn, backBtn);
         try {
-            ARCDetailsHolder holder = getArcDetailsHolder();
+            ArcDetailsHolder holder = getArcDetailsHolder();
             if (holder.getArcDetails().getBiometricOptions().trim().equalsIgnoreCase("Photo")) {
                 App.setRoot("biometric_enrollment");
             } else {
@@ -173,7 +173,7 @@ public class CameraController {
     // action for back button
     private void back(ActionEvent actionEvent) {
         confirmPane.setVisible(true);
-        ARCDetailsHolder holder = getArcDetailsHolder();
+        ArcDetailsHolder holder = getArcDetailsHolder();
         // Added For Biometric Options
         if (holder.getArcDetails().getBiometricOptions().trim().equalsIgnoreCase("Photo")) {
             confirmPaneLbl.setText("Click 'Yes' to FetchArc or Click 'No' to Capture photo");

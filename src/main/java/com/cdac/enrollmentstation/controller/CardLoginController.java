@@ -8,7 +8,7 @@ import com.cdac.enrollmentstation.dto.*;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.CardWhitelistDetail;
-import com.cdac.enrollmentstation.security.Asn1EncodedHexUtil;
+import com.cdac.enrollmentstation.util.Asn1Util;
 import com.cdac.enrollmentstation.util.LocalCardReaderErrMsgUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
@@ -44,7 +44,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
-import static com.cdac.enrollmentstation.security.Asn1EncodedHexUtil.CardDataIndex;
+import static com.cdac.enrollmentstation.util.Asn1Util.CardStaticDataIndex;
 
 
 /**
@@ -244,8 +244,8 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     // Caller must handle the exception
     private void authenticateByPN() {
         // gets pin code from card
-        String pNumber = Asn1EncodedHexUtil.extractFromStaticAns1EncodedHex(asn1EncodedHexByteArrayMap.get(DataType.STATIC), CardDataIndex.PN);
-        String cardNumber = Asn1EncodedHexUtil.extractFromStaticAns1EncodedHex(asn1EncodedHexByteArrayMap.get(DataType.STATIC), CardDataIndex.CARD_NUMBER);
+        String pNumber = Asn1Util.extractFromStaticAns1Encoded(asn1EncodedHexByteArrayMap.get(DataType.STATIC), CardStaticDataIndex.PN);
+        String cardNumber = Asn1Util.extractFromStaticAns1Encoded(asn1EncodedHexByteArrayMap.get(DataType.STATIC), CardStaticDataIndex.CARD_NUMBER);
         if (pNumber == null || pNumber.isBlank() || cardNumber == null || cardNumber.isBlank()) {
             LOGGER.log(Level.SEVERE, "Received a null or empty value for PN or Card Number from card.");
             throw new GenericException("Kindly place a valid card and try again.");
@@ -404,22 +404,22 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             throw new GenericException(LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
         }
         EnumMap<DataType, byte[]> ans1EncodedHexByteArrayMap = new EnumMap<>(DataType.class);
-        ans1EncodedHexByteArrayMap.put(DataType.STATIC, readDataFromCard(crWaitForConnectResDto.getHandle(), DataType.STATIC));
+        ans1EncodedHexByteArrayMap.put(DataType.STATIC, readBufferedData(crWaitForConnectResDto.getHandle(), DataType.STATIC));
         if (twoFactorAuthEnabled) {
-            ans1EncodedHexByteArrayMap.put(DataType.FINGERPRINT, readDataFromCard(crWaitForConnectResDto.getHandle(), DataType.FINGERPRINT));
+            ans1EncodedHexByteArrayMap.put(DataType.FINGERPRINT, readBufferedData(crWaitForConnectResDto.getHandle(), DataType.FINGERPRINT));
         }
         return ans1EncodedHexByteArrayMap;
     }
 
     // throws GenericException
-    // Caller must handle the exception
-    private byte[] readDataFromCard(int handle, DataType dataType) {
+    // Caller must handle the exception readBufferedDataFromCard
+    private byte[] readBufferedData(int handle, DataType dataType) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             // for reading multiple times
             boolean repeat = true;
             int offset = 0;
             while (repeat) {
-                CRReadDataResDto crReadDataResDto = readBufferedDataFromCard(handle, dataType, offset, CARD_READER_MAX_BUFFER_SIZE);
+                CRReadDataResDto crReadDataResDto = readData(handle, dataType, offset, CARD_READER_MAX_BUFFER_SIZE);
                 // connection timeout
                 if (crReadDataResDto == null) {
                     return null;
@@ -461,7 +461,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
 
     // throws GenericException
     // Caller must handle the exception
-    private CRReadDataResDto readBufferedDataFromCard(int handle, DataType whichData, int offset, int requestLength) {
+    private CRReadDataResDto readData(int handle, DataType whichData, int offset, int requestLength) {
         String reqData;
         try {
             reqData = Singleton.getObjectMapper().writeValueAsString(new CRReadDataReqDto(handle, whichData.getValue(), offset, requestLength));

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.cdac.enrollmentstation.security;
+package com.cdac.enrollmentstation.util;
 
 
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
@@ -17,11 +17,11 @@ import java.io.ByteArrayInputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Asn1EncodedHexUtil {
-    private static final Logger LOGGER = ApplicationLog.getLogger(Asn1EncodedHexUtil.class);
+public class Asn1Util {
+    private static final Logger LOGGER = ApplicationLog.getLogger(Asn1Util.class);
 
 
-    public enum CardDataIndex {
+    public enum CardStaticDataIndex {
         CHIP_SERIAL_NUMBER(0),
         CARD_NUMBER(1),
         CARD_TYPE_ID(2),
@@ -50,7 +50,7 @@ public class Asn1EncodedHexUtil {
         RELATION(25);
         private final int value;
 
-        CardDataIndex(int val) {
+        CardStaticDataIndex(int val) {
             value = val;
         }
 
@@ -60,18 +60,18 @@ public class Asn1EncodedHexUtil {
     }
 
     //Suppress default constructor for noninstantiability
-    private Asn1EncodedHexUtil() {
-        throw new AssertionError("The Asn1EncodedHexUtil methods must be accessed statically.");
+    private Asn1Util() {
+        throw new AssertionError("The Asn1Util methods must be accessed statically.");
     }
 
     // throws GenericException
     // Caller must handle the exception
-    public static String extractFromStaticAns1EncodedHex(byte[] bytes, CardDataIndex cardDataIndex) {
+    public static String extractFromStaticAns1Encoded(byte[] bytes, CardStaticDataIndex cardStaticDataIndex) {
         try {
             ASN1InputStream asn1InputStream = new ASN1InputStream(new ByteArrayInputStream(bytes));
             ASN1Primitive asn1Primitive = asn1InputStream.readObject();
             ASN1Sequence asn1Sequence = ASN1Sequence.getInstance(asn1Primitive);
-            return asn1Sequence.getObjectAt(cardDataIndex.getValue()).toString();
+            return asn1Sequence.getObjectAt(cardStaticDataIndex.getValue()).toString();
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);

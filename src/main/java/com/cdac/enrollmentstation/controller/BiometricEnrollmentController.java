@@ -6,7 +6,7 @@ import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.ArcDetails;
+import com.cdac.enrollmentstation.dto.ArcDetails;
 import com.cdac.enrollmentstation.model.ArcDetailsHolder;
 import com.cdac.enrollmentstation.model.SaveEnrollmentDetails;
 import com.cdac.enrollmentstation.util.PropertyFile;

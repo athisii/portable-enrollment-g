@@ -1,5 +1,6 @@
 package com.cdac.enrollmentstation.model;
 
+import com.cdac.enrollmentstation.dto.ArcDetails;
 import com.mantra.midirisenroll.MIDIrisEnroll;
 import lombok.AccessLevel;
 import lombok.Getter;

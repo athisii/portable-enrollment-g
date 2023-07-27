@@ -5,6 +5,7 @@ import com.cdac.enrollmentstation.api.CardWhitelistApi;
 import com.cdac.enrollmentstation.api.MafisServerApi;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
+import com.cdac.enrollmentstation.exception.ConnectionTimeoutException;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.CardWhitelistDetail;
@@ -143,9 +144,7 @@ public class ServerConfigController {
                 updateUI(ex.getMessage());
                 enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
                 return;
-            }
-
-            if (cardWhitelistDetails == null) {
+            } catch (ConnectionTimeoutException ex) {
                 enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
                 updateUI("Connection timeout or received an unexpected value from server.");
                 return;
@@ -170,9 +169,7 @@ public class ServerConfigController {
             updateUI(ex.getMessage());
             enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
             return;
-        }
-
-        if (units == null) {
+        } catch (ConnectionTimeoutException ex) {
             Platform.runLater(() -> {
                 messageLabel.setText("Connection timeout. Please try again.");
                 enrollmentStationUnitIdsComboBox.getItems().clear();

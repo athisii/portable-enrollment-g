@@ -1,10 +1,7 @@
 package com.cdac.enrollmentstation.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 /**
@@ -14,7 +11,11 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CRInitializeResDto {
-    @JsonProperty("retval")
-    int retVal;
+@AllArgsConstructor
+@NoArgsConstructor
+public class CRPkiAuthReqDto {
+    @JsonProperty("handle1")
+    int handle1;
+    @JsonProperty("handle2")
+    int handle2;
 }

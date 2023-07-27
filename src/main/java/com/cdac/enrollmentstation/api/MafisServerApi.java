@@ -8,10 +8,10 @@ import com.cdac.enrollmentstation.dto.SaveEnrollmentResDto;
 import com.cdac.enrollmentstation.dto.UnitCodeReqDto;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.ArcDetails;
-import com.cdac.enrollmentstation.model.ArcDetailsList;
+import com.cdac.enrollmentstation.dto.ArcDetails;
+import com.cdac.enrollmentstation.dto.ArcDetailsList;
 import com.cdac.enrollmentstation.model.Unit;
-import com.cdac.enrollmentstation.model.UnitListDetails;
+import com.cdac.enrollmentstation.dto.UnitListDetails;
 import com.cdac.enrollmentstation.security.Aes256Util;
 import com.cdac.enrollmentstation.security.HmacUtil;
 import com.cdac.enrollmentstation.security.PkiUtil;
@@ -52,7 +52,7 @@ public class MafisServerApi {
      * @throws GenericException exception on connection timeout, error, json parsing exception etc.
      */
 
-    public static ArcDetails fetchARCDetails(String url, String arcNo) {
+    public static ArcDetails fetchARCDetails(String arcNo) {
         String jsonRequestData;
         try {
             jsonRequestData = Singleton.getObjectMapper().writeValueAsString(new ArcNoReqDto(arcNo));
@@ -60,10 +60,7 @@ public class MafisServerApi {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
-        HttpResponse<String> response = HttpUtil.sendHttpRequest(HttpUtil.createPostHttpRequest(url, jsonRequestData));
-        if (response == null) {
-            return null;
-        }
+        HttpResponse<String> response = HttpUtil.sendHttpRequest(HttpUtil.createPostHttpRequest(getArcUrl(), jsonRequestData));
         ArcDetails arcDetail;
         try {
             arcDetail = Singleton.getObjectMapper().readValue(response.body(), ArcDetails.class);
@@ -107,10 +104,6 @@ public class MafisServerApi {
 
         HttpRequest postHttpRequest = HttpUtil.createPostHttpRequest(getSaveEnrollmentUrl(), base64EncodedEncryptedData, headersMap);
         HttpResponse<String> httpResponse = HttpUtil.sendHttpRequest(postHttpRequest);
-        // connection timeout
-        if (httpResponse == null) {
-            return null;
-        }
         Optional<String> base64EncodedUniqueKeyOptional = httpResponse.headers().firstValue(UNIQUE_KEY_HEADER);
 
         if (base64EncodedUniqueKeyOptional.isEmpty()) {
@@ -146,9 +139,6 @@ public class MafisServerApi {
      */
     public static List<Unit> fetchAllUnits() {
         HttpResponse<String> response = HttpUtil.sendHttpRequest(HttpUtil.createGetHttpRequest(getUnitListURL()));
-        if (response == null) {
-            return null;
-        }
         // if this line is reached, response received with status code 200
         UnitListDetails unitListDetails;
         try {
@@ -183,9 +173,6 @@ public class MafisServerApi {
         }
         HttpRequest postHttpRequest = HttpUtil.createPostHttpRequest(getDemographicURL(), jsonRequestData);
         HttpResponse<String> httpResponse = HttpUtil.sendHttpRequest(postHttpRequest);
-        if (httpResponse == null) {
-            return null;
-        }
         ArcDetailsList arcDetailsList;
         try {
             arcDetailsList = Singleton.getObjectMapper().readValue(httpResponse.body(), ArcDetailsList.class);

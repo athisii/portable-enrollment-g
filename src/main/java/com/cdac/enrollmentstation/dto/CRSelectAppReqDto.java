@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 public class CRSelectAppReqDto {
     @JsonProperty("cardtype")
-    byte cardType;
+    int cardType;
     @JsonProperty("handle")
     int handle;
 }

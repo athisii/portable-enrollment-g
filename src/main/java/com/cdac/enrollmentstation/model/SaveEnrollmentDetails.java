@@ -40,10 +40,10 @@ public class SaveEnrollmentDetails {
     String enrollmentDate;
 
     @JsonProperty("FP")
-    Set<FP> fp = new HashSet<>();
+    Set<Fp> fp = new HashSet<>();
 
     @JsonProperty("IRIS")
-    Set<IRIS> iris = new HashSet<>();
+    Set<Iris> iris = new HashSet<>();
 
     @JsonProperty("IRISScannerSerailNo")
     String iRISScannerSerailNo;
@@ -60,7 +60,6 @@ public class SaveEnrollmentDetails {
     @JsonProperty("ARCStatus")
     String arcStatus;
 
-    //For Biometric Options
     @JsonProperty("BiometricOptions")
     String biometricOptions;
 

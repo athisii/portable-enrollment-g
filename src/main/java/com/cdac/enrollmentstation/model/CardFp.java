@@ -1,6 +1,5 @@
 package com.cdac.enrollmentstation.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,13 +12,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class IRIS {
-    @JsonProperty("Position")
+public class CardFp {
     String position;
-
-    @JsonProperty("Image")
-    String image;
-
-    @JsonProperty("Template")
-    String template;
+    byte[] image;
 }

@@ -14,12 +14,12 @@ import java.util.logging.Logger;
  * @author athisii, CDAC
  * Created on 29/03/23
  */
-public class LocalCardReaderApiUrl {
-    public static final Logger LOGGER = ApplicationLog.getLogger(LocalCardReaderApiUrl.class);
+public class LocalNavalWebServiceApiUrl {
+    public static final Logger LOGGER = ApplicationLog.getLogger(LocalNavalWebServiceApiUrl.class);
 
     //Suppress default constructor for noninstantiability
-    private LocalCardReaderApiUrl() {
-        throw new AssertionError("The LocalCardReaderApiUrl methods must be accessed statically.");
+    private LocalNavalWebServiceApiUrl() {
+        throw new AssertionError("The LocalNavalWebServiceApiUrl methods must be accessed statically.");
     }
 
     public static String getInitialize() {
@@ -57,7 +57,7 @@ public class LocalCardReaderApiUrl {
         return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_PKI_AUTH));
     }
 
-    public static String getCardRemoval() {
+    public static String getWaitForRemoval() {
         //  return "http://localhost:8088/N_Wait_for_Removal"
         return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_WAIT_FOR_REMOVAL));
     }

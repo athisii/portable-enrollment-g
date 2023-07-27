@@ -14,8 +14,7 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CRSelectAppResDto {
+public class CRApiResDto {
     @JsonProperty("retval")
     int retVal;
-
 }

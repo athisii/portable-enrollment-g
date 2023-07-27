@@ -1,5 +1,6 @@
-package com.cdac.enrollmentstation.model;
+package com.cdac.enrollmentstation.dto;
 
+import com.cdac.enrollmentstation.dto.ArcDetails;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AccessLevel;

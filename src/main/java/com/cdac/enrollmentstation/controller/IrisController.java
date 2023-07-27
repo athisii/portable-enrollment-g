@@ -4,7 +4,7 @@ import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ArcDetailsHolder;
-import com.cdac.enrollmentstation.model.IRIS;
+import com.cdac.enrollmentstation.model.Iris;
 import com.cdac.enrollmentstation.model.SaveEnrollmentDetails;
 import com.cdac.enrollmentstation.util.SaveEnrollmentDetailsUtil;
 import com.mantra.midirisenroll.DeviceInfo;
@@ -89,7 +89,7 @@ public class IrisController implements MIDIrisEnrollCallback {
 
     private boolean isDeviceInitialized;
     private boolean isIrisCompleted;
-    private final Set<IRIS> irisSet = new HashSet<>();
+    private final Set<Iris> irisSet = new HashSet<>();
 
     private enum IrisType {
         LEFT, RIGHT, BOTH, NONE
@@ -319,8 +319,8 @@ public class IrisController implements MIDIrisEnrollCallback {
         isIrisCompleted = true;
     }
 
-    private IRIS getBase64EncodedIris(String position, byte[] image, byte[] template) {
-        IRIS iris = new IRIS();
+    private Iris getBase64EncodedIris(String position, byte[] image, byte[] template) {
+        Iris iris = new Iris();
         iris.setPosition(position);
         iris.setImage(Base64.getEncoder().encodeToString(image));
         iris.setTemplate(Base64.getEncoder().encodeToString(template));
@@ -342,7 +342,7 @@ public class IrisController implements MIDIrisEnrollCallback {
         SaveEnrollmentDetails saveEnrollmentDetails = holder.getSaveEnrollmentDetails();
         if (IrisType.NONE == irisTypeToCapture) {
             String notAvailable = "Not Available";
-            saveEnrollmentDetails.setIris(new HashSet<>(Set.of(new IRIS(notAvailable, notAvailable, notAvailable))));
+            saveEnrollmentDetails.setIris(new HashSet<>(Set.of(new Iris(notAvailable, notAvailable, notAvailable))));
             //saveEnrollmentDetails.setIRISScannerSerailNo(notAvailable)
         } else {
             saveEnrollmentDetails.setIris(irisSet);

@@ -6,7 +6,7 @@ import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ArcDetailsHolder;
-import com.cdac.enrollmentstation.model.FP;
+import com.cdac.enrollmentstation.model.Fp;
 import com.cdac.enrollmentstation.model.SaveEnrollmentDetails;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.SaveEnrollmentDetailsUtil;
@@ -1060,7 +1060,7 @@ public class SlapScannerController {
 
         List<byte[]> isoTemplates = new ArrayList<>();
 
-        Set<FP> fps = new HashSet<>();
+        Set<Fp> fps = new HashSet<>();
         String fingerPositionString;
 
         for (Integer finger : fingerSet) {
@@ -1133,7 +1133,7 @@ public class SlapScannerController {
 
             isoTemplates.add(template);
 
-            FP fp = new FP();
+            Fp fp = new Fp();
             fp.setPosition(fingerPositionString);
             fp.setImage(Base64.getEncoder().encodeToString(image));
             fp.setTemplate(Base64.getEncoder().encodeToString(template));

@@ -1,4 +1,4 @@
-package com.cdac.enrollmentstation.model;
+package com.cdac.enrollmentstation.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
@@ -54,7 +54,6 @@ public class ArcDetails {
     @JsonProperty("EmailID")
     String emailId;
 
-    //Added For Photo/Biometric
     @JsonProperty("BiometricOptions")
     String biometricOptions;
 

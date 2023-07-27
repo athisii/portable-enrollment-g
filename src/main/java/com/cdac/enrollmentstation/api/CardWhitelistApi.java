@@ -29,7 +29,7 @@ public class CardWhitelistApi {
     }
 
     /**
-     * Fetches all hotlisted card details.
+     * Fetches all whitelisted card details.
      * Caller must handle the exception.
      *
      * @throws GenericException exception on connection timeout, error, json parsing exception etc.
@@ -37,10 +37,6 @@ public class CardWhitelistApi {
 
     public static List<CardWhitelistDetail> fetchWhitelistedCard() {
         HttpResponse<String> response = HttpUtil.sendHttpRequest(HttpUtil.createGetHttpRequest(whitelistedCardApiUrl()));
-        // connection timeout
-        if (response == null) {
-            return null;
-        }
         try {
             return Singleton.getObjectMapper().readValue(response.body(), CardWhitelistResDto.class).getCardWhitelistDetails();
         } catch (JsonProcessingException ex) {

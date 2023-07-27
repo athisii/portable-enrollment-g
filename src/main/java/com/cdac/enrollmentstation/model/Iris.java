@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class FP {
+public class Iris {
     @JsonProperty("Position")
     String position;
 
@@ -22,5 +22,4 @@ public class FP {
 
     @JsonProperty("Template")
     String template;
-
 }

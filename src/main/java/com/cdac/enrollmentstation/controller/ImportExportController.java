@@ -6,9 +6,10 @@ import com.cdac.enrollmentstation.api.MafisServerApi;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.SaveEnrollmentResDto;
+import com.cdac.enrollmentstation.exception.ConnectionTimeoutException;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.ArcDetails;
+import com.cdac.enrollmentstation.dto.ArcDetails;
 import com.cdac.enrollmentstation.model.Unit;
 import com.cdac.enrollmentstation.security.AesFileUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
@@ -184,14 +185,11 @@ public class ImportExportController {
                 updateUI(ex.getMessage());
                 enableControls(importUnitBtn, backBtn, homeBtn, clearImportBtn, clearAllImportBtn, exportBtn);
                 continue;
-            }
-            // timeout connection
-            if (saveEnrollmentResDto == null) {
+            } catch (ConnectionTimeoutException ex) {
                 updateUI(TIMEOUT_ERR_MSG);
                 enableControls(importUnitBtn, backBtn, homeBtn, clearImportBtn, clearAllImportBtn, exportBtn);
                 return;
             }
-
             if (!"0".equals(saveEnrollmentResDto.getErrorCode())) {
                 String errorMessage = saveEnrollmentResDto.getDesc().toLowerCase();
                 LOGGER.log(Level.SEVERE, () -> "Error Desc: " + errorMessage);
@@ -262,8 +260,7 @@ public class ImportExportController {
                 messageLabel.setText(ex.getMessage());
             });
             return;
-        }
-        if (units == null) {
+        } catch (ConnectionTimeoutException ex) {
             disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportBtn);
             Platform.runLater(() -> {
                 unitListView.getItems().clear();
@@ -339,9 +336,7 @@ public class ImportExportController {
             enableControls(importUnitBtn);
             updateUI(ex.getMessage());
             return;
-        }
-
-        if (arcDetailsList == null) {
+        } catch (ConnectionTimeoutException ex) {
             Platform.runLater(() -> {
                 unitListView.getItems().clear();
                 disableControls(importUnitBtn);
@@ -349,7 +344,6 @@ public class ImportExportController {
             });
             return;
         }
-
         if (arcDetailsList.isEmpty()) {
             enableControls(importUnitBtn);
             updateUI("No e-ARC found for imported unit.");

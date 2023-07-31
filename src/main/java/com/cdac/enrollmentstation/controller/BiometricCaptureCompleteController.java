@@ -4,13 +4,16 @@ import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.api.MafisServerApi;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
-import com.cdac.enrollmentstation.dto.ArcDetails;
+import com.cdac.enrollmentstation.dto.ArcDetail;
+import com.cdac.enrollmentstation.dto.Fp;
+import com.cdac.enrollmentstation.dto.Iris;
+import com.cdac.enrollmentstation.dto.SaveEnrollmentDetail;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.*;
 import com.cdac.enrollmentstation.security.AesFileUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
-import com.cdac.enrollmentstation.util.SaveEnrollmentDetailsUtil;
+import com.cdac.enrollmentstation.util.SaveEnrollmentDetailUtil;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import javafx.application.Platform;
@@ -103,35 +106,35 @@ public class BiometricCaptureCompleteController {
 
     private void submitData() {
         ArcDetailsHolder holder = ArcDetailsHolder.getArcDetailsHolder();
-        ArcDetails arcDetails = holder.getArcDetails();
-        SaveEnrollmentDetails saveEnrollmentDetails = holder.getSaveEnrollmentDetails();
+        ArcDetail arcDetail = holder.getArcDetail();
+        SaveEnrollmentDetail saveEnrollmentDetail = holder.getSaveEnrollmentDetail();
 
         // based on biometricOptions just do the necessary actions
-        if (arcDetails.getBiometricOptions().toLowerCase().contains("biometric")) {
-            saveEnrollmentDetails.setPhoto(NOT_AVAILABLE);
-            saveEnrollmentDetails.setPhotoCompressed(NOT_AVAILABLE);
-            saveEnrollmentDetails.setEnrollmentStatus("Success");
-        } else if (arcDetails.getBiometricOptions().toLowerCase().contains("photo")) {
+        if (arcDetail.getBiometricOptions().toLowerCase().contains("biometric")) {
+            saveEnrollmentDetail.setPhoto(NOT_AVAILABLE);
+            saveEnrollmentDetail.setPhotoCompressed(NOT_AVAILABLE);
+            saveEnrollmentDetail.setEnrollmentStatus("Success");
+        } else if (arcDetail.getBiometricOptions().toLowerCase().contains("photo")) {
             // only adds photo
             try {
-                addPhoto(saveEnrollmentDetails);
+                addPhoto(saveEnrollmentDetail);
             } catch (GenericException ignored) {
                 onErrorUpdateUiControls();
                 return;
             }
             // set NA for slapscanner, iris etc.
-            saveEnrollmentDetails.setIRISScannerSerailNo(NOT_AVAILABLE);
-            saveEnrollmentDetails.setLeftFPScannerSerailNo(NOT_AVAILABLE);
-            saveEnrollmentDetails.setRightFPScannerSerailNo(NOT_AVAILABLE);
+            saveEnrollmentDetail.setIrisScannerSerialNo(NOT_AVAILABLE);
+            saveEnrollmentDetail.setLeftFrScannerSerialNo(NOT_AVAILABLE);
+            saveEnrollmentDetail.setRightFpScannerSerialNo(NOT_AVAILABLE);
             Set<Fp> fingerprintset = new HashSet<>(Set.of(new Fp(NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE)));
-            saveEnrollmentDetails.setFp(fingerprintset);
+            saveEnrollmentDetail.setFp(fingerprintset);
             Set<Iris> irisSet = new HashSet<>(Set.of(new Iris(NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE)));
-            saveEnrollmentDetails.setIris(irisSet);
-        } else if (arcDetails.getBiometricOptions().toLowerCase().contains("both")) {
+            saveEnrollmentDetail.setIris(irisSet);
+        } else if (arcDetail.getBiometricOptions().toLowerCase().contains("both")) {
             // fingerprint and iris already added in their controllers
             // so now add only photo
             try {
-                addPhoto(saveEnrollmentDetails);
+                addPhoto(saveEnrollmentDetail);
             } catch (GenericException ignored) {
                 onErrorUpdateUiControls();
                 return;
@@ -139,34 +142,34 @@ public class BiometricCaptureCompleteController {
         }
 
         // common properties
-        saveEnrollmentDetails.setEnrollmentStationID(MafisServerApi.getEnrollmentStationId());
-        saveEnrollmentDetails.setEnrollmentStationUnitID(MafisServerApi.getEnrollmentStationUnitId());
+        saveEnrollmentDetail.setEnrollmentStationId(MafisServerApi.getEnrollmentStationId());
+        saveEnrollmentDetail.setEnrollmentStationUnitId(MafisServerApi.getEnrollmentStationUnitId());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date(System.currentTimeMillis());
-        saveEnrollmentDetails.setEnrollmentDate(formatter.format(date));
-        saveEnrollmentDetails.setArcStatus(arcDetails.getArcStatus());
-        saveEnrollmentDetails.setUniqueID(arcDetails.getApplicantID());//For ApplicantID
-        saveEnrollmentDetails.setBiometricOptions(arcDetails.getBiometricOptions());
+        saveEnrollmentDetail.setEnrollmentDate(formatter.format(date));
+        saveEnrollmentDetail.setArcStatus(arcDetail.getArcStatus());
+        saveEnrollmentDetail.setUniqueId(arcDetail.getApplicantId());//For ApplicantID
+        saveEnrollmentDetail.setBiometricOptions(arcDetail.getBiometricOptions());
 
-        // saves saveEnrollmentDetails for backups
+        // saves saveEnrollmentDetail for backups
         try {
-            SaveEnrollmentDetailsUtil.writeToFile(saveEnrollmentDetails);
+            SaveEnrollmentDetailUtil.writeToFile(saveEnrollmentDetail);
         } catch (GenericException ignored) {
             onErrorUpdateUiControls();
             return;
         }
 
-        // converts saveEnrollmentDetails object to json string
+        // converts saveEnrollmentDetail object to json string
         String jsonData;
         try {
-            jsonData = Singleton.getObjectMapper().writeValueAsString(saveEnrollmentDetails);
+            jsonData = Singleton.getObjectMapper().writeValueAsString(saveEnrollmentDetail);
         } catch (JsonProcessingException ignored) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             onErrorUpdateUiControls();
             return;
         }
         // saves locally
-        startEncryptionProcess(arcDetails.getArcNo(), jsonData);
+        startEncryptionProcess(arcDetail.getArcNo(), jsonData);
     }
 
     private void startEncryptionProcess(String arcNumber, String jsonData) {
@@ -178,7 +181,7 @@ public class BiometricCaptureCompleteController {
         }
         // time for cleanup
         try {
-            SaveEnrollmentDetailsUtil.delete();
+            SaveEnrollmentDetailUtil.delete();
         } catch (GenericException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             onErrorUpdateUiControls();
@@ -206,7 +209,7 @@ public class BiometricCaptureCompleteController {
     }
 
     // adds photo to GLOBAL saveEnrollment object
-    private void addPhoto(SaveEnrollmentDetails saveEnrollmentDetails) {
+    private void addPhoto(SaveEnrollmentDetail saveEnrollmentDetail) {
         String subPhoto = PropertyFile.getProperty(PropertyName.IMG_SUB_FILE);
         if (subPhoto == null || subPhoto.isBlank()) {
             LOGGER.log(Level.SEVERE, "No entry for '" + PropertyName.IMG_SUB_FILE + ", in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
@@ -229,14 +232,14 @@ public class BiometricCaptureCompleteController {
         }
 
         try {
-            saveEnrollmentDetails.setPhoto(Base64.getEncoder().encodeToString(Files.readAllBytes(subPhotoPath)));
-            saveEnrollmentDetails.setPhotoCompressed(Base64.getEncoder().encodeToString(Files.readAllBytes(compressPhotoPath)));
+            saveEnrollmentDetail.setPhoto(Base64.getEncoder().encodeToString(Files.readAllBytes(subPhotoPath)));
+            saveEnrollmentDetail.setPhotoCompressed(Base64.getEncoder().encodeToString(Files.readAllBytes(compressPhotoPath)));
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(GENERIC_ERR_MSG);
 
         }
-        saveEnrollmentDetails.setEnrollmentStatus("PhotoCompleted");
+        saveEnrollmentDetail.setEnrollmentStatus("PhotoCompleted");
     }
 
 

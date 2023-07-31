@@ -1,6 +1,7 @@
 package com.cdac.enrollmentstation.model;
 
-import com.cdac.enrollmentstation.dto.ArcDetails;
+import com.cdac.enrollmentstation.dto.ArcDetail;
+import com.cdac.enrollmentstation.dto.SaveEnrollmentDetail;
 import com.mantra.midirisenroll.MIDIrisEnroll;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -16,9 +17,9 @@ import lombok.experimental.FieldDefaults;
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ArcDetailsHolder {
-    ArcDetails arcDetails;
+    ArcDetail arcDetail;
 
-    SaveEnrollmentDetails saveEnrollmentDetails;
+    SaveEnrollmentDetail saveEnrollmentDetail;
 
     MIDIrisEnroll mIDIrisEnroll;
 

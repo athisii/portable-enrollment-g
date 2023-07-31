@@ -9,8 +9,8 @@ import com.cdac.enrollmentstation.dto.SaveEnrollmentResDto;
 import com.cdac.enrollmentstation.exception.ConnectionTimeoutException;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.dto.ArcDetails;
-import com.cdac.enrollmentstation.model.Unit;
+import com.cdac.enrollmentstation.dto.ArcDetail;
+import com.cdac.enrollmentstation.dto.Unit;
 import com.cdac.enrollmentstation.security.AesFileUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
@@ -328,10 +328,10 @@ public class ImportExportController {
     private void importUnit(String unitCode) {
         String unitId;
         String unitCaption;
-        List<ArcDetails> arcDetailsList;
+        List<ArcDetail> arcDetailList;
         try {
             // returns null on connection timeout
-            arcDetailsList = MafisServerApi.fetchArcListByUnitCode(unitCode);
+            arcDetailList = MafisServerApi.fetchArcsByUnitCode(unitCode);
         } catch (GenericException ex) {
             enableControls(importUnitBtn);
             updateUI(ex.getMessage());
@@ -344,20 +344,20 @@ public class ImportExportController {
             });
             return;
         }
-        if (arcDetailsList.isEmpty()) {
+        if (arcDetailList.isEmpty()) {
             enableControls(importUnitBtn);
             updateUI("No e-ARC found for imported unit.");
             return;
         }
 
-        var firstArcDetails = arcDetailsList.get(0);
+        var firstArcDetails = arcDetailList.get(0);
         unitId = firstArcDetails.getArcNo().split("-")[0];
         unitCaption = firstArcDetails.getUnit().replaceAll("[^a-zA-Z0-9]", "");
         unitCode = unitCode.replaceAll("[^a-zA-Z0-9]", "");
         String jsonArcList;
         try {
             // throws exception
-            jsonArcList = Singleton.getObjectMapper().writeValueAsString(arcDetailsList);
+            jsonArcList = Singleton.getObjectMapper().writeValueAsString(arcDetailList);
         } catch (JsonProcessingException e) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             updateUI(GENERIC_ERR_MSG);

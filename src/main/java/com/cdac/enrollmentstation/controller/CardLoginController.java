@@ -9,7 +9,7 @@ import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.exception.NoReaderException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.CardFp;
-import com.cdac.enrollmentstation.model.CardWhitelistDetail;
+import com.cdac.enrollmentstation.dto.CardWhitelistDetail;
 import com.cdac.enrollmentstation.util.Asn1CardTokenUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;

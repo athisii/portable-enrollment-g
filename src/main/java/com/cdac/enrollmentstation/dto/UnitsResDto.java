@@ -1,8 +1,6 @@
 package com.cdac.enrollmentstation.dto;
 
-import com.cdac.enrollmentstation.dto.ArcDetails;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,22 +10,20 @@ import lombok.experimental.FieldDefaults;
 import java.util.List;
 
 /**
- * @author K. Karthikeyan
+ * @author root
  */
-
 @Getter
 @Setter
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@JsonPropertyOrder({"ErrorCode", "Desc", "arcDetails"})
-public class ArcDetailsList {
+public class UnitsResDto {
     @JsonProperty("ErrorCode")
     int errorCode;
 
     @JsonProperty("Desc")
     String desc;
 
-    @JsonProperty("arcDetails")
-    List<ArcDetails> arcDetails;
+    @JsonProperty("Units")
+    List<Unit> units;
 
 }

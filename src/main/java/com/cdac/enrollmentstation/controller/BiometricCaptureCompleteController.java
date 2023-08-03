@@ -10,7 +10,7 @@ import com.cdac.enrollmentstation.dto.Iris;
 import com.cdac.enrollmentstation.dto.SaveEnrollmentDetail;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.*;
+import com.cdac.enrollmentstation.model.ArcDetailsHolder;
 import com.cdac.enrollmentstation.security.AesFileUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.SaveEnrollmentDetailUtil;
@@ -110,10 +110,10 @@ public class BiometricCaptureCompleteController {
         SaveEnrollmentDetail saveEnrollmentDetail = holder.getSaveEnrollmentDetail();
 
         // based on biometricOptions just do the necessary actions
+        saveEnrollmentDetail.setEnrollmentStatus("SUCCESS");
         if (arcDetail.getBiometricOptions().toLowerCase().contains("biometric")) {
             saveEnrollmentDetail.setPhoto(NOT_AVAILABLE);
             saveEnrollmentDetail.setPhotoCompressed(NOT_AVAILABLE);
-            saveEnrollmentDetail.setEnrollmentStatus("Success");
         } else if (arcDetail.getBiometricOptions().toLowerCase().contains("photo")) {
             // only adds photo
             try {
@@ -239,7 +239,6 @@ public class BiometricCaptureCompleteController {
             throw new GenericException(GENERIC_ERR_MSG);
 
         }
-        saveEnrollmentDetail.setEnrollmentStatus("PhotoCompleted");
     }
 
 

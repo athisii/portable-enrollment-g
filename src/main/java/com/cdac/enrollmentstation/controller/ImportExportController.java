@@ -5,12 +5,12 @@ import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.api.MafisServerApi;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
+import com.cdac.enrollmentstation.dto.ArcDetail;
 import com.cdac.enrollmentstation.dto.SaveEnrollmentResDto;
+import com.cdac.enrollmentstation.dto.Unit;
 import com.cdac.enrollmentstation.exception.ConnectionTimeoutException;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.dto.ArcDetail;
-import com.cdac.enrollmentstation.dto.Unit;
 import com.cdac.enrollmentstation.security.AesFileUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
@@ -190,7 +190,7 @@ public class ImportExportController {
                 enableControls(importUnitBtn, backBtn, homeBtn, clearImportBtn, clearAllImportBtn, exportBtn);
                 return;
             }
-            if (!"0".equals(saveEnrollmentResDto.getErrorCode())) {
+            if (saveEnrollmentResDto.getErrorCode() != 0) {
                 String errorMessage = saveEnrollmentResDto.getDesc().toLowerCase();
                 LOGGER.log(Level.SEVERE, () -> "Error Desc: " + errorMessage);
                 if (!errorMessage.contains("already provided")) {

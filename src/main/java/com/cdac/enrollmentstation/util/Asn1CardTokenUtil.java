@@ -12,7 +12,7 @@ import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.*;
 import com.cdac.enrollmentstation.exception.ConnectionTimeoutException;
 import com.cdac.enrollmentstation.exception.GenericException;
-import com.cdac.enrollmentstation.exception.NoReaderException;
+import com.cdac.enrollmentstation.exception.NoReaderOrCardException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.CardFp;
 import org.bouncycastle.asn1.*;
@@ -287,7 +287,11 @@ public class Asn1CardTokenUtil {
             LOGGER.log(Level.SEVERE, () -> "****WaitForConnectErrorCode: " + jniErrorCode);
             if (jniErrorCode == -1090519029) { // custom message when press 'login' without reader connected
                 LOGGER.log(Level.SEVERE, () -> "****WaitForConnectErrorCode: No card reader detected or unsupported reader name.");
-                throw new NoReaderException("No card reader detected or unsupported reader name.");
+                throw new NoReaderOrCardException("No card reader detected or unsupported reader name.");
+            }
+            if (jniErrorCode == -1090514932) { // custom message when press 'login' without reader connected
+                LOGGER.log(Level.SEVERE, () -> "****WaitForConnectErrorCode: No card/token detected.");
+                throw new NoReaderOrCardException("No card/token detected. Kindly place it on the reader.");
             }
             throw new GenericException(LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
         }

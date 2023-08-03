@@ -4,12 +4,12 @@ import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.CRWaitForConnectResDto;
+import com.cdac.enrollmentstation.dto.CardWhitelistDetail;
 import com.cdac.enrollmentstation.exception.ConnectionTimeoutException;
 import com.cdac.enrollmentstation.exception.GenericException;
-import com.cdac.enrollmentstation.exception.NoReaderException;
+import com.cdac.enrollmentstation.exception.NoReaderOrCardException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.CardFp;
-import com.cdac.enrollmentstation.dto.CardWhitelistDetail;
 import com.cdac.enrollmentstation.util.Asn1CardTokenUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
@@ -167,7 +167,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     private void startAuthentication() {
         try {
             fileTypeToAsn1EncodedByteArrayMap = startProcedureCall();
-        } catch (NoReaderException | GenericException ex) {
+        } catch (NoReaderOrCardException | GenericException ex) {
             pNoPasswordField.clear();
             updateUI(ex.getMessage());
             enableControls(backBtn, loginBtn);
@@ -317,6 +317,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
             try {
                 crWaitForConnectResDto = Asn1CardTokenUtil.waitForConnect(MANTRA_CARD_READER_NAME);
                 break;
+                // only catch GenericException for restart
             } catch (GenericException ex) {
                 if (counter == 0) {
                     LOGGER.log(Level.INFO, () -> "****Communication error occurred. Restarting Naval_WebServices.");
@@ -330,7 +331,7 @@ public class CardLoginController implements MIDFingerAuth_Callback {
                     } // else exit code is not zero
                 }
                 LOGGER.log(Level.INFO, () -> "****Communication error occurred. Unable to restart Naval_WebServices.");
-                throw new GenericException("Something went wrong. Please try again.");
+                throw new GenericException(ex.getMessage());
             }
         }
         if (crWaitForConnectResDto.getRetVal() != 0) {

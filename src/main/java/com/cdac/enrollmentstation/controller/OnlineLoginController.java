@@ -2,6 +2,7 @@ package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.exception.GenericException;
+import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.security.AuthUtil;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -15,12 +16,15 @@ import javafx.scene.input.KeyCode;
 import javafx.util.Duration;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author athisii, CDAC
  * Created on 29/03/23
  */
 public class OnlineLoginController {
+    private static final Logger LOGGER = ApplicationLog.getLogger(OnlineLoginController.class);
     private static final int MAX_LENGTH = 30;
     private static boolean isDone = false;
     @FXML
@@ -64,6 +68,7 @@ public class OnlineLoginController {
                 isDone = true;
                 return;
             }
+            LOGGER.log(Level.INFO, "Incorrect username or password.");
             updateUi("Wrong username or password.");
         } catch (GenericException | IOException ex) {
             updateUi(ex.getMessage());

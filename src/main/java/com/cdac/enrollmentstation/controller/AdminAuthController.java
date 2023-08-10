@@ -3,21 +3,33 @@ package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.exception.GenericException;
+import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.security.AuthUtil;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author athisii, CDAC
  * Created on 29/03/23
  */
-public class AdminAuthController {
+public class AdminAuthController implements BaseController {
+    private static final Logger LOGGER = ApplicationLog.getLogger(AdminAuthController.class);
+
     private static final int MAX_LENGTH = 30;
+
+    @FXML
+    private Button backBtn;
+    @FXML
+    private Button loginBtn;
     @FXML
     private Label statusMsg;
 
@@ -35,19 +47,28 @@ public class AdminAuthController {
 
     @FXML
     public void serverConfig() {
+        disableControls(backBtn, loginBtn);
         try {
             if (AuthUtil.authenticate(username.getText(), passwordField.getText())) {
                 App.setRoot("admin_config");
                 return;
             }
-            statusMsg.setText("Wrong username or password.");
+            LOGGER.log(Level.INFO, "Incorrect username or password.");
+            updateUi("Wrong username or password.");
         } catch (GenericException | IOException ex) {
-            statusMsg.setText(ex.getMessage());
+            updateUi(ex.getMessage());
         }
         // clean up UI on failure
-        username.requestFocus();
-        username.setText("");
-        passwordField.setText("");
+        clearUiControls();
+        enableControls(backBtn, loginBtn);
+    }
+
+    private void clearUiControls() {
+        Platform.runLater(() -> {
+            username.requestFocus();
+            username.setText("");
+            passwordField.setText("");
+        });
     }
 
     public void initialize() {
@@ -77,4 +98,28 @@ public class AdminAuthController {
         }
     }
 
+    private void disableControls(Button... buttons) {
+        for (Button button : buttons) {
+            button.setDisable(true);
+        }
+    }
+
+    private void enableControls(Button... buttons) {
+        for (Button button : buttons) {
+            button.setDisable(false);
+        }
+    }
+
+    private void updateUi(String message) {
+        Platform.runLater(() -> statusMsg.setText(message));
+    }
+
+
+    @Override
+    public void onUncaughtException() {
+        LOGGER.log(Level.INFO, "***Unhandled exception occurred.");
+        backBtn.setDisable(false);
+        loginBtn.setDisable(false);
+        updateUi("Something went wrong. Please try again");
+    }
 }

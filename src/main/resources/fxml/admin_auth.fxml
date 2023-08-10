@@ -58,7 +58,7 @@
                     </font>
                 </Label>
 
-                <Button fx:id="previous" layoutX="546.0" layoutY="487.0" maxHeight="35.0" maxWidth="150.0"
+                <Button fx:id="backBtn" layoutX="546.0" layoutY="487.0" maxHeight="35.0" maxWidth="150.0"
                         minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#showHome" prefHeight="35.0"
                         prefWidth="150.0" style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;"
                         text="BACK" textFill="WHITE">
@@ -66,7 +66,7 @@
                         <Font name="System Bold" size="14.0"/>
                     </font>
                 </Button>
-                <Button fx:id="showServerConfig" layoutX="714.0" layoutY="487.0" maxHeight="35.0" maxWidth="150.0"
+                <Button fx:id="loginBtn" layoutX="714.0" layoutY="487.0" maxHeight="35.0" maxWidth="150.0"
                         minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#serverConfig"
                         prefHeight="35.0" prefWidth="150.0"
                         style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="LOGIN"

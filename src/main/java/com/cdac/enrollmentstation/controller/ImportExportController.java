@@ -45,7 +45,7 @@ import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ER
  * @author athisii, CDAC
  * Created on 29/03/23
  */
-public class ImportExportController {
+public class ImportExportController implements BaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(ImportExportController.class);
     private static final String TIMEOUT_ERR_MSG = "Connection timeout. Please try again.";
 
@@ -486,4 +486,10 @@ public class ImportExportController {
     private void updateUI(String message) {
         Platform.runLater(() -> messageLabel.setText(message));
     }
+
+    @Override
+    public void onUncaughtException() {
+        LOGGER.log(Level.SEVERE, "***Unhandled exception occurred.");
+    }
+
 }

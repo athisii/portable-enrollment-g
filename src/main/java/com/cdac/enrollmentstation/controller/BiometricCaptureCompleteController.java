@@ -35,7 +35,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,13 +44,10 @@ import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ER
  * @author athisii, CDAC
  * Created on 29/03/23
  */
-public class BiometricCaptureCompleteController {
+public class BiometricCaptureCompleteController implements BaseController {
     //For Application Log
     private static final Logger LOGGER = ApplicationLog.getLogger(BiometricCaptureCompleteController.class);
     private static final String NOT_AVAILABLE = "Not Available";
-    private static volatile boolean isEncryptedAndSaved = false;
-    private static volatile boolean isDone = false;
-    private static final CountDownLatch countDownLatch = new CountDownLatch(1);
 
 
     @FXML
@@ -272,6 +268,17 @@ public class BiometricCaptureCompleteController {
         for (Node node : nodes) {
             node.setDisable(false);
         }
+    }
+
+    @Override
+    public void onUncaughtException() {
+        LOGGER.log(Level.INFO, "***Unhandled exception occurred.");
+        homeBtn.setDisable(false);
+        updateUi("Something went wrong. Please try again");
+    }
+
+    private void updateUi(String message) {
+        Platform.runLater(() -> messageLabel.setText(message));
     }
 }
 

@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PrimaryController {
+public class PrimaryController implements BaseController {
     @FXML
     private Button importExportBtn;
     @FXML
@@ -54,5 +54,8 @@ public class PrimaryController {
         }
     }
 
-
+    @Override
+    public void onUncaughtException() {
+        LOGGER.log(Level.SEVERE, "***Unhandled exception occurred.");
+    }
 }

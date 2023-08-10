@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  * @author athisii, CDAC
  * Created on 29/03/23
  */
-public class AdminConfigController {
+public class AdminConfigController implements BaseController {
     //For Application Log
     private static final Logger LOGGER = ApplicationLog.getLogger(AdminConfigController.class);
     private static final int FINGERPRINT_LIVENESS_MAX;
@@ -172,4 +172,13 @@ public class AdminConfigController {
     }
 
 
+    @Override
+    public void onUncaughtException() {
+        LOGGER.log(Level.INFO, "***Unhandled exception occurred.");
+        updateUi("Something went wrong. Please try again");
+    }
+
+    private void updateUi(String message) {
+        Platform.runLater(() -> messageLabel.setText(message));
+    }
 }

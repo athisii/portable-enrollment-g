@@ -1,11 +1,11 @@
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
+import com.cdac.enrollmentstation.dto.Iris;
 import com.cdac.enrollmentstation.dto.SaveEnrollmentDetail;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ArcDetailsHolder;
-import com.cdac.enrollmentstation.dto.Iris;
 import com.cdac.enrollmentstation.util.SaveEnrollmentDetailUtil;
 import com.mantra.midirisenroll.DeviceInfo;
 import com.mantra.midirisenroll.MIDIrisEnroll;
@@ -39,7 +39,7 @@ import static com.cdac.enrollmentstation.model.ArcDetailsHolder.getArcDetailsHol
  * @author athisii, CDAC
  * Created on 29/03/23
  */
-public class IrisController implements MIDIrisEnrollCallback {
+public class IrisController implements MIDIrisEnrollCallback, BaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(IrisController.class);
     private static final int IMAGE_COMPRESSION_RATIO = 0;
     private static final int TEMPLATE_COMPRESSION_RATIO = 0;
@@ -424,5 +424,13 @@ public class IrisController implements MIDIrisEnrollCallback {
             statusImageView.setImage(status ? successImage : failureImage);
             isIrisCompleted = status;
         });
+    }
+
+    @Override
+    public void onUncaughtException() {
+        LOGGER.log(Level.INFO, "***Unhandled exception occurred.");
+        backBtn.setDisable(false);
+        scanBtn.setDisable(false);
+        updateUIOnFailureOrSuccess(false, "Something went wrong. Please try again");
     }
 }

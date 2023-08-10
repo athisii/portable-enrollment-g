@@ -1,10 +1,5 @@
 package com.cdac.enrollmentstation.controller;
 
-/**
- * @author athisii, CDAC
- * Created on 29/03/23
- */
-
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.api.MafisServerApi;
 import com.cdac.enrollmentstation.constant.PropertyName;
@@ -26,7 +21,12 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DeviceStatusController {
+/**
+ * @author athisii, CDAC
+ * Created on 29/03/23
+ */
+
+public class DeviceStatusController implements BaseController {
 
     private static final Logger LOGGER = ApplicationLog.getLogger(DeviceStatusController.class);
     private static final Image RED_CROSS_IMAGE;
@@ -140,4 +140,10 @@ public class DeviceStatusController {
             mafisUrlImage.setImage(GREEN_TICK_IMAGE);
         }
     }
+
+    @Override
+    public void onUncaughtException() {
+        LOGGER.log(Level.INFO, "***Unhandled exception occurred.");
+    }
+
 }

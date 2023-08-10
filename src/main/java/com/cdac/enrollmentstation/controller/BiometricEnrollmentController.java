@@ -37,7 +37,7 @@ import java.util.stream.Stream;
  * @author athisii, CDAC
  * Created on 29/03/23
  */
-public class BiometricEnrollmentController {
+public class BiometricEnrollmentController implements BaseController {
     private String tempArc;
 
     @FXML
@@ -205,7 +205,7 @@ public class BiometricEnrollmentController {
             LOGGER.log(Level.SEVERE, "Error occurred while getting value from worker thread.");
             enableControls(backBtn, showArcBtn);
             updateUiDynamicLabelText(null);
-            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+            updateUi(ApplicationConstant.GENERIC_ERR_MSG);
             return;
         }
 
@@ -213,7 +213,7 @@ public class BiometricEnrollmentController {
             LOGGER.log(Level.INFO, () -> tempArc + " is already enrolled.");
             enableControls(backBtn, showArcBtn);
             updateUiDynamicLabelText(null);
-            updateUI("Biometric already provided for e-ARC number: " + tempArc);
+            updateUi("Biometric already provided for e-ARC number: " + tempArc);
             return;
         }
 
@@ -222,7 +222,7 @@ public class BiometricEnrollmentController {
             LOGGER.log(Level.INFO, () -> "Details not found for e-ARC number: " + tempArc);
             enableControls(backBtn, showArcBtn);
             updateUiDynamicLabelText(null);
-            updateUI("Details not found for e-ARC number: " + tempArc);
+            updateUi("Details not found for e-ARC number: " + tempArc);
             return;
         }
 
@@ -230,11 +230,11 @@ public class BiometricEnrollmentController {
             LOGGER.log(Level.INFO, () -> "Biometric capturing not required for e-ARC: " + tempArc);
             enableControls(backBtn, showArcBtn);
             updateUiDynamicLabelText(arcDetail);
-            updateUI("Biometric capturing not required for e-ARC: " + tempArc);
+            updateUi("Biometric capturing not required for e-ARC: " + tempArc);
             return;
         }
         updateUiDynamicLabelText(arcDetail);
-        updateUI("Details fetched successfully for e-ARC: " + tempArc);
+        updateUi("Details fetched successfully for e-ARC: " + tempArc);
 
 
         ArcDetailsHolder holder = ArcDetailsHolder.getArcDetailsHolder();
@@ -247,7 +247,7 @@ public class BiometricEnrollmentController {
         } catch (GenericException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             enableControls(backBtn, showArcBtn);
-            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+            updateUi(ApplicationConstant.GENERIC_ERR_MSG);
             return;
         }
 
@@ -287,7 +287,7 @@ public class BiometricEnrollmentController {
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error occurred while searching e-ARC number in import folder");
-            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+            updateUi(ApplicationConstant.GENERIC_ERR_MSG);
         }
         //e-ARC number not found
         return null;
@@ -307,7 +307,7 @@ public class BiometricEnrollmentController {
             return optionalPath.isPresent();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error occurred while checking if already captured");
-            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+            updateUi(ApplicationConstant.GENERIC_ERR_MSG);
             return false;
         }
     }
@@ -349,7 +349,7 @@ public class BiometricEnrollmentController {
         return tempArc.split("-").length != 3;
     }
 
-    private void updateUI(String message) {
+    private void updateUi(String message) {
         Platform.runLater(() -> messageLabel.setText(message));
     }
 
@@ -363,5 +363,13 @@ public class BiometricEnrollmentController {
         for (Node node : nodes) {
             node.setDisable(false);
         }
+    }
+
+    @Override
+    public void onUncaughtException() {
+        LOGGER.log(Level.INFO, "***Unhandled exception occurred.");
+        backBtn.setDisable(false);
+        showArcBtn.setDisable(false);
+        updateUi("Received an invalid data from the server.");
     }
 }

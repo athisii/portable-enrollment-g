@@ -55,7 +55,7 @@ import static com.cdac.enrollmentstation.util.Asn1CardTokenUtil.*;
  *
  * @author padmanabhanj
  */
-public class CardLoginController implements MIDFingerAuth_Callback {
+public class CardLoginController implements MIDFingerAuth_Callback, BaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(CardLoginController.class);
     private boolean twoFactorAuthEnabled;
     private static final String MANTRA_CARD_READER_NAME;
@@ -450,4 +450,10 @@ public class CardLoginController implements MIDFingerAuth_Callback {
     public void updateUI(String message) {
         Platform.runLater(() -> messageLabel.setText(message));
     }
+
+    @Override
+    public void onUncaughtException() {
+        LOGGER.log(Level.INFO, "***Unhandled exception occurred.");
+    }
+
 }

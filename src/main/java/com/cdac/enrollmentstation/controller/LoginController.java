@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class LoginController {
+public class LoginController implements BaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(LoginController.class);
 
     @FXML
@@ -39,5 +39,9 @@ public class LoginController {
         App.setRoot("card_login");
     }
 
+    @Override
+    public void onUncaughtException() {
+        LOGGER.log(Level.SEVERE, "***Unhandled exception occurred.");
+    }
 
 }

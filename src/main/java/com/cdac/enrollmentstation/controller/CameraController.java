@@ -39,7 +39,7 @@ import static com.cdac.enrollmentstation.model.ArcDetailsHolder.getArcDetailsHol
  * @author athisii, CDAC
  * Created on 26/12/22
  */
-public class CameraController {
+public class CameraController implements BaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(CameraController.class);
     private static final int COUNTDOWN_IN_SEC = 5;
     private static final AtomicInteger COUNTDOWN = new AtomicInteger(COUNTDOWN_IN_SEC);
@@ -117,7 +117,7 @@ public class CameraController {
 
     private Button backBtn;
     @FXML
-    private Label message;
+    private Label messageLabel;
     @FXML
     private Button startStopCameraBtn;
     private volatile boolean isCameraActive = false;
@@ -240,7 +240,7 @@ public class CameraController {
 
         while (COUNTDOWN.get() > 0) {
             try {
-                Platform.runLater(() -> message.setText("(" + COUNTDOWN.get() + ") Move your body to fit in red box"));
+                Platform.runLater(() -> messageLabel.setText("(" + COUNTDOWN.get() + ") Move your body to fit in red box"));
                 Thread.sleep(TimeUnit.SECONDS.toMillis(1));
                 COUNTDOWN.decrementAndGet();
             } catch (InterruptedException ignored) {
@@ -251,7 +251,7 @@ public class CameraController {
         Platform.runLater(() -> {
             startStopCameraBtn.setText("Stop Camera");
             startStopCameraBtn.setDisable(false);
-            message.setText("");
+            messageLabel.setText("");
         });
         scheduledExecutorService.scheduleWithFixedDelay(this::grabFrame, 0, FIXED_DELAY_TIME_IN_MILLIS, TimeUnit.MILLISECONDS);
 
@@ -320,7 +320,7 @@ public class CameraController {
             updateImageView(iconFrame, NO_MASK_IMAGE);
             updateImageView(msgIcon, null);
             Platform.runLater(() -> {
-                message.setText("Capture threshold reached. Start camera again.");
+                messageLabel.setText("Capture threshold reached. Start camera again.");
                 startStopCameraBtn.setText("Start Camera");
             });
             return;
@@ -342,7 +342,7 @@ public class CameraController {
                     isCameraActive = false;
                 } else if (line.contains("Message=")) {
                     String subString = line.substring("Message= ".length());
-                    Platform.runLater(() -> message.setText(subString));
+                    Platform.runLater(() -> messageLabel.setText(subString));
                     hintMessage(subString);
                 } else {
                     String finalLine = line; // to be used in lambda
@@ -354,7 +354,7 @@ public class CameraController {
             LOGGER.log(Level.INFO, () -> "Process Exit Value: " + exitVal);
             updateUIOnValidImageAndNormalExit(exitVal);
         } catch (Exception ex) {
-            Platform.runLater(() -> message.setText("Something went wrong while capturing photo."));
+            Platform.runLater(() -> messageLabel.setText("Something went wrong while capturing photo."));
             LOGGER.log(Level.SEVERE, ex::getMessage);
             Thread.currentThread().interrupt();
         }
@@ -371,7 +371,7 @@ public class CameraController {
             Platform.runLater(() -> {
                 // camSlider.setVisible(true)
                 // brightness.setVisible(true)
-                message.setText("Valid image. Restart Camera if photo is not good.");
+                messageLabel.setText("Valid image. Restart Camera if photo is not good.");
                 startStopCameraBtn.setText("Restart Camera");
                 enableControls(startStopCameraBtn, backBtn, savePhotoBtn);
             });
@@ -400,7 +400,7 @@ public class CameraController {
     private void requireCameraOpened() {
         if (!videoCapture.isOpened()) {
             LOGGER.log(Level.SEVERE, () -> "Unable to open camera.");
-            Platform.runLater(() -> message.setText("Unable to start camera. Please check camera"));
+            Platform.runLater(() -> messageLabel.setText("Unable to start camera. Please check camera"));
             throw new GenericException("Unable to start the camera. Please try again");  // controls return immediately
         }
     }
@@ -455,5 +455,17 @@ public class CameraController {
         for (Node node : nodes) {
             node.setDisable(false);
         }
+    }
+
+    private void updateUi(String message) {
+        Platform.runLater(() -> messageLabel.setText(message));
+    }
+
+    @Override
+    public void onUncaughtException() {
+        LOGGER.log(Level.INFO, "***Unhandled exception occurred.");
+        backBtn.setDisable(false);
+        startStopCameraBtn.setDisable(false);
+        updateUi("Something went wrong. Please try again");
     }
 }

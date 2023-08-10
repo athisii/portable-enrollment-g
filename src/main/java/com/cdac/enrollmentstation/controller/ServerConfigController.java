@@ -5,11 +5,11 @@ import com.cdac.enrollmentstation.api.CardWhitelistApi;
 import com.cdac.enrollmentstation.api.MafisServerApi;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
+import com.cdac.enrollmentstation.dto.CardWhitelistDetail;
+import com.cdac.enrollmentstation.dto.Unit;
 import com.cdac.enrollmentstation.exception.ConnectionTimeoutException;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.dto.CardWhitelistDetail;
-import com.cdac.enrollmentstation.dto.Unit;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
 import javafx.application.Platform;
@@ -41,7 +41,7 @@ import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ER
  * Created on 29/03/23
  */
 
-public class ServerConfigController {
+public class ServerConfigController implements BaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(ServerConfigController.class);
     private List<Unit> units;
     @FXML
@@ -85,7 +85,7 @@ public class ServerConfigController {
 
     @FXML
     private void editBtnAction() {
-        updateUI("");
+        updateUi("");
         enableControls(mafisUrlTextField, enrollmentStationIdTextField, enrollmentStationUnitIdsComboBox, fetchUnitsBtn);
     }
 
@@ -141,12 +141,12 @@ public class ServerConfigController {
                 cardWhitelistDetails = CardWhitelistApi.fetchWhitelistedCard();
             } catch (GenericException ex) {
                 LOGGER.log(Level.SEVERE, ex.getMessage());
-                updateUI(ex.getMessage());
+                updateUi(ex.getMessage());
                 enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
                 return;
             } catch (ConnectionTimeoutException ex) {
                 enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
-                updateUI("Connection timeout or received an unexpected value from server.");
+                updateUi("Connection timeout or received an unexpected value from server.");
                 return;
             }
             try {
@@ -154,10 +154,10 @@ public class ServerConfigController {
                 Files.writeString(Paths.get(whitelistedCardFilePath), cardWhitelistedString, StandardCharsets.UTF_8);
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, e.getMessage());
-                updateUI(GENERIC_ERR_MSG);
+                updateUi(GENERIC_ERR_MSG);
                 enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
             }
-            updateUI("Operators card downloaded successfully.");
+            updateUi("Operators card downloaded successfully.");
             enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
         });
     }
@@ -166,7 +166,7 @@ public class ServerConfigController {
         try {
             units = MafisServerApi.fetchAllUnits();
         } catch (GenericException ex) {
-            updateUI(ex.getMessage());
+            updateUi(ex.getMessage());
             enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
             return;
         } catch (ConnectionTimeoutException ex) {
@@ -179,13 +179,13 @@ public class ServerConfigController {
         }
 
         if (units.isEmpty()) {
-            updateUI("No units for selected mafis url.");
+            updateUi("No units for selected mafis url.");
             enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
             return;
         }
         List<String> captions = units.stream().map(Unit::getCaption).collect(Collectors.toList());
         Platform.runLater(() -> enrollmentStationUnitIdsComboBox.setItems(FXCollections.observableArrayList(captions)));
-        updateUI("Units fetched successfully.");
+        updateUi("Units fetched successfully.");
         enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
 
     }
@@ -250,7 +250,7 @@ public class ServerConfigController {
         }
     }
 
-    private void updateUI(String message) {
+    private void updateUi(String message) {
         Platform.runLater((() -> messageLabel.setText(message)));
     }
 
@@ -265,5 +265,12 @@ public class ServerConfigController {
         for (Node node : nodes) {
             node.setDisable(false);
         }
+    }
+
+    @Override
+    public void onUncaughtException() {
+        LOGGER.log(Level.INFO, "***Unhandled exception occurred.");
+        enableControls(backBtn, fetchUnitsBtn, homeBtn, downloadWhitelistedCardBtn);
+        updateUi("Received an invalid data from the server.");
     }
 }

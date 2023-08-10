@@ -33,7 +33,7 @@
                     </Button>
 
                 </Pane>
-                <Label fx:id="message" alignment="CENTER" layoutX="363.0" layoutY="298.0" prefHeight="20.0" prefWidth="580.0" text="Adjust camera height, press Start Camera and then look at the CAMERA" textAlignment="CENTER">
+                <Label fx:id="messageLabel" alignment="CENTER" layoutX="363.0" layoutY="298.0" prefHeight="20.0" prefWidth="580.0" text="Adjust camera height, press Start Camera and then look at the CAMERA" textAlignment="CENTER">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>

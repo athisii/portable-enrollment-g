@@ -1,6 +1,5 @@
 package com.cdac.enrollmentstation.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,15 +8,11 @@ import lombok.experimental.FieldDefaults;
  */
 @Getter
 @Setter
-@ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Unit {
-    @JsonProperty("Caption")
     String caption;
-
-    @JsonProperty("Value")
     String value;
 
 }

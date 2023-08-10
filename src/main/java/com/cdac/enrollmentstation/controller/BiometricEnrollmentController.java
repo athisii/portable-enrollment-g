@@ -5,10 +5,10 @@ import com.cdac.enrollmentstation.api.MafisServerApi;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.ArcDetail;
+import com.cdac.enrollmentstation.dto.SaveEnrollmentDetail;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ArcDetailsHolder;
-import com.cdac.enrollmentstation.dto.SaveEnrollmentDetail;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.SaveEnrollmentDetailUtil;
 import com.cdac.enrollmentstation.util.Singleton;
@@ -41,12 +41,12 @@ public class BiometricEnrollmentController implements BaseController {
     private String tempArc;
 
     @FXML
-    public Button continueBtn;
+    private Button continueBtn;
     @FXML
 
-    public Button backBtn;
+    private Button backBtn;
     @FXML
-    public Button showArcBtn;
+    private Button showArcBtn;
 
     @FXML
     private TextField arcNumberTextField;

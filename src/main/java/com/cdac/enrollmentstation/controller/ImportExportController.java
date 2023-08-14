@@ -328,10 +328,10 @@ public class ImportExportController implements BaseController {
     private void importUnit(String unitCode) {
         String unitId;
         String unitCaption;
-        List<ArcDetail> arcDetailList;
+        List<ArcDetail> arcDetails;
         try {
             // returns null on connection timeout
-            arcDetailList = MafisServerApi.fetchArcsByUnitCode(unitCode);
+            arcDetails = MafisServerApi.fetchArcsByUnitCode(unitCode);
         } catch (GenericException ex) {
             enableControls(importUnitBtn);
             updateUI(ex.getMessage());
@@ -344,20 +344,20 @@ public class ImportExportController implements BaseController {
             });
             return;
         }
-        if (arcDetailList.isEmpty()) {
+        if (arcDetails == null || arcDetails.isEmpty()) {
             enableControls(importUnitBtn);
             updateUI("No e-ARC found for imported unit.");
             return;
         }
 
-        var firstArcDetails = arcDetailList.get(0);
+        var firstArcDetails = arcDetails.get(0);
         unitId = firstArcDetails.getArcNo().split("-")[0];
         unitCaption = firstArcDetails.getUnit().replaceAll("[^a-zA-Z0-9]", "");
         unitCode = unitCode.replaceAll("[^a-zA-Z0-9]", "");
         String jsonArcList;
         try {
             // throws exception
-            jsonArcList = Singleton.getObjectMapper().writeValueAsString(arcDetailList);
+            jsonArcList = Singleton.getObjectMapper().writeValueAsString(arcDetails);
         } catch (JsonProcessingException e) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             updateUI(GENERIC_ERR_MSG);

@@ -344,7 +344,7 @@ public class ImportExportController implements BaseController {
             });
             return;
         }
-        if (arcDetailList.isEmpty()) {
+        if (arcDetailList == null || arcDetailList.isEmpty()) {
             enableControls(importUnitBtn);
             updateUI("No e-ARC found for imported unit.");
             return;

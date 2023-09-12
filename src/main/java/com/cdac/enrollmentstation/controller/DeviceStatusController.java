@@ -133,10 +133,8 @@ public class DeviceStatusController implements BaseController {
             MafisServerApi.fetchARCDetail("123abc");
             mafisUrlImage.setImage(GREEN_TICK_IMAGE);
         } catch (ConnectionTimeoutException ex) {
-            // connected but throws exception on JSON parsing error
             mafisUrlImage.setImage(RED_CROSS_IMAGE);
         } catch (Exception ex) {
-            // connected but throws exception on JSON parsing error
             mafisUrlImage.setImage(GREEN_TICK_IMAGE);
         }
     }

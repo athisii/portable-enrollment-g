@@ -42,7 +42,6 @@ public class MafisServerApi {
      * Fetches single ARCDetails based on e-ARC number.
      * Caller must handle the exception.
      *
-     * @param url   url of the API.
      * @param arcNo unique id whose details are to be fetched
      * @return ARCDetails or null on connection timeout
      * @throws GenericException exception on connection timeout, error, json parsing exception etc.

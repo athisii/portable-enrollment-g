@@ -453,8 +453,8 @@ public class SlapScannerController implements BaseController {
     }
 
     // called when capture succeeds or error occurs
-    private void captureCallback(int deviceHandle, int errorCode, byte[] imageData, byte[] qualityMap, int imageWidth, int imageHeight, int quality, int liveness) {
-
+//    private void captureCallback(int deviceHandle, int errorCode, byte[] imageData, byte[] qualityMap, int imageWidth, int imageHeight, int quality, int liveness) {
+    private void captureCallback(int errorCode, byte[] imageData, int imageWidth, int imageHeight) {
         Button button;  // local reference for pointing to different multiple buttons
         String successMessage;
         if (FingerSetType.LEFT == fingerSetTypeToScan) {
@@ -602,6 +602,7 @@ public class SlapScannerController implements BaseController {
 
     // set capture mode, register a callback, start capture and return immediately
     private void setModeAndStartCapture() {
+
         Map<String, Integer> mFingersToScanSeqMap;
 
         // fingerSetTypeToScan - GLOBAL MEMBER FIELD
@@ -639,17 +640,19 @@ public class SlapScannerController implements BaseController {
             throw new GenericException(GENERIC_RS_ERR_MSG);
         }
 
+        // TODO: not required if callback is not used.
         /* RS_RegisterAdvCaptureDataCallback Error Code
                 RS_SUCCESS - The callback is registered successfully.
                 RS_ERR_SDK_UNINITIALIZED - The SDK is not yet initialized.
                 RS_ERR_INVALID_HANDLE - The device handle is invalid.
         */
+        /*
         jniReturnedCode = RS_RegisterAdvCaptureDataCallback(deviceHandler, this, "captureCallback");
         if (jniReturnedCode != RS_SUCCESS) {
             LOGGER.log(Level.SEVERE, () -> RS_GetErrString(jniReturnedCode));
             throw new GenericException(GENERIC_RS_ERR_MSG);
         }
-
+         */
          /*
             RS_SetMinimumFinger Error Codes:
                 RS_SUCCESS - The capture mode is set successfully.
@@ -683,7 +686,7 @@ public class SlapScannerController implements BaseController {
             }
         }
 
-
+        // TODO: not required if callback is not used.
         /*
          RS_StartCapture Error Codes:
                 RS_SUCCESS - Capture process is started successfully.
@@ -695,6 +698,7 @@ public class SlapScannerController implements BaseController {
                 RS_ERR_CAPTURE_IS_RUNNING - A capture process is already running.
          */
         // returns immediately, callbacks are executed in background thread.
+        /*
         jniReturnedCode = RS_StartCapture(deviceHandler, false, 0);
         if (jniReturnedCode != RS_SUCCESS) {
             if (jniReturnedCode != RS_ERR_SENSOR_DIRTY && jniReturnedCode != RS_ERR_FINGER_EXIST) {
@@ -715,7 +719,7 @@ public class SlapScannerController implements BaseController {
             Thread.currentThread().interrupt();
             throw new GenericException("Interrupted while sleeping.");
         }
-
+         */
         /*
         RS_TakeCurrentImageData Error Codes:
                 RS_SUCCESS - An image is captured successfully.
@@ -731,12 +735,14 @@ public class SlapScannerController implements BaseController {
                 RS_ERR_ROLL_WRONG_DIR - The rolling does not confirm to the specified direction.
                 RS_ERR_ROLL_TOO_SHORT - Rolling time is too short.
          */
-        jniReturnedCode = RS_TakeCurrentImageData(deviceHandler, 10000, new RSImageInfo());
+        RSImageInfo imageInfo = new RSImageInfo();
+        jniReturnedCode = RS_TakeCurrentImageData(deviceHandler, 10000, imageInfo);
         if (jniReturnedCode != RS_SUCCESS) {
             jniErrorMsg = RS_GetErrString(jniReturnedCode);
             LOGGER.log(Level.INFO, () -> "******RS_TakeCurrentImageData returned message: " + jniErrorMsg);
             throw new GenericException("Quality too poor. Please try again.");
         }
+        App.getThreadPool().execute(() -> captureCallback(jniReturnedCode, imageInfo.pbyImgBuf, imageInfo.imageWidth, imageInfo.imageHeight));
     }
 
     private void displaySegmentedFpImage(Map<Integer, RSImageInfo> fingerTypeRsImageInfo) {

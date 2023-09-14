@@ -123,7 +123,6 @@ public class DeviceStatusController implements BaseController {
             LOGGER.log(Level.SEVERE, () -> PropertyFile.getProperty(PropertyName.BARCODE_FILE_PATH) + "not found.");
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, () -> "An error occurred while reading barcode file.");
-            e.printStackTrace();
             throw new GenericException("An error occurred while reading barcode file.");
         }
     }
@@ -135,6 +134,7 @@ public class DeviceStatusController implements BaseController {
         } catch (ConnectionTimeoutException ex) {
             mafisUrlImage.setImage(RED_CROSS_IMAGE);
         } catch (Exception ex) {
+            // connected but throws exception on JSON parsing error
             mafisUrlImage.setImage(GREEN_TICK_IMAGE);
         }
     }

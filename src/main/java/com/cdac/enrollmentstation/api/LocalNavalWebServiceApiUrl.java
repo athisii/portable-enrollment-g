@@ -67,6 +67,11 @@ public class LocalNavalWebServiceApiUrl {
         return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_DE_INITIALIZE));
     }
 
+    public static String getVerifyPin() {
+        //   return "http://localhost:8088/N_verifyPIN"
+        return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_VERIFY_PIN));
+    }
+
     public static String getListOfReaders() {
         //   return "http://localhost:8088/listOfReaders"
         return requireNonBlank(PropertyFile.getProperty(PropertyName.CARD_API_LIST_OF_READERS));

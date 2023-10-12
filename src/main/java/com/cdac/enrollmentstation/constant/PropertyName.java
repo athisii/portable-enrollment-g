@@ -24,6 +24,7 @@ public class PropertyName {
     public static final String CARD_API_PKI_AUTH = "card.api.pki.auth";
     public static final String CARD_API_WAIT_FOR_REMOVAL = "card.api.wait.for.removal";
     public static final String CARD_API_DE_INITIALIZE = "card.api.de.initialize";
+    public static final String CARD_API_VERIFY_PIN = "card.api.verify.pin";
     public static final String CARD_API_LIST_OF_READERS = "card.api.list.of.readers";
     public static final String JKS_CERT_FILE = "jks.cert.file";
     public static final String JKS_PASSWORD = "jks.password";

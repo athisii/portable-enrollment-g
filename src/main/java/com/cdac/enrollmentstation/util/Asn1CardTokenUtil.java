@@ -603,4 +603,27 @@ public class Asn1CardTokenUtil {
             throw new GenericException(LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
         }
     }
+
+    /**
+     * verifies pin
+     * Caller must handle the exception.
+     *
+     * @throws ConnectionTimeoutException - on timeout or response status code not 200
+     * @throws GenericException           - on Exception
+     */
+    public static void verifyPin(int handle, String pin) {
+        String reqData;
+        try {
+            reqData = Singleton.getObjectMapper().writeValueAsString(new CRVerifyPinReqDto(handle, Base64.getEncoder().encodeToString(pin.getBytes()), pin.length()));
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, ex::getMessage);
+            throw new GenericException(GENERIC_ERR_MSG);
+        }
+        CRApiResDto crApiResDto = LocalNavalWebServiceApi.postVerifyPin(reqData);
+        jniErrorCode = crApiResDto.getRetVal();
+        if (jniErrorCode != 0) {
+            LOGGER.log(Level.SEVERE, () -> "****VerifyPinErrorCode: " + jniErrorCode + " Message: " + LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
+            throw new GenericException("Wrong pin.");
+        }
+    }
 }

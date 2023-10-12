@@ -9,17 +9,10 @@ import com.cdac.enrollmentstation.exception.ConnectionTimeoutException;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.exception.NoReaderOrCardException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.CardFp;
 import com.cdac.enrollmentstation.util.Asn1CardTokenUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.mantra.midfingerauth.DeviceInfo;
-import com.mantra.midfingerauth.MIDFingerAuth;
-import com.mantra.midfingerauth.MIDFingerAuth_Callback;
-import com.mantra.midfingerauth.enums.DeviceDetection;
-import com.mantra.midfingerauth.enums.DeviceModel;
-import com.mantra.midfingerauth.enums.TemplateFormat;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -27,13 +20,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,7 +31,6 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,39 +43,26 @@ import static com.cdac.enrollmentstation.util.Asn1CardTokenUtil.*;
  *
  * @author padmanabhanj
  */
-public class CardLoginController implements MIDFingerAuth_Callback, BaseController {
+public class CardLoginController implements BaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(CardLoginController.class);
-    private boolean twoFactorAuthEnabled;
     private static final String MANTRA_CARD_READER_NAME;
     private static final String CARD_API_SERVICE_RESTART_COMMAND;
     private static final int MAX_LENGTH = 30;
     private EnumMap<CardTokenFileType, byte[]> fileTypeToAsn1EncodedByteArrayMap; // GLOBAL data store.
-    private int jniErrorCode;
-
 
     @FXML
     private Label messageLabel;
     @FXML
-    private Label cardPinLabel;
+    private Label cardLabel;
     @FXML
-    private PasswordField pNoPasswordField;
-    @FXML
-    private ImageView iconOrFpImageView;
+    private PasswordField cardPasswordField;
+
     @FXML
     private Button loginBtn;
     @FXML
     private Button backBtn;
 
-    private boolean isPinAuthCompleted;
-
-    //***********************Fingerprint***************************//
-    private MIDFingerAuth midFingerAuth; // For MID finger jar
-    private DeviceInfo deviceInfo;
-    private boolean isDeviceInitialized;
-    private static final int MIN_QUALITY = 60;
-    private static final int FINGERPRINT_CAPTURE_TIMEOUT_IN_SEC = 10;
-
-    //***********************Fingerprint***************************//
+    private boolean isPnAuthCompleted;
 
 
     static {
@@ -109,54 +84,58 @@ public class CardLoginController implements MIDFingerAuth_Callback, BaseControll
 
     public void initialize() {
         /* adds changeListener to restrict the text length */
-        pNoPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
+        cardPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.isBlank()) {
                 messageLabel.setText("");
             }
-            limitCharacters(pNoPasswordField, oldValue, newValue);
+            limitCharacters(cardPasswordField, oldValue, newValue);
         });
-        pNoPasswordField.setOnKeyPressed(event -> {
-            if (event.getCode().equals(KeyCode.ENTER)) {
+        cardPasswordField.setOnKeyPressed(event -> {
+            if (event.getCode().equals(KeyCode.ENTER) && (!isPnAuthCompleted)) {
                 loginBtnAction();
+            }
+            if (isPnAuthCompleted && cardPasswordField.getText().length() == 4) {
+                cardPasswordField.setDisable(true);
+                authenticateByPinCode(cardPasswordField.getText());
             }
             event.consume();
         });
-        try {
-            twoFactorAuthEnabled = Boolean.parseBoolean(PropertyFile.getProperty(PropertyName.TWO_FACTOR_AUTH_ENABLED).trim());
-        } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, () -> "Not a number or no entry for '" + PropertyName.TWO_FACTOR_AUTH_ENABLED + "' in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
-            throw new GenericException(ex.getMessage());
-        }
-        if (twoFactorAuthEnabled) {
-            midFingerAuth = new MIDFingerAuth(this);
-            initFpReader();
-        }
         App.setNudLogin(false);
     }
 
-    private boolean initFpReader() {
-        List<String> devices = new ArrayList<>();
-        jniErrorCode = midFingerAuth.GetConnectedDevices(devices);
-        if (jniErrorCode != 0 || devices.isEmpty()) {
-            LOGGER.log(Level.INFO, () -> midFingerAuth.GetErrorMessage(jniErrorCode));
-            updateUI("Single fingerprint reader not connected.");
-            return false;
+    private void authenticateByPinCode(String pinCode) {
+        try {
+            startProcedureCallToVerifyPin(pinCode);
+            App.setRoot("main_screen");
+        } catch (NoReaderOrCardException | GenericException ex) {
+            Platform.runLater(() -> cardPasswordField.clear());
+            updateUI(ex.getMessage());
+            enableControls(backBtn, cardPasswordField);
+        } catch (ConnectionTimeoutException ex) {
+            updateUI("Something went wrong. Kindly check Card API service.");
+            Platform.runLater(() -> cardPasswordField.clear());
+            enableControls(backBtn, cardPasswordField);
+        } catch (Exception e) {
+            // by App.setRoot()
+            updateUI("Something went wrong. Kindly contact system admin.");
         }
-        if (!midFingerAuth.IsDeviceConnected(DeviceModel.valueFor(devices.get(0)))) {
-            LOGGER.log(Level.INFO, "Fingerprint reader not connected");
-            updateUI("Device not connected. Please connect and try again.");
-            return false;
-        }
+    }
 
-        deviceInfo = new DeviceInfo();
-        jniErrorCode = midFingerAuth.Init(DeviceModel.valueFor(devices.get(0)), deviceInfo);
-        if (jniErrorCode != 0) {
-            LOGGER.log(Level.INFO, () -> midFingerAuth.GetErrorMessage(jniErrorCode));
-            updateUI("Single fingerprint reader not initialized.");
-            return false;
+    private void startProcedureCallToVerifyPin(String pinCode) {
+        Asn1CardTokenUtil.deInitialize();
+        Asn1CardTokenUtil.initialize();
+        try {
+            Thread.sleep(SLEEP_TIME_BEFORE_WAIT_FOR_CONNECT_CALL_IN_MIL_SEC);
+        } catch (InterruptedException e) {
+            LOGGER.log(Level.SEVERE, "****BeforeWaitSleep: Interrupted while sleeping.");
+            Thread.currentThread().interrupt();
         }
-        isDeviceInitialized = true;
-        return true;
+        CRWaitForConnectResDto crWaitForConnectResDto = Asn1CardTokenUtil.waitForConnect(MANTRA_CARD_READER_NAME);
+        if (crWaitForConnectResDto.getRetVal() != 0) {
+            throw new GenericException("Kindly reconnect the reader and place card correctly.");
+        }
+        Asn1CardTokenUtil.selectApp(CARD_TYPE_NUMBER, crWaitForConnectResDto.getHandle());
+        Asn1CardTokenUtil.verifyPin(crWaitForConnectResDto.getHandle(), pinCode);
     }
 
     @FXML
@@ -166,9 +145,9 @@ public class CardLoginController implements MIDFingerAuth_Callback, BaseControll
 
     private void startAuthentication() {
         try {
-            fileTypeToAsn1EncodedByteArrayMap = startProcedureCall();
+            fileTypeToAsn1EncodedByteArrayMap = startProcedureCallForPN();
         } catch (NoReaderOrCardException | GenericException ex) {
-            pNoPasswordField.clear();
+            cardPasswordField.clear();
             updateUI(ex.getMessage());
             enableControls(backBtn, loginBtn);
             return;
@@ -178,33 +157,19 @@ public class CardLoginController implements MIDFingerAuth_Callback, BaseControll
             return;
         }
 
-        if (!twoFactorAuthEnabled) {
-            try {
-                authenticateByPN(fileTypeToAsn1EncodedByteArrayMap.get(CardTokenFileType.STATIC));
-                App.setRoot("main_screen");
-            } catch (Exception ex) {
-                if (ex instanceof IOException) {
-                    LOGGER.log(Level.SEVERE, ex.getMessage());
-                    throw new GenericException(GENERIC_ERR_MSG);
-                }
-                pNoPasswordField.clear();
-                updateUI(ex.getMessage());
-                enableControls(backBtn, loginBtn);
-            }
-            return;
-        }
-        // if reached here, then two-factor auth is enabled.
         try {
-            if (!isPinAuthCompleted) {
+            if (!isPnAuthCompleted) {
                 authenticateByPN(fileTypeToAsn1EncodedByteArrayMap.get(CardTokenFileType.STATIC));
-                isPinAuthCompleted = true;
+                isPnAuthCompleted = true;
             }
-            cardPinLabel.setVisible(false);
-            pNoPasswordField.setVisible(false);
-            // loads next page by OnComplete callback if authenticated successfully.
-            captureFingerprint();
+            enableControls(backBtn);
+            Platform.runLater(() -> {
+                messageLabel.setText("Kindly enter pin code to continue.");
+                cardLabel.setText("Pin Code:");
+                cardPasswordField.clear();
+            });
         } catch (Exception ex) {
-            pNoPasswordField.clear();
+            cardPasswordField.clear();
             updateUI(ex.getMessage());
             enableControls(backBtn, loginBtn);
         }
@@ -212,14 +177,13 @@ public class CardLoginController implements MIDFingerAuth_Callback, BaseControll
 
     @FXML
     public void loginBtnAction() throws IllegalStateException {
-        if (pNoPasswordField.getText().isBlank() || pNoPasswordField.getText().length() < 4) {
-            messageLabel.setText("Please enter valid card pin.");
+        if (cardPasswordField.getText().isBlank() || cardPasswordField.getText().length() < 4) {
+            messageLabel.setText("Please enter valid number.");
             return;
         }
         disableControls(backBtn, loginBtn);
         App.getThreadPool().execute(this::startAuthentication);
     }
-
 
     // throws GenericException
     // Caller must handle the exception
@@ -275,7 +239,7 @@ public class CardLoginController implements MIDFingerAuth_Callback, BaseControll
             throw new GenericException(unauthorizedMessage);
         }
 
-        if (!pNumber.equalsIgnoreCase(pNoPasswordField.getText())) {
+        if (!pNumber.equalsIgnoreCase(cardPasswordField.getText())) {
             LOGGER.log(Level.INFO, "Personal Number and user input number does not matched.");
             throw new GenericException("Invalid Personal Number.");
         }
@@ -297,7 +261,7 @@ public class CardLoginController implements MIDFingerAuth_Callback, BaseControll
 
     }
 
-    private EnumMap<CardTokenFileType, byte[]> startProcedureCall() {
+    private EnumMap<CardTokenFileType, byte[]> startProcedureCallForPN() {
         // required to follow the procedure calls
         // deInitialize -> initialize ->[waitForConnect -> selectApp] -> readData
         CRWaitForConnectResDto crWaitForConnectResDto;
@@ -340,99 +304,7 @@ public class CardLoginController implements MIDFingerAuth_Callback, BaseControll
         Asn1CardTokenUtil.selectApp(CARD_TYPE_NUMBER, crWaitForConnectResDto.getHandle());
         EnumMap<CardTokenFileType, byte[]> fileTypeByteArrayMap = new EnumMap<>(CardTokenFileType.class);
         fileTypeByteArrayMap.put(CardTokenFileType.STATIC, readBufferedData(crWaitForConnectResDto.getHandle(), CardTokenFileType.STATIC));
-        if (twoFactorAuthEnabled) {
-            fileTypeByteArrayMap.put(CardTokenFileType.FINGERPRINT_FILE, readBufferedData(crWaitForConnectResDto.getHandle(), CardTokenFileType.FINGERPRINT_FILE));
-        }
         return fileTypeByteArrayMap;
-    }
-
-    private void captureFingerprint() {
-        if (!isDeviceInitialized && (!initFpReader())) {
-            //message updated by initFpReader()
-            return;
-        }
-        jniErrorCode = midFingerAuth.StartCapture(MIN_QUALITY, (int) TimeUnit.SECONDS.toMillis(FINGERPRINT_CAPTURE_TIMEOUT_IN_SEC));
-        if (jniErrorCode != 0) {
-            LOGGER.log(Level.INFO, () -> midFingerAuth.GetErrorMessage(jniErrorCode));
-            throw new GenericException(GENERIC_ERR_MSG);
-        }
-    }
-
-    @Override
-    public void OnDeviceDetection(String s, DeviceDetection deviceDetection) {
-        if (DeviceDetection.DISCONNECTED == deviceDetection) {
-            LOGGER.log(Level.INFO, "Fingerprint scanner disconnected.");
-            updateUI("Fingerprint scanner disconnected.");
-            midFingerAuth.Uninit();
-            isDeviceInitialized = false;
-        }
-    }
-
-    @Override
-    public void OnPreview(int errorCode, int quality, final byte[] imageData) {
-        if (errorCode != 0 || imageData == null) {
-            LOGGER.log(Level.SEVERE, () -> midFingerAuth.GetErrorMessage(errorCode));
-            loginBtn.setDisable(false);
-            return;
-        }
-        InputStream inputStream = new ByteArrayInputStream(imageData);
-        Image image = new Image(inputStream, iconOrFpImageView.getFitWidth(), iconOrFpImageView.getFitHeight(), true, false);
-        iconOrFpImageView.setImage(image);
-    }
-
-    @Override
-    public void OnComplete(int errorCode, int quality, int nFIQ) {
-        if (errorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> midFingerAuth.GetErrorMessage(errorCode));
-            updateUI("Fingerprint quality too poor. Please try again.");
-            loginBtn.setDisable(false);
-            return;
-        }
-        int dataLen = 2500;  // as is. but can also be used from OnPreview callback
-        byte[] template = new byte[dataLen];
-        int[] templateLen = {dataLen};
-        jniErrorCode = midFingerAuth.GetTemplate(template, templateLen, TemplateFormat.FMR_V2011);
-        if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> midFingerAuth.GetErrorMessage(errorCode));
-            updateUI(GENERIC_ERR_MSG);
-            loginBtn.setDisable(false);
-            return;
-        }
-        try {
-            matchFingerprintTemplate(template);
-            App.setRoot("main_screen");
-        } catch (GenericException | IOException ex) {
-            if (ex instanceof IOException) {
-                LOGGER.log(Level.SEVERE, ex.getMessage());
-                throw new GenericException(GENERIC_ERR_MSG);
-            }
-            updateUI(ex.getMessage());
-            loginBtn.setDisable(false);
-        }
-    }
-
-    public void matchFingerprintTemplate(byte[] template) {
-        int fpMatchMinThreshold;
-        try {
-            fpMatchMinThreshold = Integer.parseInt(PropertyFile.getProperty(PropertyName.FP_MATCH_MIN_THRESHOLD).trim());
-        } catch (NumberFormatException | GenericException ex) {
-            LOGGER.log(Level.SEVERE, () -> "Not a number or no entry for '" + PropertyName.FP_MATCH_MIN_THRESHOLD + "' in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
-            throw new GenericException(GENERIC_ERR_MSG);
-        }
-        int[] matchScore = new int[1];
-        List<CardFp> cardFps = Asn1CardTokenUtil.extractFromAsn1EncodedFingerprintData(fileTypeToAsn1EncodedByteArrayMap.get(CardTokenFileType.FINGERPRINT_FILE));
-        for (CardFp cardFp : cardFps) {
-            jniErrorCode = midFingerAuth.MatchTemplate(template, cardFp.getImage(), matchScore, TemplateFormat.FMR_V2011);
-            if (jniErrorCode != 0) {
-                LOGGER.log(Level.SEVERE, () -> midFingerAuth.GetErrorMessage(jniErrorCode));
-                throw new GenericException(GENERIC_ERR_MSG);
-            }
-            if (matchScore[0] >= fpMatchMinThreshold) {
-                return;
-            }
-        }
-        LOGGER.log(Level.SEVERE, "Fingerprint not matched.");
-        throw new GenericException("Fingerprint not matched. Please try again.");
     }
 
     private void disableControls(Node... nodes) {

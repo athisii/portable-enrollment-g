@@ -138,26 +138,27 @@ public class Asn1CardTokenUtil {
         USER_CATEGORY_ID(3),
         NAME(4),
         SERVICE(5),
-        PN(6),
-        UNIQUE_ID(7),
-        RANK(8),
-        DESIGNATION(9),
-        GROUP(10),
-        DATE_OF_BIRTH(11),
-        UNIT(12),
-        ZONE_ACCESS(13),
-        DATE_ISSUED(14),
-        PLACE_ISSUED(15),
-        BLOOD_GROUP(16),
-        NATIONALITY(17),
-        ISSUED_BY(18),
-        FIRMS_NAME(19),
-        GENDER(20),
-        SPONSOR_PHONE_NUMBER(21),
-        SPONSOR_NAME(22),
-        SPONSOR_RANK(23),
-        SPONSORS_UNIT(24),
-        RELATION(25);
+        EMPTY(6),
+        PN(7),
+        UNIQUE_ID(8),
+        RANK(9),
+        DESIGNATION(10),
+        GROUP(111),
+        DATE_OF_BIRTH(12),
+        UNIT(13),
+        ZONE_ACCESS(14),
+        DATE_ISSUED(15),
+        PLACE_ISSUED(16),
+        BLOOD_GROUP(17),
+        NATIONALITY(18),
+        ISSUED_BY(19),
+        FIRMS_NAME(20),
+        GENDER(21),
+        SPONSOR_PHONE_NUMBER(22),
+        SPONSOR_NAME(23),
+        SPONSOR_RANK(24),
+        SPONSORS_UNIT(25),
+        RELATION(26);
         private final int value;
 
         CardStaticDataIndex(int val) {
@@ -623,6 +624,9 @@ public class Asn1CardTokenUtil {
         jniErrorCode = crApiResDto.getRetVal();
         if (jniErrorCode != 0) {
             LOGGER.log(Level.SEVERE, () -> "****VerifyPinErrorCode: " + jniErrorCode + " Message: " + LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
+            if (-1310891072 == jniErrorCode) {
+                throw new GenericException("PIN attempts exhausted for the card.");
+            }
             throw new GenericException("Wrong pin.");
         }
     }

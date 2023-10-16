@@ -48,6 +48,7 @@ public class CardLoginController implements BaseController {
     private static final String MANTRA_CARD_READER_NAME;
     private static final String CARD_API_SERVICE_RESTART_COMMAND;
     private static final int MAX_LENGTH = 30;
+    private static int handle;
     private EnumMap<CardTokenFileType, byte[]> fileTypeToAsn1EncodedByteArrayMap; // GLOBAL data store.
 
     @FXML
@@ -90,22 +91,22 @@ public class CardLoginController implements BaseController {
             }
             limitCharacters(cardPasswordField, oldValue, newValue);
         });
-        cardPasswordField.setOnKeyPressed(event -> {
+        cardPasswordField.setOnKeyReleased(event -> {
             if (event.getCode().equals(KeyCode.ENTER) && (!isPnAuthCompleted)) {
                 loginBtnAction();
             }
             if (isPnAuthCompleted && cardPasswordField.getText().length() == 4) {
                 cardPasswordField.setDisable(true);
-                authenticateByPinCode(cardPasswordField.getText());
+                authenticateByPin(cardPasswordField.getText());
             }
             event.consume();
         });
         App.setNudLogin(false);
     }
 
-    private void authenticateByPinCode(String pinCode) {
+    private void authenticateByPin(String pinCode) {
         try {
-            startProcedureCallToVerifyPin(pinCode);
+            Asn1CardTokenUtil.verifyPin(handle, pinCode);
             App.setRoot("main_screen");
         } catch (NoReaderOrCardException | GenericException ex) {
             Platform.runLater(() -> cardPasswordField.clear());
@@ -119,23 +120,6 @@ public class CardLoginController implements BaseController {
             // by App.setRoot()
             updateUI("Something went wrong. Kindly contact system admin.");
         }
-    }
-
-    private void startProcedureCallToVerifyPin(String pinCode) {
-        Asn1CardTokenUtil.deInitialize();
-        Asn1CardTokenUtil.initialize();
-        try {
-            Thread.sleep(SLEEP_TIME_BEFORE_WAIT_FOR_CONNECT_CALL_IN_MIL_SEC);
-        } catch (InterruptedException e) {
-            LOGGER.log(Level.SEVERE, "****BeforeWaitSleep: Interrupted while sleeping.");
-            Thread.currentThread().interrupt();
-        }
-        CRWaitForConnectResDto crWaitForConnectResDto = Asn1CardTokenUtil.waitForConnect(MANTRA_CARD_READER_NAME);
-        if (crWaitForConnectResDto.getRetVal() != 0) {
-            throw new GenericException("Kindly reconnect the reader and place card correctly.");
-        }
-        Asn1CardTokenUtil.selectApp(CARD_TYPE_NUMBER, crWaitForConnectResDto.getHandle());
-        Asn1CardTokenUtil.verifyPin(crWaitForConnectResDto.getHandle(), pinCode);
     }
 
     @FXML
@@ -160,12 +144,12 @@ public class CardLoginController implements BaseController {
         try {
             if (!isPnAuthCompleted) {
                 authenticateByPN(fileTypeToAsn1EncodedByteArrayMap.get(CardTokenFileType.STATIC));
-                isPnAuthCompleted = true;
             }
+            isPnAuthCompleted = true;
             enableControls(backBtn);
             Platform.runLater(() -> {
-                messageLabel.setText("Kindly enter pin code to continue.");
-                cardLabel.setText("Pin Code:");
+                messageLabel.setText("Kindly enter the PIN to continue.");
+                cardLabel.setText("    PIN:");
                 cardPasswordField.clear();
             });
         } catch (Exception ex) {
@@ -301,6 +285,7 @@ public class CardLoginController implements BaseController {
         if (crWaitForConnectResDto.getRetVal() != 0) {
             throw new GenericException("Kindly reconnect the reader and place card correctly.");
         }
+        handle = crWaitForConnectResDto.getHandle();
         Asn1CardTokenUtil.selectApp(CARD_TYPE_NUMBER, crWaitForConnectResDto.getHandle());
         EnumMap<CardTokenFileType, byte[]> fileTypeByteArrayMap = new EnumMap<>(CardTokenFileType.class);
         fileTypeByteArrayMap.put(CardTokenFileType.STATIC, readBufferedData(crWaitForConnectResDto.getHandle(), CardTokenFileType.STATIC));

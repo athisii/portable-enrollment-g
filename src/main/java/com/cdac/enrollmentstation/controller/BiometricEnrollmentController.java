@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -72,16 +73,20 @@ public class BiometricEnrollmentController implements BaseController {
     @FXML
     private Label txtBiometricOptions;
     private static final Logger LOGGER = ApplicationLog.getLogger(BiometricEnrollmentController.class);
+    private final AtomicInteger lastCaretPosition = new AtomicInteger(0);
 
     public void initialize() {
         backBtn.setOnAction(event -> back());
         showArcBtn.setOnAction(event -> showArcBtnAction());
         continueBtn.setOnAction(event -> continueBtnAction());
 
-        arcNumberTextField.setOnKeyPressed(event -> {
+        arcNumberTextField.setOnKeyReleased(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
                 showArcBtnAction();
             }
+            lastCaretPosition.set(arcNumberTextField.getCaretPosition());
+            arcNumberTextField.setText(arcNumberTextField.getText().toUpperCase());
+            arcNumberTextField.positionCaret(lastCaretPosition.get());
         });
     }
 

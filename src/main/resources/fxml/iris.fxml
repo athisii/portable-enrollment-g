@@ -17,7 +17,7 @@
                 <Button fx:id="saveIrisBtn" disable="true" layoutX="804.0" layoutY="666.0" maxHeight="36.0"
                         maxWidth="163.0" minHeight="36.0" minWidth="150.0" mnemonicParsing="false" prefHeight="36.0"
                         prefWidth="163.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
-                        text="CAPTURE PHOTO" textFill="WHITE">
+                        text="SAVE IRIS" textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="14.0"/>
                     </font>

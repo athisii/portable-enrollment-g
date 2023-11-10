@@ -60,14 +60,14 @@ public class SlapScannerController implements BaseController {
     private final int fingerprintLivenessValue; // value can be updated on UI too.
     private static final int FP_SEGMENT_WIDTH;
     private static final int FP_SEGMENT_HEIGHT;
-    private static final int FP_NIST_VALUE;
+    private static final int FP_NFIQ_VALUE;
 
 
     static {
         try {
             FP_SEGMENT_WIDTH = Integer.parseInt(PropertyFile.getProperty(PropertyName.FP_SEGMENT_WIDTH).trim());
             FP_SEGMENT_HEIGHT = Integer.parseInt(PropertyFile.getProperty(PropertyName.FP_SEGMENT_HEIGHT).trim());
-            FP_NIST_VALUE = Integer.parseInt(PropertyFile.getProperty(PropertyName.FP_NIST_VALUE).trim());
+            FP_NFIQ_VALUE = Integer.parseInt(PropertyFile.getProperty(PropertyName.FP_NFIQ_VALUE).trim());
         } catch (RuntimeException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException("Not a number or no entry found.");
@@ -479,7 +479,7 @@ public class SlapScannerController implements BaseController {
             return;
         }
         int nistQuality = RS_GetQualityScore(imageData, imageWidth, imageHeight);
-        if (nistQuality > FP_NIST_VALUE) {
+        if (nistQuality > FP_NFIQ_VALUE) {
             LOGGER.log(Level.INFO, "Quality too poor (NIST): " + nistQuality);
             updateUi("Quality too poor. Please try again.");
             enableControls(backBtn, button);

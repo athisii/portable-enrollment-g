@@ -1,11 +1,14 @@
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
+import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
+import com.cdac.enrollmentstation.dto.SaveEnrollmentDetail;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ArcDetailsHolder;
 import com.cdac.enrollmentstation.util.PropertyFile;
+import com.cdac.enrollmentstation.util.SaveEnrollmentDetailUtil;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -25,7 +28,9 @@ import org.opencv.videoio.VideoCapture;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -47,9 +52,10 @@ public class CameraController implements BaseController {
     private static final int FIXED_DELAY_TIME_IN_MILLIS = 5; // in milliseconds
     private static final int EXECUTOR_SHUTDOWN_WAIT_TIME_IN_MILLIS = 50; // in milliseconds
     private static final int IMAGE_CAPTURE_LIMIT = 30;
-    private static final String INPUT_FILE;
+    private static final String IMG_PHOTO_INPUT_FILE;
+    private static final String IMG_PHOTO_COMPRESSED_FILE;
     private static final String PYTHON_IMAGE_PROCESSOR_COMMAND;
-    private static final String SUB_FILE;
+    private static final String IMG_PHOTO_FILE;
 
     private static final Image OUT_OF_FRAME_IMAGE;
     private static final Image NO_MASK_IMAGE;
@@ -64,9 +70,10 @@ public class CameraController implements BaseController {
 
     static {
         try {
-            INPUT_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.IMG_INPUT_FILE));
-            PYTHON_IMAGE_PROCESSOR_COMMAND = requireNonBlank(PropertyFile.getProperty(PropertyName.PYTHON_IMAGE_PROCESSOR_COMMAND));
-            SUB_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.IMG_SUB_FILE));
+            IMG_PHOTO_INPUT_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.IMG_PHOTO_INPUT_FILE), PropertyName.IMG_PHOTO_INPUT_FILE);
+            IMG_PHOTO_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.IMG_PHOTO_FILE), PropertyName.IMG_PHOTO_FILE);
+            IMG_PHOTO_COMPRESSED_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.IMG_PHOTO_COMPRESSED_FILE), PropertyName.IMG_PHOTO_COMPRESSED_FILE);
+            PYTHON_IMAGE_PROCESSOR_COMMAND = requireNonBlank(PropertyFile.getProperty(PropertyName.PYTHON_IMAGE_PROCESSOR_COMMAND), PropertyName.PYTHON_IMAGE_PROCESSOR_COMMAND);
             // loads --> /img/
             NO_MASK_IMAGE = loadFileFromImgDirectory("no_mask.png");
             NO_GLASSES_IMAGE = loadFileFromImgDirectory("no_goggles.jpg");
@@ -174,23 +181,50 @@ public class CameraController implements BaseController {
     private void back(ActionEvent actionEvent) {
         confirmPane.setVisible(true);
         ArcDetailsHolder holder = getArcDetailsHolder();
-        // Added For Biometric Options
         if (holder.getArcDetail().getBiometricOptions().trim().equalsIgnoreCase("Photo")) {
-            confirmPaneLbl.setText("Click 'Yes' to FetchArc or Click 'No' to Capture photo");
+            confirmPaneLbl.setText("Click 'Yes' to Fetch e-ARC or Click 'No' to Capture photo");
         } else {
             confirmPaneLbl.setText("Click 'Yes' to Scan Iris or Click 'No' to Capture photo");
         }
-
         disableControls(startStopCameraBtn, backBtn, savePhotoBtn);
     }
 
     // action for save photo button
     private void savePhoto(ActionEvent actionEvent) {
-        LOGGER.log(Level.INFO, () -> "***********savePhoto*************");
         try {
+            addPhoto(ArcDetailsHolder.getArcDetailsHolder().getSaveEnrollmentDetail());
+        } catch (Exception ex) {
+            messageLabel.setText(ex.getMessage());
+            backBtn.setDisable(false);
+            return;
+        }
+        try {
+            if (ArcDetailsHolder.getArcDetailsHolder().getArcDetail().isSignatureRequired()) {
+                App.setRoot("signature");
+                return;
+            }
             App.setRoot("biometric_capture_complete");
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, ex::getMessage);
+        }
+    }
+
+    private void addPhoto(SaveEnrollmentDetail saveEnrollmentDetail) {
+        Path photoPath = Paths.get(IMG_PHOTO_FILE);
+        Path compressPhotoPath = Paths.get(IMG_PHOTO_COMPRESSED_FILE);
+        // check if photo files exist.
+        if (!Files.exists(photoPath) || !Files.exists(compressPhotoPath)) {
+            LOGGER.log(Level.SEVERE, "Both or either sub photo and compress photo file not found.");
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+        }
+        try {
+            saveEnrollmentDetail.setPhoto(Base64.getEncoder().encodeToString(Files.readAllBytes(photoPath)));
+            saveEnrollmentDetail.setPhotoCompressed(Base64.getEncoder().encodeToString(Files.readAllBytes(compressPhotoPath)));
+            saveEnrollmentDetail.setEnrollmentStatus("PhotoCompleted");
+            SaveEnrollmentDetailUtil.writeToFile(saveEnrollmentDetail);
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 
@@ -311,7 +345,7 @@ public class CameraController implements BaseController {
             return;
         }
         // writes to /usr/share/enrollment/images/input.jpeg
-        Imgcodecs.imwrite(INPUT_FILE, matrix);
+        Imgcodecs.imwrite(IMG_PHOTO_INPUT_FILE, matrix);
         this.imageCaptureCount.getAndIncrement();
         // stop camera after IMAGE_CAPTURE_LIMIT shots
         if (imageCaptureCount.get() > IMAGE_CAPTURE_LIMIT) {
@@ -363,7 +397,7 @@ public class CameraController implements BaseController {
 
     private void updateUIOnValidImageAndNormalExit(int exitVal) throws IOException {
         if (exitVal == 0 && validImage) {
-            Image image = new Image(Files.newInputStream(Paths.get(SUB_FILE)));
+            Image image = new Image(Files.newInputStream(Paths.get(IMG_PHOTO_FILE)));
             resultImageView.setImage(image);
             updateImageView(iconFrame, TICK_GREEN_IMAGE);
             updateImageView(msgIcon, null);
@@ -405,17 +439,19 @@ public class CameraController implements BaseController {
         }
     }
 
-    private static String requireNonBlank(String str) {
-        if (str == null || str.isBlank()) {
-            throw new GenericException("Property value is null or blank");
+    private static String requireNonBlank(String value, String propertyName) {
+        if (value == null || value.isBlank()) {
+            throw new GenericException(propertyName + " value is null or blank in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
         }
-        return str;
+        return value;
     }
 
     private static Image loadFileFromFaceCodeDirectory(String filename) {
         InputStream inputStream = CameraController.class.getResourceAsStream("/facecode/" + filename);
         if (inputStream == null) {
-            throw new GenericException(filename + " not found in '/facecode/' directory");
+            String errorMessage = filename + " not found in '/facecode/' directory";
+            LOGGER.log(Level.SEVERE, errorMessage);
+            throw new GenericException(errorMessage);
         }
         return new Image(inputStream);
     }
@@ -423,7 +459,9 @@ public class CameraController implements BaseController {
     private static Image loadFileFromImgDirectory(String filename) {
         InputStream inputStream = CameraController.class.getResourceAsStream("/img/" + filename);
         if (inputStream == null) {
-            throw new GenericException(filename + " not found in '/img/' directory");
+            String errorMessage = filename + " not found in '/img/' directory";
+            LOGGER.log(Level.SEVERE, errorMessage);
+            throw new GenericException(errorMessage);
         }
         return new Image(inputStream);
     }

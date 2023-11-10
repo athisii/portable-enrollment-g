@@ -1,5 +1,6 @@
 package com.cdac.enrollmentstation.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,4 +29,6 @@ public class ArcDetail {
     String desc;
     String emailId;
     String biometricOptions;
+    @JsonProperty("isSignatureRequired")
+    boolean isSignatureRequired;
 }

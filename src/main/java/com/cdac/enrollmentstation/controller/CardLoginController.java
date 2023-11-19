@@ -43,7 +43,7 @@ import static com.cdac.enrollmentstation.util.Asn1CardTokenUtil.*;
  *
  * @author padmanabhanj
  */
-public class CardLoginController implements BaseController {
+public class CardLoginController extends AbstractBaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(CardLoginController.class);
     private static final String MANTRA_CARD_READER_NAME;
     private static final String CARD_API_SERVICE_RESTART_COMMAND;

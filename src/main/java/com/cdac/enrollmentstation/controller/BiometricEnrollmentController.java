@@ -38,7 +38,7 @@ import java.util.stream.Stream;
  * @author athisii, CDAC
  * Created on 29/03/23
  */
-public class BiometricEnrollmentController implements BaseController {
+public class BiometricEnrollmentController extends AbstractBaseController {
     private String tempArc;
 
     @FXML

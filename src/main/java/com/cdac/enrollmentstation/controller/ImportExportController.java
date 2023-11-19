@@ -45,7 +45,7 @@ import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ER
  * @author athisii, CDAC
  * Created on 29/03/23
  */
-public class ImportExportController implements BaseController {
+public class ImportExportController extends AbstractBaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(ImportExportController.class);
     private static final String TIMEOUT_ERR_MSG = "Connection timeout. Please try again.";
 

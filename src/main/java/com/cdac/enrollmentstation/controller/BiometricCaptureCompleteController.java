@@ -42,7 +42,7 @@ import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ER
  * @author athisii, CDAC
  * Created on 29/03/23
  */
-public class BiometricCaptureCompleteController implements BaseController {
+public class BiometricCaptureCompleteController extends AbstractBaseController {
     //For Application Log
     private static final Logger LOGGER = ApplicationLog.getLogger(BiometricCaptureCompleteController.class);
     private static final String NOT_AVAILABLE = "Not Available";
@@ -174,7 +174,7 @@ public class BiometricCaptureCompleteController implements BaseController {
         Platform.runLater(() -> {
             InputStream inputStream;
             if (success) {
-                inputStream = BiometricCaptureCompleteController.class.getResourceAsStream("/img/tick_green.jpg");
+                inputStream = BiometricCaptureCompleteController.class.getResourceAsStream("/img/tick.png");
             } else {
                 inputStream = BiometricCaptureCompleteController.class.getResourceAsStream("/img/red_cross.png");
             }

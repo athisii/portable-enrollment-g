@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  * @author athisii, CDAC
  * Created on 29/03/23
  */
-public class AdminAuthController implements BaseController {
+public class AdminAuthController extends AbstractBaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(AdminAuthController.class);
 
     private static final int MAX_LENGTH = 30;

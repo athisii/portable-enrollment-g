@@ -1,12 +1,9 @@
 package com.cdac.enrollmentstation;
 
 
-import com.cdac.enrollmentstation.constant.ApplicationConstant;
-import com.cdac.enrollmentstation.constant.PropertyName;
-import com.cdac.enrollmentstation.controller.BaseController;
-import com.cdac.enrollmentstation.exception.GenericException;
+import com.cdac.enrollmentstation.controller.AbstractBaseController;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.util.PropertyFile;
+import com.cdac.enrollmentstation.util.DisplayUtil;
 import javafx.application.Application;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
@@ -18,6 +15,7 @@ import javafx.stage.StageStyle;
 import org.opencv.core.Core;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -25,7 +23,7 @@ import java.util.logging.Logger;
 
 public class App extends Application {
     private static final Logger LOGGER = ApplicationLog.getLogger(App.class);
-    private static BaseController controller;
+    private static AbstractBaseController controller;
 
     private static volatile boolean isNudLogin;
     private static Scene scene;
@@ -44,7 +42,8 @@ public class App extends Application {
             event.consume();
             Platform.exit();  //Comment this line in production/deployment (Alt+f4 and close button)
         });
-        scene = new Scene(loadFXML("login"), 1366, 768);
+        scene = new Scene(loadFXML("login"), DisplayUtil.SCREEN_WIDTH, DisplayUtil.SCREEN_HEIGHT);
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource(getCssFileName())).toExternalForm());
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             LOGGER.log(Level.SEVERE, () -> "Caused: " + throwable.getCause());
             LOGGER.log(Level.SEVERE, () -> "Message: " + throwable.getMessage());
@@ -86,12 +85,11 @@ public class App extends Application {
         return isNudLogin;
     }
 
-    public static String getAppVersion() {
-        String appVersionNumber = PropertyFile.getProperty(PropertyName.APP_VERSION_NUMBER);
-        if (appVersionNumber == null || appVersionNumber.isBlank()) {
-            LOGGER.log(Level.SEVERE, () -> "No entry for '" + PropertyName.APP_VERSION_NUMBER + "' or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
-            throw new GenericException("No entry for '" + PropertyName.APP_VERSION_NUMBER + "' or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
+    public static String getCssFileName() {
+        // if width >= 1440 and height >= 1080
+        if (DisplayUtil.SCREEN_WIDTH >= DisplayUtil.SCREEN_HD[0]) {
+            return "/style/screen_hd.css";
         }
-        return appVersionNumber;
+        return "/style/base.css";
     }
 }

@@ -40,7 +40,7 @@ import static com.cdac.enrollmentstation.model.ArcDetailsHolder.getArcDetailsHol
  * @author athisii, CDAC
  * Created on 29/03/23
  */
-public class IrisController implements MIDIrisEnrollCallback, BaseController {
+public class IrisController extends AbstractBaseController implements MIDIrisEnrollCallback {
     private static final Logger LOGGER = ApplicationLog.getLogger(IrisController.class);
     private static final int IMAGE_COMPRESSION_RATIO = 0;
     private static final int TEMPLATE_COMPRESSION_RATIO = 0;
@@ -152,7 +152,7 @@ public class IrisController implements MIDIrisEnrollCallback, BaseController {
             return;
         }
         failureImage = new Image(inputStream, statusImageView.getFitWidth(), statusImageView.getFitHeight(), true, false);
-        inputStream = IrisController.class.getResourceAsStream("/img/tick_green.jpg");
+        inputStream = IrisController.class.getResourceAsStream("/img/tick.png");
         if (inputStream == null) {
             LOGGER.log(Level.SEVERE, "Received a null inputStream stream while loading success image from file system.");
             messageLabel.setText(GENERIC_IRIS_ERR_MSG);

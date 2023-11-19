@@ -44,7 +44,7 @@ import static com.cdac.enrollmentstation.model.ArcDetailsHolder.getArcDetailsHol
  * @author athisii, CDAC
  * Created on 26/12/22
  */
-public class CameraController implements BaseController {
+public class CameraController extends AbstractBaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(CameraController.class);
     private static final int COUNTDOWN_IN_SEC = 5;
     private static final AtomicInteger COUNTDOWN = new AtomicInteger(COUNTDOWN_IN_SEC);
@@ -85,7 +85,7 @@ public class CameraController implements BaseController {
             LEFT_ROTATE_COLOR_IMAGE = loadFileFromFaceCodeDirectory("left_rotate_color.png");
             CHIN_DOWN_COLORED_IMAGE = loadFileFromFaceCodeDirectory("chin_down_colored.png");
             CHIN_UP_COLOR_IMAGE = loadFileFromFaceCodeDirectory("chin_up_color.png");
-            TICK_GREEN_IMAGE = loadFileFromFaceCodeDirectory("tick_green.jpg");
+            TICK_GREEN_IMAGE = loadFileFromFaceCodeDirectory("tick.png");
 
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());

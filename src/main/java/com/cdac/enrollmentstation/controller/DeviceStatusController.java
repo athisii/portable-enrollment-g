@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  * Created on 29/03/23
  */
 
-public class DeviceStatusController implements BaseController {
+public class DeviceStatusController extends AbstractBaseController {
 
     private static final Logger LOGGER = ApplicationLog.getLogger(DeviceStatusController.class);
     private static final Image RED_CROSS_IMAGE;
@@ -34,7 +34,7 @@ public class DeviceStatusController implements BaseController {
 
     static {
         RED_CROSS_IMAGE = new Image(Objects.requireNonNull(DeviceStatusController.class.getResourceAsStream("/img/red_cross.png")));
-        GREEN_TICK_IMAGE = new Image(Objects.requireNonNull(DeviceStatusController.class.getResourceAsStream("/img/tick_green.jpg")));
+        GREEN_TICK_IMAGE = new Image(Objects.requireNonNull(DeviceStatusController.class.getResourceAsStream("/img/tick.png")));
     }
 
     @FXML

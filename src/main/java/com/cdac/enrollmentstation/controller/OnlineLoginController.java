@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  * @author athisii, CDAC
  * Created on 29/03/23
  */
-public class OnlineLoginController implements BaseController {
+public class OnlineLoginController extends AbstractBaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(OnlineLoginController.class);
     private static final int MAX_LENGTH = 30;
     private static boolean isDone = false;

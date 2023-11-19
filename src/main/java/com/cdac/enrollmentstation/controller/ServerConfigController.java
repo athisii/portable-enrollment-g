@@ -41,7 +41,7 @@ import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ER
  * Created on 29/03/23
  */
 
-public class ServerConfigController implements BaseController {
+public class ServerConfigController extends AbstractBaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(ServerConfigController.class);
     private List<Unit> units;
     @FXML

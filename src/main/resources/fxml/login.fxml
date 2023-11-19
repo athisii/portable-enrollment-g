@@ -4,82 +4,56 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
-<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.LoginController">
-
-    <BorderPane>
-        <center>
-            <AnchorPane prefHeight="768.0" prefWidth="1366.0" style="-fx-background-color: #fff;"
-                        BorderPane.alignment="CENTER">
-                <AnchorPane layoutY="-8.0" prefHeight="108.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
-
-                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="20.0" layoutY="20.0" pickOnBounds="true"
-                               preserveRatio="true">
-
-                        <Image url="@../img/navy_logo.png"/>
-
-                    </ImageView>
-                </AnchorPane>
-
-                <AnchorPane layoutY="100.0" prefHeight="60.0" prefWidth="1366.0"
-                            style="-fx-background-color: #04127b;"/>
-                <Label alignment="CENTER" layoutX="492.0" layoutY="117.0" prefHeight="33.0" prefWidth="373.0"
-                       text="LOGIN  PAGE" textFill="#fffefe">
-                    <font>
-                        <Font name="System Bold" size="15.0"/>
-                    </font>
-                </Label>
-
-                <AnchorPane layoutX="322.0" layoutY="250.0" prefHeight="258.0" prefWidth="257.0"
-                            style="-fx-background-color: #fff; -fx-border-color: #04127b;">
-
-                    <ImageView fitHeight="90.0" fitWidth="100.0" layoutX="73.0" layoutY="83.0" pickOnBounds="true"
-                               preserveRatio="true">
-
-                        <Image url="@../img/card.jpeg"/>
-
-                    </ImageView>
-                    <Button layoutX="49.0" layoutY="196.0" maxHeight="35.0" maxWidth="262.0" minHeight="35.0"
-                            minWidth="150.0" mnemonicParsing="false" onAction="#offlineLogin" prefHeight="35.0"
-                            prefWidth="167.0" style="-fx-background-color: #04127b; -fx-background-radius: 10 10 10 10;"
-                            text="I-CARD LOGIN" textFill="WHITE">
-                        <font>
-                            <Font name="System Bold" size="14.0"/>
-                        </font>
-                    </Button>
-
-                </AnchorPane>
-                <AnchorPane layoutX="774.0" layoutY="252.0" prefHeight="255.0" prefWidth="278.0"
-                            style="-fx-background-color: #fff; -fx-border-color: #04127b;">
-
-                    <ImageView fitHeight="75.0" fitWidth="109.0" layoutX="110.0" layoutY="104.0" pickOnBounds="true"
-                               preserveRatio="true">
-
-                        <Image url="@../img/login.jpg"/>
-
-                    </ImageView>
-                    <Button layoutX="69.0" layoutY="192.0" maxHeight="44.0" maxWidth="275.0" minHeight="35.0"
-                            minWidth="150.0" mnemonicParsing="false" onAction="#onlineLogin" prefHeight="37.0"
-                            prefWidth="160.0" style="-fx-background-color: #04127b; -fx-background-radius: 10 10 10 10;"
-                            text="NUD LOGIN" textFill="WHITE">
-                        <font>
-                            <Font name="System Bold" size="14.0"/>
-                        </font>
-                    </Button>
-
-                </AnchorPane>
-
-                <AnchorPane layoutY="720.0" prefHeight="50.0" prefWidth="1366.0"
-                            style="-fx-background-color: #1990ea;"/>
-                <AnchorPane layoutY="728.0" prefHeight="40.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
-
-                    <Label fx:id="version" layoutX="646.0" layoutY="11.0" prefHeight="16.0" prefWidth="29.0"
-                           textFill="#fffdfd"/>
-                </AnchorPane>
-
-            </AnchorPane>
-        </center>
-    </BorderPane>
-
-</VBox>
+<BorderPane xmlns="http://javafx.com/javafx/11.0.14-internal"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.LoginController">
+    <top>
+        <HBox styleClass="padding, bg-color-bright-blue">
+            <ImageView preserveRatio="true">
+                <Image url="@../img/navy_logo.png"/>
+            </ImageView>
+        </HBox>
+    </top>
+    <center>
+        <VBox>
+            <HBox styleClass="img-container, padding-medium, bg-color-darkblue" alignment="CENTER">
+                <Label styleClass="text-white" text="WELCOME TO PORTABLE ENROLMENT STATION "/>
+            </HBox>
+            <VBox VBox.vgrow="ALWAYS" alignment="CENTER">
+                <HBox alignment="CENTER">
+                    <VBox alignment="CENTER">
+                        <!--  id: _imgContainerXLarge -> only used in fxml expression       -->
+                        <!--  using prefWidth and prefHeight of the container, child image's size will be set.       -->
+                        <HBox fx:id="_imgContainerXLarge" styleClass="img-container-xlarge" alignment="CENTER">
+                            <ImageView fitWidth="${_imgContainerXLarge.prefWidth}"
+                                       fitHeight="${_imgContainerXLarge.prefHeight}"
+                                       preserveRatio="true">
+                                <Image url="@../img/card_login.png"/>
+                            </ImageView>
+                        </HBox>
+                        <Region styleClass="min-height-medium"/>
+                        <Button styleClass="btn-large, press-effect" onAction="#offlineLogin"
+                                text="I-CARD LOGIN"/>
+                    </VBox>
+                    <Region styleClass="min-width-xlarge"/>
+                    <VBox alignment="CENTER">
+                        <HBox styleClass="img-container-xlarge" alignment="CENTER">
+                            <!--  reusing id: _imgContainerXLarge    -->
+                            <ImageView fitWidth="${_imgContainerXLarge.prefWidth}"
+                                       fitHeight="${_imgContainerXLarge.prefHeight}">
+                                <Image url="@../img/nud_login.png"/>
+                            </ImageView>
+                        </HBox>
+                        <Region styleClass="min-height-medium"/>
+                        <Button styleClass="btn-large, press-effect" onAction="#onlineLogin"
+                                text="NUD LOGIN"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+        </VBox>
+    </center>
+    <bottom>
+        <HBox styleClass="padding, bg-color-bright-blue" alignment="CENTER">
+            <Label styleClass="text-white" text="${controller.appVersion}"/>
+        </HBox>
+    </bottom>
+</BorderPane>

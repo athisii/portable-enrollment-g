@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  * @author athisii, CDAC
  * Created on 29/03/23
  */
-public class AdminConfigController implements BaseController {
+public class AdminConfigController extends AbstractBaseController {
     //For Application Log
     private static final Logger LOGGER = ApplicationLog.getLogger(AdminConfigController.class);
     private static final int FINGERPRINT_LIVENESS_MAX;

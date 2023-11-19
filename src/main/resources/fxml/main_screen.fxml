@@ -3,112 +3,84 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.PrimaryController">
-
-    <BorderPane prefHeight="778.0" prefWidth="1024.0">
-        <top>
-            <AnchorPane prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: #fff;"
-                        BorderPane.alignment="CENTER">
-
-                <AnchorPane prefHeight="100.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
-
-                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="20.0" layoutY="10.0" pickOnBounds="true"
-                               preserveRatio="true">
-
-                        <Image url="@../img/navy_logo.png"/>
-
-                    </ImageView>
-                    <Label alignment="CENTER" layoutX="876.0" layoutY="42.0" prefHeight="31.0" prefWidth="108.0"
-                           style="-fx-background-color: #fff; -fx-background-radius: 0 20 20 0; -fx-border-width: 1; -fx-border-color: #00aaff; -fx-border-radius: 0 20 20 0;"
-                           text="INS INDIA" textAlignment="CENTER" textFill="#030303" visible="false"/>
-
-                </AnchorPane>
-
-
-                <ImageView fitHeight="47.0" fitWidth="48.0" layoutX="21.0" layoutY="112.0" pickOnBounds="true"
-                           preserveRatio="true">
-
-                    <Image url="@../img/home.png"/>
-
-                </ImageView>
-                <Label layoutX="66.0" layoutY="131.0" prefHeight="27.0" prefWidth="77.0" text="HOME">
-                    <font>
-                        <Font size="16.0"/>
-                    </font>
-                </Label>
-
-                <ImageView fitHeight="45.0" fitWidth="48.0" layoutX="1055.0" layoutY="122.0" pickOnBounds="true"
-                           preserveRatio="true">
-
-                    <Image url="@../img/settings.png"/>
-
-                </ImageView>
-                <Label layoutX="1110.0" layoutY="130.0" onMouseClicked="#onSettings" prefHeight="27.0" prefWidth="88.0"
-                       style="-fx-cursor: hand;" text="SETTINGS" underline="true">
-                    <font>
-                        <Font size="16.0"/>
-                    </font>
-                </Label>
-
-                <ImageView fitHeight="36.0" fitWidth="35.0" layoutX="1231.0" layoutY="123.0" pickOnBounds="true"
-                           preserveRatio="true">
-
-                    <Image url="@../img/logout.png"/>
-
-                </ImageView>
-                <Label layoutX="1276.0" layoutY="131.0" onMouseClicked="#onLogout" prefHeight="27.0" prefWidth="77.0"
-                       style="-fx-cursor: hand;" text="LOGOUT" underline="true">
-                    <font>
-                        <Font size="16.0"/>
-                    </font>
-                </Label>
-
-                <AnchorPane layoutX="239.0" layoutY="235.0" prefHeight="400.0" prefWidth="370.0">
-
-                    <ImageView fitHeight="199.0" fitWidth="352.0" layoutX="11.0" layoutY="81.0" pickOnBounds="true"
-                               preserveRatio="true">
-
-                        <Image url="@../img/import_export.jpeg"/>
-
-                    </ImageView>
-                    <Button fx:id="importExportBtn" layoutX="32.0" layoutY="275.0" mnemonicParsing="false"
-                            onAction="#showImportExport" prefHeight="50.0" prefWidth="310.0"
-                            style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
-                            text="IMPORT/EXPORT" textFill="WHITE">
-                        <font>
-                            <Font size="16.0"/>
-                        </font>
-                    </Button>
-
-                </AnchorPane>
-                <AnchorPane layoutX="749.0" layoutY="235.0" prefHeight="400.0" prefWidth="370.0">
-
-                    <ImageView fitHeight="190.0" fitWidth="254.0" layoutX="95.0" layoutY="51.0" pickOnBounds="true"
-                               preserveRatio="true">
-
-                        <Image url="@../img/bio_first.png"/>
-
-                    </ImageView>
-                    <Button layoutX="46.0" layoutY="275.0" mnemonicParsing="false" onAction="#showEnrollmentHome"
-                            prefHeight="51.0" prefWidth="303.0"
-                            style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
-                            text="BIOMETRIC ENROLMENT" textFill="WHITE">
-                        <font>
-                            <Font size="16.0"/>
-                        </font>
-                    </Button>
-
-                </AnchorPane>
-
-                <AnchorPane layoutY="728.0" prefHeight="40.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
-
-                    <Label fx:id="version" layoutX="646.0" layoutY="11.0" prefHeight="16.0" prefWidth="29.0"
-                           text="version" textFill="#fffdfd"/>
-                </AnchorPane>
-            </AnchorPane>
-        </top>
-    </BorderPane>
-
-</VBox>
+<BorderPane xmlns="http://javafx.com/javafx/11.0.14-internal"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.PrimaryController">
+    <top>
+        <HBox styleClass="padding, bg-color-bright-blue">
+            <ImageView preserveRatio="true">
+                <Image url="@../img/navy_logo.png"/>
+            </ImageView>
+        </HBox>
+    </top>
+    <center>
+        <VBox>
+            <HBox>
+                <HBox styleClass="padding">
+                    <HBox fx:id="_imgContainer" styleClass="img-container">
+                        <ImageView fitWidth="${_imgContainer.prefWidth}" fitHeight="${_imgContainer.prefHeight}"
+                                   preserveRatio="true">
+                            <Image url="@../img/home_new.png"/>
+                        </ImageView>
+                    </HBox>
+                    <Label styleClass="press-effect, padding-small, bg-border-radius-small" text="HOME"/>
+                </HBox>
+                <HBox HBox.hgrow="ALWAYS" alignment="TOP_RIGHT">
+                    <HBox styleClass="padding">
+                        <HBox styleClass="img-container">
+                            <ImageView fitWidth="${_imgContainer.prefWidth}" fitHeight="${_imgContainer.prefHeight}"
+                                       preserveRatio="true">
+                                <Image url="@../gif/settings.gif"/>
+                            </ImageView>
+                        </HBox>
+                        <Button styleClass="padding-small, press-effect, bg-border-radius-small" text="SETTINGS"
+                                onAction="#onSettings"/>
+                    </HBox>
+                    <HBox styleClass="padding">
+                        <HBox styleClass="img-container">
+                            <ImageView fitWidth="${_imgContainer.prefWidth}" fitHeight="${_imgContainer.prefHeight}"
+                                       preserveRatio="true">
+                                <Image url="@../gif/logout.gif"/>
+                            </ImageView>
+                        </HBox>
+                        <Button styleClass="padding-small, press-effect, bg-border-radius-small" text="LOGOUT"
+                                onAction="#onLogout"/>
+                    </HBox>
+                </HBox>
+            </HBox>
+            <HBox VBox.vgrow="ALWAYS" alignment="CENTER">
+                <VBox alignment="CENTER">
+                    <!--  id: _imgContainerXLarge -> only used in fxml expression       -->
+                    <!--  using prefWidth and prefHeight of the container, child image's size will be set.       -->
+                    <HBox fx:id="_imgContainerXLarge" styleClass="img-container-xlarge" alignment="CENTER">
+                        <ImageView fitWidth="${_imgContainerXLarge.prefWidth}"
+                                   fitHeight="${_imgContainerXLarge.prefHeight}"
+                                   preserveRatio="true">
+                            <Image url="@../img/import_export_new.png"/>
+                        </ImageView>
+                    </HBox>
+                    <Region styleClass="min-height-medium"/>
+                    <Button fx:id="importExportBtn" styleClass="btn-large, press-effect" onAction="#showImportExport"
+                            text="IMPORT/EXPORT"/>
+                </VBox>
+                <Region styleClass="min-width-xlarge"/>
+                <VBox alignment="CENTER">
+                    <HBox styleClass="img-container-xlarge" alignment="CENTER">
+                        <!--  reusing id: _imgContainerXLarge    -->
+                        <ImageView fitWidth="${_imgContainerXLarge.prefWidth}"
+                                   fitHeight="${_imgContainerXLarge.prefHeight}">
+                            <Image url="@../gif/biometric.gif"/>
+                        </ImageView>
+                    </HBox>
+                    <Region styleClass="min-height-medium"/>
+                    <Button styleClass="btn-large, press-effect" onAction="#showEnrollmentHome"
+                            text="BIOMETRIC ENROLMENT"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+    <bottom>
+        <HBox styleClass="padding, bg-color-bright-blue" alignment="CENTER">
+            <Label styleClass="text-white" text="${controller.appVersion}"/>
+        </HBox>
+    </bottom>
+</BorderPane>

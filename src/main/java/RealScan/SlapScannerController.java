@@ -24,8 +24,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.text.Text;
+import javafx.scene.layout.VBox;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -143,13 +142,13 @@ public class SlapScannerController extends AbstractBaseController {
     private Button backBtn;
 
     @FXML
-    private AnchorPane confirmPane;
+    private VBox confirmVbox;
     @FXML
     private Button confirmYesBtn;
     @FXML
     private Button confirmNoBtn;
     @FXML
-    private Text confirmText;
+    private Label confirmText;
     private Button currentEnabledButton;
 
 
@@ -893,7 +892,7 @@ public class SlapScannerController extends AbstractBaseController {
     }
 
     private void backBtnAction() {
-        confirmPane.setVisible(true);
+        confirmVbox.setVisible(true);
         if (!scanBtn.isDisable()) {
             currentEnabledButton = scanBtn;
         } else if (!leftScanBtn.isDisable()) {
@@ -941,7 +940,7 @@ public class SlapScannerController extends AbstractBaseController {
 
     private void confirmStay() {
         backBtn.setDisable(false);
-        confirmPane.setVisible(false);
+        confirmVbox.setVisible(false);
         captureIrisBtn.setDisable(!isFpScanCompleted);
         currentEnabledButton.setDisable(false);
     }

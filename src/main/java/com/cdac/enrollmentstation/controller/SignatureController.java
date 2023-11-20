@@ -21,7 +21,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.WritableImage;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 import javax.imageio.*;
@@ -73,11 +73,13 @@ public class SignatureController extends AbstractBaseController {
     private Button saveSignatureBtn;
 
     @FXML
-    private AnchorPane confirmPane;
+    private VBox confirmVbox;
     @FXML
     private Button confirmYesBtn;
     @FXML
     private Button confirmNoBtn;
+    @FXML
+    private Label arcLbl;
 
 
     @FXML
@@ -99,6 +101,7 @@ public class SignatureController extends AbstractBaseController {
         saveSignatureBtn.setOnAction(this::saveSignatureBtnAction);
         confirmNoBtn.setOnAction(this::confirmNo);
         confirmYesBtn.setOnAction(this::confirmYes);
+        backBtn.setOnAction(this::backBtnAction);
 
         gc = canvas.getGraphicsContext2D();
         gc.setLineWidth(2);
@@ -138,12 +141,12 @@ public class SignatureController extends AbstractBaseController {
             lastX = -1;
             lastY = -1;
         });
+        arcLbl.setText("e-ARC: " + ArcDetailsHolder.getArcDetailsHolder().getArcDetail().getArcNo());
     }
 
-    @FXML
-    private void backBtnAction() {
+    private void backBtnAction(ActionEvent event) {
         disableControls(backBtn, clearBtn, saveSignatureBtn);
-        confirmPane.setVisible(true);
+        confirmVbox.setVisible(true);
         if ("biometric".equalsIgnoreCase(ArcDetailsHolder.getArcDetailsHolder().getArcDetail().getBiometricOptions().trim())) {
             confirmPaneLbl.setText("Click 'Yes' to Iris Scan or Click 'No' Capture Signature");
         } else {
@@ -152,7 +155,7 @@ public class SignatureController extends AbstractBaseController {
     }
 
     private void confirmYes(ActionEvent actionEvent) {
-        confirmPane.setVisible(false);
+        confirmVbox.setVisible(false);
         try {
             if ("biometric".equalsIgnoreCase(ArcDetailsHolder.getArcDetailsHolder().getArcDetail().getBiometricOptions().trim())) {
                 App.setRoot("iris");
@@ -165,7 +168,7 @@ public class SignatureController extends AbstractBaseController {
     }
 
     private void confirmNo(ActionEvent actionEvent) {
-        confirmPane.setVisible(false);
+        confirmVbox.setVisible(false);
         enableControls(backBtn, clearBtn, saveSignatureBtn);
     }
 

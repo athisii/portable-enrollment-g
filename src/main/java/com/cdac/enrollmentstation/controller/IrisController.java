@@ -23,7 +23,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -80,13 +80,17 @@ public class IrisController extends AbstractBaseController implements MIDIrisEnr
     private Button saveIrisBtn;
 
     @FXML
-    private AnchorPane confirmPane;
+    private VBox confirmVbox;
 
     @FXML
     private Button scanBtn;
 
     @FXML
     private Button backBtn;
+    @FXML
+    private Button confirmYesBtn;
+    @FXML
+    private Button confirmNoBtn;
 
     private boolean isDeviceInitialized;
     private boolean isIrisCompleted;
@@ -142,6 +146,8 @@ public class IrisController extends AbstractBaseController implements MIDIrisEnr
         backBtn.setOnAction(this::backBtnAction);
         scanBtn.setOnAction(this::scanBtnAction);
         saveIrisBtn.setOnAction(this::saveIrisBtnAction);
+        confirmNoBtn.setOnAction(this::confirmNoBtnAction);
+        confirmYesBtn.setOnAction(this::confirmYesBtnAction);
 
 
         // loads failure and success images from FS.
@@ -336,7 +342,7 @@ public class IrisController extends AbstractBaseController implements MIDIrisEnr
         backBtn.setDisable(true);
         scanBtn.setDisable(true);
         saveIrisBtn.setDisable(true);
-        confirmPane.setVisible(true);
+        confirmVbox.setVisible(true);
     }
 
     private void saveIrisBtnAction(ActionEvent event) {
@@ -388,8 +394,8 @@ public class IrisController extends AbstractBaseController implements MIDIrisEnr
         }
     }
 
-    @FXML
-    private void goBack() {
+
+    private void confirmYesBtnAction(ActionEvent event) {
         if (isDeviceInitialized) {
             jniErrorCode = midIrisEnroll.Uninit();
             if (jniErrorCode != 0) {
@@ -405,9 +411,8 @@ public class IrisController extends AbstractBaseController implements MIDIrisEnr
 
     }
 
-    @FXML
-    private void stayBack() {
-        confirmPane.setVisible(false);
+    private void confirmNoBtnAction(ActionEvent event) {
+        confirmVbox.setVisible(false);
         scanBtn.setDisable(false);
         backBtn.setDisable(false);
         saveIrisBtn.setDisable(!isIrisCompleted);

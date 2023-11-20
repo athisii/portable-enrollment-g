@@ -17,7 +17,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.Point;
@@ -104,7 +104,7 @@ public class CameraController extends AbstractBaseController {
     private ImageView iconFrame;
     @FXML
 
-    private AnchorPane confirmPane;
+    private VBox confirmVbox;
     @FXML
     private Label confirmPaneLbl;
     @FXML
@@ -155,7 +155,7 @@ public class CameraController extends AbstractBaseController {
     }
 
     private void confirmYes(ActionEvent actionEvent) {
-        confirmPane.setVisible(false);
+        confirmVbox.setVisible(false);
         savePhotoBtn.setDisable(!validImage);
         enableControls(startStopCameraBtn, backBtn);
         try {
@@ -172,14 +172,14 @@ public class CameraController extends AbstractBaseController {
     }
 
     private void confirmNo(ActionEvent actionEvent) {
-        confirmPane.setVisible(false);
+        confirmVbox.setVisible(false);
         savePhotoBtn.setDisable(!validImage);
         enableControls(startStopCameraBtn, backBtn);
     }
 
     // action for back button
     private void back(ActionEvent actionEvent) {
-        confirmPane.setVisible(true);
+        confirmVbox.setVisible(true);
         ArcDetailsHolder holder = getArcDetailsHolder();
         if (holder.getArcDetail().getBiometricOptions().trim().equalsIgnoreCase("Photo")) {
             confirmPaneLbl.setText("Click 'Yes' to Fetch e-ARC or Click 'No' to Capture photo");

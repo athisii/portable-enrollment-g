@@ -73,20 +73,13 @@ public class ServerConfigController extends AbstractBaseController {
 
 
     @FXML
-    public void homeBtnAction() throws IOException {
+    private void homeBtnAction() throws IOException {
         App.setRoot("main_screen");
     }
 
     @FXML
-    public void backBtnAction() throws IOException {
+    private void backBtnAction() throws IOException {
         App.setRoot("admin_config");
-    }
-
-
-    @FXML
-    private void editBtnAction() {
-        updateUi("");
-        enableControls(mafisUrlTextField, enrollmentStationIdTextField, enrollmentStationUnitIdsComboBox, fetchUnitsBtn);
     }
 
 

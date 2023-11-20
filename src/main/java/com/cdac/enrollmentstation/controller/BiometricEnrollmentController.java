@@ -157,12 +157,31 @@ public class BiometricEnrollmentController extends AbstractBaseController {
 
             case "IrisCompleted":
                 try {
+                    if ("biometric".equalsIgnoreCase(ArcDetailsHolder.getArcDetailsHolder().getArcDetail().getBiometricOptions().trim())) {
+                        if (ArcDetailsHolder.getArcDetailsHolder().getArcDetail().isSignatureRequired()) {
+                            App.setRoot("signature");
+                            return;
+                        }
+                        App.setRoot("biometric_capture_complete");
+                        return;
+                    }
                     App.setRoot("camera");
+                } catch (IOException ex) {
+                    LOGGER.log(Level.INFO, ex::getMessage);
+                }
+                break;
+            case "PhotoCompleted":
+                try {
+                    if (ArcDetailsHolder.getArcDetailsHolder().getArcDetail().isSignatureRequired()) {
+                        App.setRoot("signature");
+                        return;
+                    }
+                    App.setRoot("biometric_capture_complete");
                 } catch (IOException ex) {
                     LOGGER.log(Level.SEVERE, ex.getMessage());
                 }
                 break;
-            case "PhotoCompleted":
+            case "SignatureCompleted":
             case "SUCCESS":
                 try {
                     App.setRoot("biometric_capture_complete");

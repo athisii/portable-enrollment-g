@@ -25,7 +25,7 @@
             </HBox>
             <!--  id: bodyHeaderLabel!-> only used in fxml expression       -->
             <Label fx:id="bodyHeaderLabel" styleClass="padding-small, bg-border-radius-small, press-effect"
-                   text="AUTHENTICATION" focusTraversable="true"/>
+                   text="AUTHENTICATION"/>
         </HBox>
     </left>
     <!--   will place the content in the middle -->

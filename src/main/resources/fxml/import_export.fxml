@@ -4,120 +4,73 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.ImportExportController">
-
-    <BorderPane prefHeight="778.0" prefWidth="1024.0">
-        <left>
-            <AnchorPane prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: #fff;"
-                        BorderPane.alignment="CENTER">
-                <AnchorPane prefHeight="100.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
-                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="20.0" layoutY="10.0" pickOnBounds="true"
-                               preserveRatio="true">
-                        <Image url="@../img/navy_logo.png"/>
-                    </ImageView>
-                </AnchorPane>
-                <AnchorPane layoutX="76.0" layoutY="170.0" prefHeight="360.0" prefWidth="356.0"
-                            style="-fx-background-color: #fff; -fx-border-color: #04127b;">
-                    <Text fill="#04127b" layoutY="170.0" strokeType="OUTSIDE" strokeWidth="0.0" text="UNIT :">
-                        <font>
-                            <Font name="System Bold" size="13.0"/>
-                        </font>
-                    </Text>
-
-                    <ImageView fx:id="refreshIcon" fitHeight="29.0" fitWidth="33.0" layoutX="320.0" layoutY="150.0"
-                               pickOnBounds="true" preserveRatio="true">
-                        <Image url="@../img/refresh.png"/>
-                    </ImageView>
-                    <TextField fx:id="searchText" layoutX="48.0" layoutY="13.0" prefHeight="33.0" prefWidth="269.0"
-                               promptText="search"/>
-                    <ListView fx:id="unitListView" editable="true" layoutX="47.0" layoutY="50.0" prefHeight="265.0"
-                              prefWidth="271.0"/>
-                    <Button fx:id="importUnitBtn" layoutX="52.0" layoutY="318.0" maxHeight="35.0" maxWidth="262.0"
-                            minHeight="35.0" minWidth="150.0" mnemonicParsing="false" prefHeight="35.0"
-                            prefWidth="262.0" style="-fx-background-color: #04127b; -fx-background-radius: 10 10 10 10;"
-                            text="IMPORT" textFill="WHITE">
-                        <font>
-                            <Font name="System Bold" size="14.0"/>
-                        </font>
-                    </Button>
-
-                </AnchorPane>
-                <AnchorPane layoutX="489.0" layoutY="169.0" prefHeight="360.0" prefWidth="356.0"
-                            style="-fx-background-color: #fff; -fx-border-color: #04127b;">
-                    <Text fx:id="importedUnitText" fill="#04127b" layoutX="114.0" layoutY="26.0" strokeType="OUTSIDE"
-                          strokeWidth="0.0" text="IMPORTED UNIT">
-                        <font>
-                            <Font name="System Bold" size="13.0"/>
-                        </font>
-                    </Text>
-                    <ListView fx:id="importedUnitListView" editable="true" layoutX="41.0" layoutY="48.0"
-                              prefHeight="265.0" prefWidth="271.0"/>
-                    <Button fx:id="clearImportBtn" layoutX="22.0" layoutY="318.0" maxHeight="35.0" maxWidth="150.0"
-                            minHeight="35.0" minWidth="150.0" mnemonicParsing="false" prefHeight="35.0"
-                            prefWidth="262.0" style="-fx-background-color: #04127b; -fx-background-radius: 10 10 10 10;"
-                            text="CLEAR" textFill="WHITE">
-                        <font>
-                            <Font name="System Bold" size="14.0"/>
-                        </font>
-                    </Button>
-                    <Button fx:id="clearAllImportBtn" layoutX="176.0" layoutY="318.0" maxHeight="35.0" maxWidth="150.0"
-                            minHeight="35.0" minWidth="150.0" mnemonicParsing="false" prefHeight="35.0"
-                            prefWidth="262.0" style="-fx-background-color: #04127b; -fx-background-radius: 10 10 10 10;"
-                            text="CLEAR ALL" textFill="WHITE">
-                        <font>
-                            <Font name="System Bold" size="14.0"/>
-                        </font>
-                    </Button>
-                </AnchorPane>
-                <AnchorPane layoutX="926.0" layoutY="170.0" prefHeight="360.0" prefWidth="356.0"
-                            style="-fx-background-color: #fff; -fx-border-color: #04127b;">
-                    <Text fx:id="capturedBiometricText" fill="#04127b" layoutX="96.0" layoutY="26.0"
-                          strokeType="OUTSIDE" strokeWidth="0.0" text="CAPTURED BIOMETRIC">
-                        <font>
-                            <Font name="System Bold" size="13.0"/>
-                        </font>
-                    </Text>
-                    <ListView fx:id="capturedArcListView" editable="true" layoutX="53.0" layoutY="48.0"
-                              prefHeight="265.0" prefWidth="271.0"/>
-
-                    <Button fx:id="exportBtn" layoutX="54.0" layoutY="318.0" maxHeight="35.0" maxWidth="275.0"
-                            minHeight="35.0" minWidth="150.0" mnemonicParsing="false" prefHeight="33.0"
-                            prefWidth="270.0" style="-fx-background-color: #04127b; -fx-background-radius: 10 10 10 10;"
-                            text="EXPORT" textFill="WHITE">
-                        <font>
-                            <Font name="System Bold" size="14.0"/>
-                        </font>
-                    </Button>
-                </AnchorPane>
-
-                <Label fx:id="messageLabel" alignment="CENTER" layoutX="204.0" layoutY="568.0" prefHeight="21.0"
-                       prefWidth="931.0">
-                    <font>
-                        <Font name="System Bold" size="17.0"/>
-                    </font>
-                </Label>
-                <Button fx:id="backBtn" layoutX="497.0" layoutY="612.0" maxHeight="35.0" maxWidth="150.0"
-                        minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#back" prefHeight="36.0"
-                        prefWidth="150.0" style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;"
-                        text="Back" textFill="WHITE">
-                    <font>
-                        <Font name="System Bold" size="14.0"/>
-                    </font>
-                </Button>
-                <Button fx:id="homeBtn" layoutX="777.0" layoutY="612.0" maxHeight="35.0" maxWidth="150.0"
-                        minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#home" prefHeight="35.0"
-                        prefWidth="150.0" style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;"
-                        text="Home" textFill="WHITE">
-                    <font>
-                        <Font name="System Bold" size="14.0"/>
-                    </font>
-                </Button>
-                <AnchorPane layoutY="729.0" prefHeight="40.0" prefWidth="1366.0"
-                            style="-fx-background-color: #1990ea;"/>
-            </AnchorPane>
-        </left>
-    </BorderPane>
-
-</VBox>
+<BorderPane xmlns="http://javafx.com/javafx/11.0.14-internal"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cdac.enrollmentstation.controller.ImportExportController">
+    <top>
+        <HBox styleClass="padding, bg-color-bright-blue">
+            <ImageView preserveRatio="true">
+                <Image url="@../img/navy_logo.png"/>
+            </ImageView>
+        </HBox>
+    </top>
+    <center>
+        <VBox>
+            <Region styleClass="min-height-small"/>
+            <HBox alignment="CENTER">
+                <VBox styleClass="border-color-darkblue, padding-small, border-radius-small" alignment="BOTTOM_CENTER">
+                    <Label text="UNIT" focusTraversable="true"/>
+                    <TextField fx:id="searchText" styleClass="input-field" promptText="search"/>
+                    <Region styleClass="min-height"/>
+                    <ListView fx:id="unitListView"/>
+                    <Region styleClass="min-height-small"/>
+                    <HBox alignment="CENTER">
+                        <Button fx:id="importUnitBtn" styleClass="btn-medium, press-effect" text="IMPORT"/>
+                        <Region styleClass="min-width-small"/>
+                        <HBox fx:id="_imgContainer1" styleClass="img-container">
+                            <ImageView fx:id="refreshIcon" fitWidth="${_imgContainer1.prefWidth}"
+                                       fitHeight="${_imgContainer1.prefHeight}" preserveRatio="true">
+                                <Image url="@../img/ezgif.com-resize.png"/>
+                            </ImageView>
+                        </HBox>
+                    </HBox>
+                </VBox>
+                <Region styleClass="min-width-medium"/>
+                <VBox styleClass="border-color-darkblue, padding-small, border-radius-small" alignment="BOTTOM_CENTER">
+                    <Label fx:id="importedUnitText" text="IMPORTED UNIT"/>
+                    <Region styleClass="min-height-small"/>
+                    <ListView fx:id="importedUnitListView"/>
+                    <Region styleClass="min-height-small"/>
+                    <HBox alignment="CENTER">
+                        <Button fx:id="clearImportBtn" styleClass="btn-medium, press-effect" text="CLEAR"/>
+                        <Region styleClass="min-width-small"/>
+                        <Button fx:id="clearAllImportBtn" styleClass="btn-medium, press-effect" text="CLEAR ALL"/>
+                    </HBox>
+                </VBox>
+                <Region styleClass="min-width-medium"/>
+                <VBox styleClass="border-color-darkblue, padding-small, border-radius-small" alignment="BOTTOM_CENTER">
+                    <Label fx:id="capturedBiometricText" text="CAPTURED BIOMETRIC"/>
+                    <Region styleClass="min-height-small"/>
+                    <ListView fx:id="capturedArcListView"/>
+                    <Region styleClass="min-height-small"/>
+                    <Button fx:id="exportBtn" styleClass="btn-medium, press-effect" text="EXPORT"/>
+                </VBox>
+            </HBox>
+            <Region styleClass="min-height-medium"/>
+            <HBox alignment="CENTER">
+                <Label fx:id="messageLabel"/>
+            </HBox>
+            <Region styleClass="min-height-small"/>
+            <HBox alignment="CENTER">
+                <Button fx:id="backBtn" styleClass="btn-medium, press-effect" onAction="#back" text="BACK"/>
+                <Region styleClass="min-width-medium"/>
+                <Button fx:id="homeBtn" styleClass="btn-medium, press-effect" onAction="#home" text="HOME"/>
+            </HBox>
+        </VBox>
+    </center>
+    <bottom>
+        <HBox styleClass="padding, bg-color-bright-blue" alignment="CENTER">
+            <Label styleClass="text-white" text="${controller.appVersion}"/>
+        </HBox>
+    </bottom>
+</BorderPane>

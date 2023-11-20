@@ -26,7 +26,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.text.Text;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -54,9 +53,9 @@ public class ImportExportController extends AbstractBaseController {
     @FXML
     private Button homeBtn;
     @FXML
-    private Text importedUnitText;
+    private Label importedUnitText;
     @FXML
-    private Text capturedBiometricText;
+    private Label capturedBiometricText;
     @FXML
     private Button exportBtn;
     @FXML
@@ -158,6 +157,12 @@ public class ImportExportController extends AbstractBaseController {
     }
 
 
+    @FXML
+    public void home() throws IOException {
+        App.setRoot("main_screen");
+
+    }
+
     private void decryptAndSendToServer(List<Path> paths) {
         String decryptedJsonData;
         for (Path path : paths) {
@@ -227,12 +232,6 @@ public class ImportExportController extends AbstractBaseController {
     }
 
     @FXML
-    public void home() throws IOException {
-        App.setRoot("main_screen");
-
-    }
-
-    @FXML
     public void back() throws IOException {
         App.setRoot("main_screen");
 
@@ -275,13 +274,14 @@ public class ImportExportController extends AbstractBaseController {
 
         if (allUnits.isEmpty()) {
             updateUI("No units available.");
+        } else {
+            enableControls(importUnitBtn);
         }
 
         Platform.runLater(() -> {
             unitListView.setItems(FXCollections.observableArrayList(unitCaptions));
             messageLabel.setText("");
         });
-        enableControls(importUnitBtn, exportBtn, clearImportBtn, clearAllImportBtn);
     }
 
 
@@ -371,6 +371,7 @@ public class ImportExportController extends AbstractBaseController {
             Files.writeString(Path.of(filePath), jsonArcList, StandardCharsets.UTF_8);
             updateImportedListView();
             updateUI("Unit imported successfully.");
+            enableControls(clearImportBtn, clearAllImportBtn);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             updateUI(GENERIC_ERR_MSG);
@@ -393,6 +394,8 @@ public class ImportExportController extends AbstractBaseController {
 
             if (unitCaptions.isEmpty()) {
                 disableControls(clearImportBtn, clearAllImportBtn);
+            } else {
+                enableControls(clearImportBtn, clearAllImportBtn);
             }
             Platform.runLater(() -> {
                 importedUnitListView.setItems(FXCollections.observableList(unitCaptions));
@@ -471,12 +474,13 @@ public class ImportExportController extends AbstractBaseController {
 
             if (capturedArcs.isEmpty()) {
                 disableControls(exportBtn);
+            } else {
+                enableControls(exportBtn);
             }
             Platform.runLater(() -> {
                 capturedBiometricText.setText(CAPTURED_BIOMETRIC_TEXT + capturedArcs.size());
                 capturedArcListView.setItems(FXCollections.observableList(capturedArcs));
             });
-
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error occurred while getting the count of captured biometric data");
             updateUI(GENERIC_ERR_MSG);

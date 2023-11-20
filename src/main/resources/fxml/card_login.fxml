@@ -1,87 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<VBox alignment="CENTER" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/11.0.14-internal"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdac.enrollmentstation.controller.CardLoginController">
-
-    <BorderPane prefHeight="778.0" prefWidth="1024.0">
-        <center>
-            <AnchorPane prefHeight="607.0" prefWidth="1024.0" style="-fx-background-color: #fff;"
-                        BorderPane.alignment="CENTER">
-
-                <AnchorPane prefHeight="100.0" prefWidth="1366.0" style="-fx-background-color: #1990ea;">
-
-                    <ImageView fitHeight="91.0" fitWidth="363.0" layoutX="20.0" layoutY="10.0" pickOnBounds="true"
+<BorderPane xmlns="http://javafx.com/javafx/11.0.14-internal"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cdac.enrollmentstation.controller.CardLoginController">
+    <top>
+        <HBox styleClass="padding, bg-color-bright-blue">
+            <ImageView preserveRatio="true">
+                <Image url="@../img/navy_logo.png"/>
+            </ImageView>
+        </HBox>
+    </top>
+    <center>
+        <VBox>
+            <HBox styleClass="padding">
+                <!--  id: _imgContainer -> only used in fxml expression       -->
+                <!--  using prefWidth and prefHeight of the container, child image's size will be set.       -->
+                <HBox fx:id="_imgContainer" styleClass="img-container">
+                    <ImageView fitWidth="${_imgContainer.prefWidth}" fitHeight="${_imgContainer.prefHeight}"
                                preserveRatio="true">
-
-                        <Image url="@../img/navy_logo.png"/>
-
+                        <Image url="@../gif/authentication.gif"/>
                     </ImageView>
-                    <Label alignment="CENTER" layoutX="876.0" layoutY="42.0" prefHeight="31.0" prefWidth="108.0"
-                           style="-fx-background-color: #fff; -fx-background-radius: 0 20 20 0; -fx-border-width: 1; -fx-border-color: #00aaff; -fx-border-radius: 0 20 20 0;"
-                           text="INS INDIA" textAlignment="CENTER" visible="false"/>
-
-                </AnchorPane>
-                <AnchorPane layoutY="100.0" prefHeight="60.0" prefWidth="1366.0"
-                            style="-fx-background-color: #04127b;"/>
-                <Label alignment="CENTER" layoutX="482.0" layoutY="117.0" prefHeight="33.0" prefWidth="373.0"
-                       text="Kindly Place the Card in Card Reader" textFill="#fffefe">
-                    <font>
-                        <Font name="System Bold" size="15.0"/>
-                    </font>
-                </Label>
-                <AnchorPane layoutX="474.0" layoutY="219.0" prefHeight="216.0" prefWidth="399.0"
-                            style="-fx-border-color: #04127b;">
-
-                    <ImageView fitHeight="131.0" fitWidth="132.0" layoutX="143.0" layoutY="9.0" pickOnBounds="true"
-                               preserveRatio="true">
-
-                        <Image url="@../img/card.jpeg"/>
-
-                    </ImageView>
-                    <Label fx:id="cardLabel" layoutX="34.0" layoutY="158.0" text="Personal Number:">
-                        <font>
-                            <Font name="System Bold" size="14.0"/>
-                        </font>
-                    </Label>
-
-                    <PasswordField fx:id="cardPasswordField" layoutX="184.0" layoutY="155.0" prefHeight="26.0"
-                                   prefWidth="189.0" promptText="Personal Number"/>
-
-                </AnchorPane>
-
-                <Label fx:id="messageLabel" alignment="CENTER" layoutX="409.0" layoutY="463.0" prefHeight="23.0"
-                       prefWidth="522.0">
-                    <font>
-                        <Font name="System Bold" size="15.0"/>
-                    </font>
-                </Label>
-                <Button fx:id="backBtn" focusTraversable="false" layoutX="512.0" layoutY="496.0" maxHeight="35.0"
-                        maxWidth="150.0" minHeight="35.0" minWidth="150.0" mnemonicParsing="false"
-                        onAction="#backBtnAction" prefHeight="35.0" prefWidth="150.0"
-                        style="-fx-background-color: #f7a304; -fx-background-radius: 20 20 20 20;" text="BACK"
-                        textFill="WHITE">
-                    <font>
-                        <Font name="System Bold" size="14.0"/>
-                    </font>
-                </Button>
-                <Button fx:id="loginBtn" focusTraversable="false" layoutX="696.0" layoutY="496.0" maxHeight="35.0"
-                        maxWidth="150.0" minHeight="35.0" minWidth="150.0" mnemonicParsing="false"
-                        onAction="#loginBtnAction" prefHeight="35.0" prefWidth="150.0"
-                        style="-fx-background-color: #04127b; -fx-background-radius: 20 20 20 20;" text="LOGIN"
-                        textFill="WHITE">
-                    <font>
-                        <Font name="System Bold" size="14.0"/>
-                    </font>
-                </Button>
-                <AnchorPane layoutY="728.0" prefHeight="40.0" prefWidth="1366.0"
-                            style="-fx-background-color: #1990ea;"/>
-            </AnchorPane>
-        </center>
-    </BorderPane>
-
-</VBox>
+                </HBox>
+                <!--  id: bodyHeaderLabel!-> only used in fxml expression       -->
+                <Label fx:id="bodyHeaderLabel" styleClass="padding-small, bg-border-radius-small, press-effect"
+                       text=" CARD AUTHENTICATION"/>
+            </HBox>
+            <HBox alignment="CENTER" styleClass="padding-medium">
+                <Label styleClass="font-size-medium"
+                       text="Please place the card on the reader, enter PN and click the 'LOGIN' button."/>
+            </HBox>
+            <Region styleClass="min-height-large"/>
+            <HBox alignment="CENTER">
+                <VBox styleClass="border-color-darkblue, padding-medium, border-radius-medium">
+                    <HBox fx:id="_imgContainerXlarge" styleClass="img-container-xlarge, padding-small"
+                          alignment="CENTER">
+                        <ImageView fitWidth="${_imgContainerXlarge.prefWidth}"
+                                   fitHeight="${_imgContainerXlarge.prefHeight}"
+                                   preserveRatio="true">
+                            <Image url="@../gif/card_creader.gif"/>
+                        </ImageView>
+                    </HBox>
+                    <HBox alignment="CENTER">
+                        <Label fx:id="cardLabel" text="Personal Number:"/>
+                        <Region styleClass="min-width-medium"/>
+                        <PasswordField fx:id="cardPasswordField" styleClass="input-field" promptText="Personal Number"/>
+                    </HBox>
+                </VBox>
+            </HBox>
+            <HBox alignment="CENTER" styleClass="padding-medium">
+                <Label fx:id="messageLabel"/>
+            </HBox>
+            <HBox alignment="CENTER">
+                <Button fx:id="backBtn" styleClass="btn-medium, press-effect" onAction="#backBtnAction" text="BACK"/>
+                <Region styleClass="min-width-medium"/>
+                <Button fx:id="loginBtn" styleClass="btn-medium, press-effect" onAction="#loginBtnAction" text="LOGIN"/>
+            </HBox>
+        </VBox>
+    </center>
+    <bottom>
+        <HBox styleClass="padding, bg-color-bright-blue" alignment="CENTER">
+            <Label styleClass="text-white" text="${controller.appVersion}"/>
+        </HBox>
+    </bottom>
+</BorderPane>

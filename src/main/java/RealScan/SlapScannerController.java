@@ -280,7 +280,6 @@ public class SlapScannerController extends AbstractBaseController {
         }
         Path licensePath = Paths.get(licFilePath);
         if (Files.notExists(licensePath)) {
-            LOGGER.log(Level.SEVERE, "License file not found");
             throw new GenericException("License file not found");
         }
         byte[] licBytes = Files.readAllBytes(licensePath);
@@ -902,6 +901,7 @@ public class SlapScannerController extends AbstractBaseController {
         } else if (!thumbScanBtn.isDisable()) {
             currentEnabledButton = thumbScanBtn;
         } else {
+            // when license check fails
             LOGGER.log(Level.SEVERE, "No button is enabled.");
             throw new GenericException("At least one button should be enabled.");
         }
@@ -926,12 +926,18 @@ public class SlapScannerController extends AbstractBaseController {
                     Thread.sleep(1000);
                     releaseDevice();
                 }
-                App.setRoot("biometric_enrollment");
-            } catch (IOException | InterruptedException ex) {
+                Platform.runLater(() -> {
+                    try {
+                        App.setRoot("biometric_enrollment");
+                    } catch (IOException ex) {
+                        LOGGER.log(Level.SEVERE, ex.getMessage());
+                        confirmText.setText(GENERIC_ERR_MSG);
+                        enableControls(confirmNoBtn, confirmYesBtn);
+                    }
+                });
+            } catch (InterruptedException ex) {
                 LOGGER.log(Level.SEVERE, ex.getMessage());
-                if (ex instanceof InterruptedException) {
-                    Thread.currentThread().interrupt();
-                }
+                Thread.currentThread().interrupt();
                 Platform.runLater(() -> confirmText.setText(GENERIC_ERR_MSG));
                 enableControls(confirmNoBtn, confirmYesBtn);
             }

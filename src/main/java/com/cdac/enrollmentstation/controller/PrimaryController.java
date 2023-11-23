@@ -4,7 +4,6 @@ import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -13,9 +12,13 @@ import java.util.logging.Logger;
 public class PrimaryController extends AbstractBaseController {
     @FXML
     private Button importExportBtn;
-    @FXML
-    private Label version;
     private static final Logger LOGGER = ApplicationLog.getLogger(PrimaryController.class);
+
+    public void initialize() {
+        if (!App.isNudLogin()) {
+            importExportBtn.setDisable(true);
+        }
+    }
 
     @FXML
     private void showEnrollmentHome() throws IOException {

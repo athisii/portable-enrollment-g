@@ -17,7 +17,7 @@
 }
 
 .bg-color-greenish-blue {
-    -fx-background-color: #00c79c;
+    -fx-background-color: #00C79C;
 }
 
 
@@ -30,17 +30,17 @@
 }
 
 .pref-width-small {
-    -fx-pref-width: 100px;
+    -fx-pref-width: 130px;
 }
 
 .pref-width-medium {
-    -fx-pref-width: 250px;
+    -fx-pref-width: 325px;
 }
 
 .label-border-style {
     -fx-border-color: #DAD3D3;
     -fx-border-style: solid;
-    -fx-pref-width: 220px;
+    -fx-pref-width: 286px;
     -fx-pref-height: 30px;
     -fx-border-radius: 5px;
 }
@@ -51,14 +51,14 @@
 }
 
 .btn-medium {
-    -fx-pref-width: 150px;
+    -fx-pref-width: 195px;
     -fx-pref-height: 40px;
     -fx-background-radius: 20px;
 }
 
 .btn-large {
     -fx-font-size: 18px;
-    -fx-pref-width: 270px;
+    -fx-pref-width: 351px;
     -fx-pref-height: 40px;
     -fx-background-radius: 20px;
 }
@@ -66,7 +66,7 @@
 .btn-img {
     -fx-background-color: #FFF;
     -fx-pref-height: 40px;
-    -fx-pref-width: 40px;
+    -fx-pref-width: 52px;
     -fx-padding: 5px;
 }
 
@@ -184,33 +184,33 @@
 
 .input-field {
     -fx-font-size: 16px;
-    -fx-pref-width: 250px;
+    -fx-pref-width: 325px;
     -fx-pref-height: 34px;
     -fx-background-radius: 8px;
 }
 
 .min-width {
-    -fx-min-width: 5px;
+    -fx-min-width: 6px;
 }
 
 .min-width-small {
-    -fx-min-width: 10px;
+    -fx-min-width: 13px;
 }
 
 .min-width-medium {
-    -fx-min-width: 20px;
+    -fx-min-width: 26px;
 }
 
 .min-width-large {
-    -fx-min-width: 100px;
+    -fx-min-width: 130px;
 }
 
 .min-width-xlarge {
-    -fx-min-width: 150px;
+    -fx-min-width: 195px;
 }
 
 .min-width-xx-large {
-    -fx-min-width: 500px; /* used in license info */
+    -fx-min-width: 650px;
 }
 
 .min-height {
@@ -239,7 +239,7 @@
 }
 
 .canvas-container {
-    -fx-pref-width: 500px;
+    -fx-pref-width: 650px;
     -fx-pref-height: 300px;
     -fx-border-color: black;
     -fx-border-width: 2px;
@@ -252,12 +252,12 @@
 }
 
 .table-container-3-cols {
-    -fx-pref-width: 600px;
+    -fx-pref-width: 780px;
     -fx-pref-height: 400px;
 }
 
 .table-container-4-cols {
-    -fx-pref-width: 650px;
+    -fx-pref-width: 845px;
     -fx-pref-height: 400px;
 }
 
@@ -274,11 +274,11 @@
 }
 
 .table-view-column-width {
-    -fx-pref-width: 200px;
+    -fx-pref-width: 260px;
 }
 
 .combo-box {
     -fx-background-radius: 5px;
-    -fx-background-color: #CC99ff;
-    -fx-pref-width: 200px;
+    -fx-background-color: #CC99FF;
+    -fx-pref-width: 260px;
 }

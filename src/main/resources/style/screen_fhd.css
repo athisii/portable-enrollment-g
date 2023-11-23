@@ -5,35 +5,35 @@
 }
 
 .pref-width-small {
-    -fx-pref-width: 140px;
+    -fx-pref-width: 182px;
 }
 
 .pref-width-medium {
-    -fx-pref-width: 350px;
+    -fx-pref-width: 454px;
 }
 
 .label-border-style {
-    -fx-pref-width: 308px;
+    -fx-pref-width: 400px;
     -fx-pref-height: 42px;
     -fx-border-radius: 7px;
 }
 
 .btn-medium {
-    -fx-pref-width: 210px;
+    -fx-pref-width: 273px;
     -fx-pref-height: 56px;
     -fx-background-radius: 28px;
 }
 
 .btn-large {
     -fx-font-size: 25px;
-    -fx-pref-width: 378px;
+    -fx-pref-width: 491px;
     -fx-pref-height: 56px;
     -fx-background-radius: 28px;
 }
 
 .btn-img {
     -fx-pref-height: 56px;
-    -fx-pref-width: 56px;
+    -fx-pref-width: 72px;
     -fx-padding: 7px;
 }
 
@@ -66,6 +66,7 @@
     -fx-pref-width: 280px;
     -fx-pref-height: 280px;
 }
+
 
 /* padding */
 .padding {
@@ -136,33 +137,33 @@
 
 .input-field {
     -fx-font-size: 22px;
-    -fx-pref-width: 350px;
+    -fx-pref-width: 454px;
     -fx-pref-height: 47px;
     -fx-background-radius: 11px;
 }
 
 .min-width {
-    -fx-min-width: 7px;
+    -fx-min-width: 8px;
 }
 
 .min-width-small {
-    -fx-min-width: 14px;
+    -fx-min-width: 18px;
 }
 
 .min-width-medium {
-    -fx-min-width: 28px;
+    -fx-min-width: 36px;
 }
 
 .min-width-large {
-    -fx-min-width: 140px;
+    -fx-min-width: 182px;
 }
 
 .min-width-xlarge {
-    -fx-min-width: 210px;
+    -fx-min-width: 273px;
 }
 
 .min-width-xx-large {
-    -fx-min-width: 700px;
+    -fx-min-width: 909px;
 }
 
 .min-height {
@@ -190,7 +191,7 @@
 }
 
 .canvas-container {
-    -fx-pref-width: 700px;
+    -fx-pref-width: 909px;
     -fx-pref-height: 420px;
     -fx-border-color: black;
     -fx-border-width: 2px;
@@ -203,15 +204,21 @@
 }
 
 .table-container-3-cols {
-    -fx-pref-width: 840px;
+    -fx-pref-width: 1092px;
     -fx-pref-height: 560px;
 }
 
 .table-container-4-cols {
-    -fx-pref-width: 909px;
+    -fx-pref-width: 1183px;
     -fx-pref-height: 560px;
 }
 
+
 .table-view-column-width {
-    -fx-pref-width: 280px;
+    -fx-pref-width: 364px;
+}
+
+.combo-box {
+    -fx-background-radius: 7px;
+    -fx-pref-width: 364px;
 }

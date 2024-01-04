@@ -64,13 +64,20 @@ public class OnlineLoginController extends AbstractBaseController {
     private void authenticateUser() {
         try {
             if (AuthUtil.authenticate(textField.getText(), passwordField.getText())) {
-                App.setRoot("main_screen");
+                // must set on JavaFX thread.
+                Platform.runLater(() -> {
+                    try {
+                        App.setRoot("main_screen");
+                    } catch (IOException ex) {
+                        throw new GenericException(ex.getMessage());
+                    }
+                });
                 isDone = true;
                 return;
             }
             LOGGER.log(Level.INFO, "Incorrect username or password.");
             updateUi("Wrong username or password.");
-        } catch (GenericException | IOException ex) {
+        } catch (GenericException ex) {
             updateUi(ex.getMessage());
         }
         isDone = true;

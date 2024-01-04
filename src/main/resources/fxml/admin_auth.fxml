@@ -72,7 +72,7 @@
             <HBox alignment="CENTER">
                 <Button fx:id="backBtn" styleClass="btn-medium, press-effect" onAction="#showHome" text="BACK"/>
                 <Region styleClass="min-width-large"/>
-                <Button fx:id="loginBtn" styleClass="btn-medium, press-effect" onAction="#serverConfig" text="LOGIN"/>
+                <Button fx:id="loginBtn" styleClass="btn-medium, press-effect" onAction="#loginBtnAction" text="LOGIN"/>
             </HBox>
         </VBox>
     </center>

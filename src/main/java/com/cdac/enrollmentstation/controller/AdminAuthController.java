@@ -46,16 +46,23 @@ public class AdminAuthController extends AbstractBaseController {
 
 
     @FXML
-    public void serverConfig() {
+    public void loginBtnAction() {
         disableControls(backBtn, loginBtn);
         try {
             if (AuthUtil.authenticate(username.getText(), passwordField.getText())) {
-                App.setRoot("admin_config");
+                // must set on JavaFX thread.
+                Platform.runLater(() -> {
+                    try {
+                        App.setRoot("admin_config");
+                    } catch (IOException ex) {
+                        throw new GenericException(ex.getMessage());
+                    }
+                });
                 return;
             }
             LOGGER.log(Level.INFO, "Incorrect username or password.");
             updateUi("Wrong username or password.");
-        } catch (GenericException | IOException ex) {
+        } catch (GenericException ex) {
             updateUi(ex.getMessage());
         }
         // clean up UI on failure
@@ -85,7 +92,7 @@ public class AdminAuthController extends AbstractBaseController {
         });
         passwordField.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
-                serverConfig();
+                loginBtnAction();
             }
         });
         // only meant for PES(as virtual keyboard not used)

@@ -96,8 +96,8 @@ public class ServerConfigController extends AbstractBaseController {
         PropertyFile.changePropertyValue(PropertyName.MAFIS_API_URL, mafisUrlTextField.getText());
         PropertyFile.changePropertyValue(PropertyName.ENROLLMENT_STATION_ID, enrollmentStationIdTextField.getText());
         PropertyFile.changePropertyValue(PropertyName.ENROLLMENT_STATION_UNIT_ID, unit.getValue());
+        PropertyFile.changePropertyValue(PropertyName.ENROLLMENT_STATION_UNIT_CAPTION, unit.getCaption());
         messageLabel.setText("Updated successfully.");
-
     }
 
 
@@ -110,6 +110,8 @@ public class ServerConfigController extends AbstractBaseController {
         homeBtn.requestFocus();
         messageLabel.setText("Fetching units...");
         disableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
+        enrollmentStationUnitIdsComboBox.setItems(FXCollections.observableArrayList());
+        enrollmentStationUnitIdsComboBox.setValue(null); // selected value
         App.getThreadPool().execute(this::fetchUnits);
 
     }
@@ -165,7 +167,6 @@ public class ServerConfigController extends AbstractBaseController {
         } catch (ConnectionTimeoutException ex) {
             Platform.runLater(() -> {
                 messageLabel.setText("Connection timeout. Please try again.");
-                enrollmentStationUnitIdsComboBox.getItems().clear();
                 enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
             });
             return;
@@ -178,6 +179,8 @@ public class ServerConfigController extends AbstractBaseController {
         }
         List<String> captions = units.stream().map(Unit::getCaption).collect(Collectors.toList());
         Platform.runLater(() -> enrollmentStationUnitIdsComboBox.setItems(FXCollections.observableArrayList(captions)));
+        String enrollmentStationUnitCaption = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_CAPTION);
+        Platform.runLater(() -> enrollmentStationUnitIdsComboBox.getSelectionModel().select(enrollmentStationUnitCaption));
         updateUi("Units fetched successfully.");
         enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
 
@@ -191,6 +194,7 @@ public class ServerConfigController extends AbstractBaseController {
         String mafisUrl = PropertyFile.getProperty(PropertyName.MAFIS_API_URL);
         String enrollmentStationId = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_ID);
         String enrollmentStationUnitId = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_ID);
+        String enrollmentStationUnitCaption = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_CAPTION);
         if (whitelistedCardUrl == null || whitelistedCardUrl.isBlank()) {
             errorMessage += PropertyName.CARD_API_WHITELISTED_URL + commonText;
         }
@@ -203,12 +207,16 @@ public class ServerConfigController extends AbstractBaseController {
         if (enrollmentStationUnitId == null || enrollmentStationUnitId.isBlank()) {
             errorMessage += "\n" + PropertyName.ENROLLMENT_STATION_UNIT_ID + commonText;
         }
+        if (enrollmentStationUnitCaption == null || enrollmentStationUnitCaption.isBlank()) {
+            errorMessage += "\n" + PropertyName.ENROLLMENT_STATION_UNIT_CAPTION + commonText;
+        }
         if (!errorMessage.isBlank()) {
             throw new GenericException(errorMessage);
         }
         whitelistedCardUrlTextField.setText(whitelistedCardUrl);
         mafisUrlTextField.setText(mafisUrl);
         enrollmentStationIdTextField.setText(enrollmentStationId);
+        enrollmentStationUnitIdsComboBox.getSelectionModel().select(enrollmentStationUnitCaption);
         enrollmentStationUnitIdsComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             // sometimes old and new value will be null.
             if (newValue != null) {

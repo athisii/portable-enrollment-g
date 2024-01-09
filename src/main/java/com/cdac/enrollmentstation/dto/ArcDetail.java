@@ -29,6 +29,6 @@ public class ArcDetail {
     String desc;
     String emailId;
     String biometricOptions;
-    @JsonProperty("isSignatureRequired")
-    boolean isSignatureRequired;
+    @JsonProperty("signatureReqd")
+    boolean signatureRequired;
 }

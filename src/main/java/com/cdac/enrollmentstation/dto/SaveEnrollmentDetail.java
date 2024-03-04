@@ -25,7 +25,7 @@ public class SaveEnrollmentDetail {
     Set<Fp> fp;
     Set<Iris> iris;
     String irisScannerSerialNo;
-    String leftFrScannerSerialNo;
+    String leftFpScannerSerialNo;
     String rightFpScannerSerialNo;
     String uniqueId;
     String arcStatus;

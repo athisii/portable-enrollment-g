@@ -111,7 +111,7 @@ public class BiometricCaptureCompleteController extends AbstractBaseController {
         } else if (arcDetail.getBiometricOptions().toLowerCase().contains("photo")) {
             // set NA for slapscanner, iris etc.
             saveEnrollmentDetail.setIrisScannerSerialNo(NOT_AVAILABLE);
-            saveEnrollmentDetail.setLeftFrScannerSerialNo(NOT_AVAILABLE);
+            saveEnrollmentDetail.setLeftFpScannerSerialNo(NOT_AVAILABLE);
             saveEnrollmentDetail.setRightFpScannerSerialNo(NOT_AVAILABLE);
             Set<Fp> fingerprintset = new HashSet<>(Set.of(new Fp(NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE)));
             saveEnrollmentDetail.setFp(fingerprintset);

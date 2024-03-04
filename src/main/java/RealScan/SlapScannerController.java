@@ -1140,7 +1140,7 @@ public class SlapScannerController extends AbstractBaseController {
 
         ArcDetailsHolder arcDetailsHolder = ArcDetailsHolder.getArcDetailsHolder();
         SaveEnrollmentDetail saveEnrollmentDetail = arcDetailsHolder.getSaveEnrollmentDetail();
-        saveEnrollmentDetail.setLeftFrScannerSerialNo(deviceInfo.deviceID);
+        saveEnrollmentDetail.setLeftFpScannerSerialNo(deviceInfo.deviceID);
         saveEnrollmentDetail.setRightFpScannerSerialNo(deviceInfo.deviceID);
         saveEnrollmentDetail.setFp(fps);
         saveEnrollmentDetail.setEnrollmentStatus("FingerPrintCompleted");

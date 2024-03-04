@@ -3,7 +3,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.Line?>
 <BorderPane xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cdac.enrollmentstation.controller.BiometricEnrollmentController">
     <top>
@@ -27,9 +26,6 @@
             </HBox>
             <HBox fx:id="_bodyHeaderRow" styleClass="img-container, padding, bg-color-darkblue" alignment="CENTER">
                 <Label styleClass="text-white" text="INPUT e-ARC NUMBER "/>
-                <Line startX="10.0" endX="10.0" endY="${_bodyHeaderRow.prefHeight}" stroke="white"
-                      strokeWidth="5.0"/>
-                <Label styleClass="text-white" text=" SCAN BARCODE  "/>
                 <TextField fx:id="arcNumberTextField" styleClass="input-field"/>
                 <Region styleClass="min-width-small"/>
                 <Button fx:id="showArcBtn" styleClass="btn-img, bg-border-radius-small, press-effect">

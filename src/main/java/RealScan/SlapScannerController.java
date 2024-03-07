@@ -478,13 +478,6 @@ public class SlapScannerController implements BaseController {
             enableControls(backBtn, button);
             return;
         }
-        int nistQuality = RS_GetQualityScore(imageData, imageWidth, imageHeight);
-        if (nistQuality > FP_NIST_VALUE) {
-            LOGGER.log(Level.INFO, "Quality too poor (NIST): " + nistQuality);
-            updateUi("Quality too poor. Please try again.");
-            enableControls(backBtn, button);
-            return;
-        }
 
         // check LFD only when value is non-zero
         if (fingerprintLivenessValue != 0) {
@@ -885,6 +878,12 @@ public class SlapScannerController implements BaseController {
                 LOGGER.log(Level.SEVERE, "Received a null value for RsImageInfo buffer.");
                 throw new GenericException(GENERIC_RS_ERR_MSG);
             }
+            int nistQuality = RS_GetQualityScore(rsImageInfoTemp.pbyImgBuf, rsImageInfoTemp.imageWidth, rsImageInfoTemp.imageHeight);
+            if (nistQuality > FP_NIST_VALUE) {
+                LOGGER.log(Level.INFO, () -> "Quality too poor (NIST): " + nistQuality);
+                throw new GenericException("Quality too poor. Please try again.");
+            }
+
             mFingerTypeRsImageInfoMap.put(slapInfoArray[counter.get()].fingerType, rsImageInfoTemp);
             counter.getAndIncrement();
         });

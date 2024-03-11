@@ -66,15 +66,14 @@
             <Region styleClass="min-height-medium"/>
             <HBox alignment="CENTER" styleClass="padding-medium">
                 <VBox alignment="BOTTOM_CENTER">
-                    <HBox fx:id="_imgContainerMedium4" styleClass="img-container-medium, padding-small"
-                          alignment="CENTER">
-                        <ImageView fitWidth="${_imgContainerMedium4.prefWidth}"
-                                   fitHeight="${_imgContainerMedium4.prefHeight}"
-                                   preserveRatio="true">
-                            <Image url="@../img/close.png"/>
-                        </ImageView>
+                    <HBox alignment="CENTER">
+                        <Label text="NFIQ"/>
                     </HBox>
-                    <Button styleClass="btn-large, press-effect" onAction="#closeApp" text="CLOSE APP"/>
+                    <HBox styleClass="input-field, padding-small" alignment="CENTER">
+                        <TextField fx:id="nfiqTextField" styleClass="input-field" alignment="center"
+                                   editable="false"/>
+                    </HBox>
+                    <Button fx:id="nfiqBtn" styleClass="btn-large, press-effect" text="EDIT"/>
                 </VBox>
                 <Region styleClass="min-width-medium"/>
                 <VBox alignment="BOTTOM_CENTER">
@@ -97,6 +96,18 @@
             </HBox>
             <Region styleClass="min-height-medium"/>
             <HBox alignment="CENTER" styleClass="padding-medium">
+                <VBox alignment="BOTTOM_CENTER">
+                    <HBox fx:id="_imgContainerMedium4" styleClass="img-container-medium, padding-small"
+                          alignment="CENTER">
+                        <ImageView fitWidth="${_imgContainerMedium4.prefWidth}"
+                                   fitHeight="${_imgContainerMedium4.prefHeight}"
+                                   preserveRatio="true">
+                            <Image url="@../img/close.png"/>
+                        </ImageView>
+                    </HBox>
+                    <Button styleClass="btn-large, press-effect" onAction="#closeApp" text="CLOSE APP"/>
+                </VBox>
+                <Region styleClass="min-width-medium"/>
                 <VBox alignment="BOTTOM_CENTER">
                     <HBox fx:id="_imgContainerMedium5" styleClass="img-container-medium, padding-small"
                           alignment="CENTER">

@@ -178,21 +178,26 @@ public class CardLoginController implements MIDFingerAuth_Callback, BaseControll
             return;
         }
 
-        if (!twoFactorAuthEnabled) {
-            try {
-                authenticateByPN(fileTypeToAsn1EncodedByteArrayMap.get(CardTokenFileType.STATIC));
-                App.setRoot("main_screen");
-            } catch (Exception ex) {
-                if (ex instanceof IOException) {
-                    LOGGER.log(Level.SEVERE, ex.getMessage());
-                    throw new GenericException(GENERIC_ERR_MSG);
+        // not required in R1
+//        if (!twoFactorAuthEnabled) {
+        try {
+            authenticateByPN(fileTypeToAsn1EncodedByteArrayMap.get(CardTokenFileType.STATIC));
+            // must set on JavaFX thread.
+            Platform.runLater(() -> {
+                try {
+                    App.setRoot("main_screen");
+                } catch (IOException ex) {
+                    throw new GenericException(ex.getMessage());
                 }
-                pNoPasswordField.clear();
-                updateUI(ex.getMessage());
-                enableControls(backBtn, loginBtn);
-            }
-            return;
+            });
+        } catch (Exception ex) {
+            pNoPasswordField.clear();
+            updateUI(ex.getMessage());
+            enableControls(backBtn, loginBtn);
         }
+            /*
+            return;
+//        }
         // if reached here, then two-factor auth is enabled.
         try {
             if (!isPinAuthCompleted) {
@@ -208,6 +213,7 @@ public class CardLoginController implements MIDFingerAuth_Callback, BaseControll
             updateUI(ex.getMessage());
             enableControls(backBtn, loginBtn);
         }
+        */
     }
 
     @FXML

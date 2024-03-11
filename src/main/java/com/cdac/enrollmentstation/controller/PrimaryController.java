@@ -24,7 +24,6 @@ public class PrimaryController implements BaseController {
     @FXML
     private void showEnrollmentHome() throws IOException {
         App.setRoot("biometric_enrollment");
-
     }
 
     @FXML

@@ -582,7 +582,7 @@ public class SlapScannerController implements BaseController {
             if (rsLfdResult.nResult[i] == RS_LFD_FAKE) {
                 int j = i; //used in lambda
                 LOGGER.log(Level.SEVERE, () -> "Fake fingerprint detected. Score: " + rsLfdResult.nScore[j]);
-                throw new GenericException("Quality standard not met or captured fake fingerprint. Kindly try again.");
+                throw new GenericException("Captured fake fingerprint. Kindly try again.");
             }
         }
 

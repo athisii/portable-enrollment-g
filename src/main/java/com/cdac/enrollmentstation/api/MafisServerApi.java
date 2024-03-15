@@ -6,8 +6,6 @@ import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.*;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.dto.ArcDetail;
-import com.cdac.enrollmentstation.dto.Unit;
 import com.cdac.enrollmentstation.security.Aes256Util;
 import com.cdac.enrollmentstation.security.HmacUtil;
 import com.cdac.enrollmentstation.security.PkiUtil;
@@ -56,6 +54,7 @@ public class MafisServerApi {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
+        LOGGER.log(Level.INFO, () -> "***Fetching details for e-ARC: " + arcNo);
         HttpResponse<String> response = HttpUtil.sendHttpRequest(HttpUtil.createPostHttpRequest(getArcUrl(), jsonRequestData));
         ArcDetail arcDetail;
         try {
@@ -134,6 +133,7 @@ public class MafisServerApi {
      * @throws GenericException exception on error, json parsing exception etc.
      */
     public static List<Unit> fetchAllUnits() {
+        LOGGER.log(Level.INFO, () -> "***Fetching all units.");
         HttpResponse<String> response = HttpUtil.sendHttpRequest(HttpUtil.createGetHttpRequest(getUnitListURL()));
         // if this line is reached, response received with status code 200
         UnitsResDto unitsResDto;
@@ -143,6 +143,7 @@ public class MafisServerApi {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
+        LOGGER.log(Level.INFO, () -> "***ServerResponseErrorCode: " + unitsResDto.getErrorCode());
         if (unitsResDto.getErrorCode() != 0) {
             LOGGER.log(Level.SEVERE, () -> ApplicationConstant.GENERIC_SERVER_ERR_MSG + unitsResDto.getDesc());
             throw new GenericException(unitsResDto.getDesc());
@@ -167,6 +168,7 @@ public class MafisServerApi {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
+        LOGGER.log(Level.INFO, () -> "***Fetching DemographicDetails for unitCode: " + unitCode);
         HttpRequest postHttpRequest = HttpUtil.createPostHttpRequest(getDemographicURL(), jsonRequestData);
         HttpResponse<String> httpResponse = HttpUtil.sendHttpRequest(postHttpRequest);
         ArcDetailsResDto arcDetailsResDto;
@@ -176,6 +178,7 @@ public class MafisServerApi {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
+        LOGGER.log(Level.INFO, () -> "***ServerResponseErrorCode: " + arcDetailsResDto.getErrorCode());
         if (arcDetailsResDto.getErrorCode() != 0) {
             String desc = arcDetailsResDto.getDesc();
             desc = desc.replace("ARC", "e-ARC");

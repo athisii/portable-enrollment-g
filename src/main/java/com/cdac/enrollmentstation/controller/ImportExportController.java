@@ -179,6 +179,7 @@ public class ImportExportController implements BaseController {
             }
 
             SaveEnrollmentResDto saveEnrollmentResDto;
+            LOGGER.log(Level.INFO, () -> "***Saving biometric data to server for e-ARC: " + arcNumber);
             try {
                 saveEnrollmentResDto = MafisServerApi.postEnrollment(decryptedJsonData);
             } catch (GenericException ex) {
@@ -190,6 +191,7 @@ public class ImportExportController implements BaseController {
                 enableControls(importUnitBtn, backBtn, homeBtn, clearImportBtn, clearAllImportBtn, exportBtn);
                 return;
             }
+            LOGGER.log(Level.INFO, () -> "***ServerResponseErrorCode: " + saveEnrollmentResDto.getErrorCode());
             if (saveEnrollmentResDto.getErrorCode() != 0) {
                 String errorMessage = saveEnrollmentResDto.getDesc().toLowerCase();
                 LOGGER.log(Level.SEVERE, () -> "Error Desc: " + errorMessage);

@@ -141,7 +141,7 @@ public class ServerConfigController extends AbstractBaseController {
                 return;
             } catch (ConnectionTimeoutException ex) {
                 enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
-                updateUi("Connection timeout or received an unexpected value from server.");
+                updateUi("Connection timeout or received an unexpected value from the server.");
                 return;
             }
             try {
@@ -151,6 +151,7 @@ public class ServerConfigController extends AbstractBaseController {
                 LOGGER.log(Level.SEVERE, e.getMessage());
                 updateUi(GENERIC_ERR_MSG);
                 enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
+                return;
             }
             updateUi("Operators card downloaded successfully.");
             enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);

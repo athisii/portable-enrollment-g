@@ -6,8 +6,6 @@ import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.*;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.dto.ArcDetail;
-import com.cdac.enrollmentstation.dto.Unit;
 import com.cdac.enrollmentstation.security.Aes256Util;
 import com.cdac.enrollmentstation.security.HmacUtil;
 import com.cdac.enrollmentstation.security.PkiUtil;
@@ -103,7 +101,7 @@ public class MafisServerApi {
 
         if (base64EncodedUniqueKeyOptional.isEmpty()) {
             LOGGER.log(Level.SEVERE, "Unique key header not found in http response");
-            throw new GenericException("Unique Key not received from server.");
+            throw new GenericException("Unique Key not received from the server.");
         }
         // received base64 encoded encrypted secret key from server
         byte[] encryptedSecretKey = Base64.getDecoder().decode(base64EncodedUniqueKeyOptional.get());
@@ -133,6 +131,7 @@ public class MafisServerApi {
      * @throws GenericException exception on error, json parsing exception etc.
      */
     public static List<Unit> fetchAllUnits() {
+        LOGGER.log(Level.INFO, () -> "***Fetching all units from the server.");
         HttpResponse<String> response = HttpUtil.sendHttpRequest(HttpUtil.createGetHttpRequest(getUnitListURL()));
         // if this line is reached, response received with status code 200
         UnitsResDto unitsResDto;
@@ -142,6 +141,7 @@ public class MafisServerApi {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
+        LOGGER.log(Level.INFO, () -> "***ServerResponseErrorCode: " + unitsResDto.getErrorCode());
         if (unitsResDto.getErrorCode() != 0) {
             LOGGER.log(Level.SEVERE, () -> ApplicationConstant.GENERIC_SERVER_ERR_MSG + unitsResDto.getDesc());
             throw new GenericException(unitsResDto.getDesc());
@@ -166,6 +166,7 @@ public class MafisServerApi {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
+        LOGGER.log(Level.INFO, () -> "***Fetching all e-ARCs for unitCode:" + unitCode);
         HttpRequest postHttpRequest = HttpUtil.createPostHttpRequest(getDemographicURL(), jsonRequestData);
         HttpResponse<String> httpResponse = HttpUtil.sendHttpRequest(postHttpRequest);
         ArcDetailsResDto arcDetailsResDto;
@@ -175,6 +176,7 @@ public class MafisServerApi {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
+        LOGGER.log(Level.INFO, () -> "***ServerResponseErrorCode: " + arcDetailsResDto.getErrorCode());
         if (arcDetailsResDto.getErrorCode() != 0) {
             String desc = arcDetailsResDto.getDesc();
             desc = desc.replace("ARC", "e-ARC");
@@ -198,7 +200,7 @@ public class MafisServerApi {
      */
     public static String getMafisApiUrl() {
         String mafisServerApi = PropertyFile.getProperty(PropertyName.MAFIS_API_URL);
-        if (mafisServerApi == null || mafisServerApi.isBlank()) {
+        if (mafisServerApi.isBlank()) {
             throw new GenericException("'" + PropertyName.MAFIS_API_URL + "' not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
         }
 
@@ -210,7 +212,7 @@ public class MafisServerApi {
 
     public static String getEnrollmentStationId() {
         String enrollmentStationId = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_ID);
-        if (enrollmentStationId == null || enrollmentStationId.isBlank()) {
+        if (enrollmentStationId.isBlank()) {
             throw new GenericException("'enrollment.station.id' not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
         }
         return enrollmentStationId;
@@ -218,7 +220,7 @@ public class MafisServerApi {
 
     public static String getEnrollmentStationUnitId() {
         String enrollmentStationUnitId = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_ID);
-        if (enrollmentStationUnitId == null || enrollmentStationUnitId.isBlank()) {
+        if (enrollmentStationUnitId.isBlank()) {
             throw new GenericException("'enrollment.station.unit.id' not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
         }
         return enrollmentStationUnitId;

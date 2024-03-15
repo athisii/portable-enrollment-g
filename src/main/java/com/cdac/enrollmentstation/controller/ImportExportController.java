@@ -15,6 +15,7 @@ import com.cdac.enrollmentstation.security.AesFileUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.Event;
@@ -132,7 +133,7 @@ public class ImportExportController extends AbstractBaseController {
 
     private List<Path> getEncryptedArcPaths() {
         String encFolderString = PropertyFile.getProperty(PropertyName.ENC_EXPORT_FOLDER);
-        if (encFolderString == null || encFolderString.isBlank()) {
+        if (encFolderString.isBlank()) {
             LOGGER.log(Level.SEVERE, "Entry for '" + PropertyName.ENC_EXPORT_FOLDER + "' not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
             throw new GenericException(GENERIC_ERR_MSG);
         }
@@ -222,14 +223,14 @@ public class ImportExportController extends AbstractBaseController {
             enableControls(importUnitBtn, backBtn, homeBtn, clearImportBtn, clearAllImportBtn, exportBtn);
             return;
         }
+        updateCapturedBiometric();
         if (encryptedArcPaths.isEmpty()) {
+            clearAllImportedUnits();
             updateUI("Record(s) exported successfully.");
         } else {
             updateUI("Unable to export all captured biometrics. Kindly try again.");
-            enableControls(exportBtn);
+            enableControls(exportBtn, clearImportBtn, clearAllImportBtn);
         }
-        updateCapturedBiometric();
-        clearAllImportedUnits();
         enableControls(homeBtn, backBtn, importUnitBtn);
     }
 
@@ -241,6 +242,7 @@ public class ImportExportController extends AbstractBaseController {
 
     public void refresh() {
         messageLabel.setText("Fetching units....");
+        disableControls(importUnitBtn);
         App.getThreadPool().execute(this::fetchAllUnits);
     }
 
@@ -248,21 +250,23 @@ public class ImportExportController extends AbstractBaseController {
     private void fetchAllUnits() {
         List<String> unitCaptions = new ArrayList<>();
         allUnits.clear();
+        Platform.runLater(() -> {
+            unitListView.getItems().clear();
+        });
         List<Unit> units;
 
         try {
-            // returns null on connection timeout
             units = MafisServerApi.fetchAllUnits();
         } catch (GenericException ex) {
             allUnits.clear();
-            disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportBtn);
+            disableControls(importUnitBtn);
             Platform.runLater(() -> {
                 unitListView.getItems().clear();
                 messageLabel.setText(ex.getMessage());
             });
             return;
         } catch (ConnectionTimeoutException ex) {
-            disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportBtn);
+            disableControls(importUnitBtn);
             Platform.runLater(() -> {
                 unitListView.getItems().clear();
                 messageLabel.setText(TIMEOUT_ERR_MSG);
@@ -322,9 +326,14 @@ public class ImportExportController extends AbstractBaseController {
         for (String unitCode : selectedUnitCodes) {
             App.getThreadPool().execute(() -> importUnit(unitCode));
         }
-        disableControls(importUnitBtn);
+        disableControls(importUnitBtn, clearImportBtn, clearAllImportBtn, exportBtn, homeBtn, backBtn);
         messageLabel.setText("Importing unit. Please wait.......");
 
+    }
+
+    public void updateUIViews() {
+        updateImportedListView();
+        updateCapturedBiometric();
     }
 
     private void importUnit(String unitCode) {
@@ -332,13 +341,15 @@ public class ImportExportController extends AbstractBaseController {
         String unitCaption;
         List<ArcDetail> arcDetails;
         try {
-            // returns null on connection timeout
             arcDetails = MafisServerApi.fetchArcsByUnitCode(unitCode);
         } catch (GenericException ex) {
-            enableControls(importUnitBtn);
+            updateUIViews(); // since all buttons are disabled
+            enableControls(importUnitBtn, homeBtn, backBtn); // since all buttons are disabled
             updateUI(ex.getMessage());
             return;
         } catch (ConnectionTimeoutException ex) {
+            enableControls(homeBtn, backBtn);  // since all buttons are disabled
+            updateUIViews(); // since all buttons are disabled
             Platform.runLater(() -> {
                 unitListView.getItems().clear();
                 disableControls(importUnitBtn);
@@ -347,10 +358,12 @@ public class ImportExportController extends AbstractBaseController {
             return;
         }
         if (arcDetails == null || arcDetails.isEmpty()) {
-            enableControls(importUnitBtn);
+            enableControls(importUnitBtn, homeBtn, backBtn); // since all buttons are disabled
+            updateUIViews(); // since all buttons are disabled
             updateUI("No e-ARC found for imported unit.");
             return;
         }
+        enableControls(importUnitBtn, homeBtn, backBtn); // since all buttons are disabled
 
         var firstArcDetails = arcDetails.get(0);
         unitId = firstArcDetails.getArcNo().split("-")[0];
@@ -363,7 +376,7 @@ public class ImportExportController extends AbstractBaseController {
         } catch (JsonProcessingException e) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             updateUI(GENERIC_ERR_MSG);
-            enableControls(importUnitBtn);
+            updateUIViews(); // since all buttons are disabled
             return;
         }
 
@@ -371,28 +384,37 @@ public class ImportExportController extends AbstractBaseController {
         try {
             // throws exception
             Files.writeString(Path.of(filePath), jsonArcList, StandardCharsets.UTF_8);
-            updateImportedListView();
             updateUI("Unit imported successfully.");
-            enableControls(clearImportBtn, clearAllImportBtn);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             updateUI(GENERIC_ERR_MSG);
         }
-        enableControls(importUnitBtn);
+        updateUIViews(); // since all buttons are disabled
     }
 
     private void updateImportedListView() {
         // throws exception
         try (Stream<Path> importFolder = Files.walk(Path.of(PropertyFile.getProperty(PropertyName.IMPORT_JSON_FOLDER)))) {
-            List<String> unitCaptions = importFolder.filter(Files::isRegularFile).map(file -> {
-                String[] splitFileName = file.getFileName().toString().split("-");
-                if (splitFileName.length > 2) {
-                    //00001-INSI-INS INDIA
-                    return splitFileName[2];
-                }
-                LOGGER.log(Level.SEVERE, () -> "Malformed filename: " + file.getFileName());
-                return "";
-            }).filter(unitCaption -> !unitCaption.isBlank()).collect(Collectors.toList());
+            List<String> unitCaptions = importFolder.filter(Files::isRegularFile)
+                    .map(file -> {
+                        List<ArcDetail> arcDetails;
+                        try {
+                            arcDetails = Singleton.getObjectMapper().readValue(Files.readAllBytes(file), new TypeReference<>() {
+                            });
+                        } catch (IOException ex) {
+                            LOGGER.log(Level.INFO, () -> "***Error: " + ex.getMessage());
+                            return "";
+                        }
+
+                        if (arcDetails.isEmpty()) {
+                            LOGGER.log(Level.INFO, () -> "***No e-arcs found for file" + file);
+                            return "";
+                        }
+                        return arcDetails.get(0).getUnit();
+                    })
+                    .filter(unitCaption -> !unitCaption.isBlank())
+                    .sorted()
+                    .collect(Collectors.toList());
 
             if (unitCaptions.isEmpty()) {
                 disableControls(clearImportBtn, clearAllImportBtn);
@@ -412,6 +434,7 @@ public class ImportExportController extends AbstractBaseController {
     private void clearSingleImportedUnit() {
         String selectedImportedUnit = importedUnitListView.getSelectionModel().getSelectedItem();
         if (selectedImportedUnit == null || selectedImportedUnit.isBlank()) {
+            updateUI("Select an imported unit to clear.");
             return;
         }
         // throws exception
@@ -421,16 +444,18 @@ public class ImportExportController extends AbstractBaseController {
                     String[] splitFileName = file.getFileName().toString().split("-");
                     if (splitFileName.length > 2) {
                         //00001-INSI-INS INDIA
-                        return selectedImportedUnit.equals(splitFileName[2]);
+                        return selectedImportedUnit.replaceAll("[^a-zA-Z0-9]", "").equals(splitFileName[2]);
                     }
                 }
                 return false;
             }).findFirst();
             if (optionalPath.isEmpty()) {
+                updateUI("");
                 return;
             }
             Files.delete(optionalPath.get());
             updateImportedListView();
+            updateUI("");
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error deleting selected unit.");
             updateUI(GENERIC_ERR_MSG);
@@ -442,6 +467,7 @@ public class ImportExportController extends AbstractBaseController {
         try (Stream<Path> importFolder = Files.walk(Path.of(PropertyFile.getProperty(PropertyName.IMPORT_JSON_FOLDER)))) {
             importFolder.filter(Files::isRegularFile).forEach(this::deletePath);
             updateImportedListView();
+            updateUI("");
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error while deleting files");
             updateUI(GENERIC_ERR_MSG);

@@ -279,8 +279,8 @@ public class Asn1CardTokenUtil {
         }
         CRWaitForConnectResDto crWaitForConnectResDto = LocalNavalWebServiceApi.postWaitForConnect(reqData);
         jniErrorCode = crWaitForConnectResDto.getRetVal();
+        LOGGER.log(Level.SEVERE, () -> "****WaitForConnectErrorCode: " + jniErrorCode);
         if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> "****WaitForConnectErrorCode: " + jniErrorCode);
             if (jniErrorCode == -1090519029) { // custom message when press 'login' without reader connected
                 LOGGER.log(Level.SEVERE, () -> "****WaitForConnectErrorCode: No card reader detected or unsupported reader name.");
                 throw new NoReaderOrCardException("No card reader detected or unsupported reader name.");
@@ -311,8 +311,8 @@ public class Asn1CardTokenUtil {
         }
         CRApiResDto crSelectAppResDto = LocalNavalWebServiceApi.postSelectApp(reqData);
         jniErrorCode = crSelectAppResDto.getRetVal();
+        LOGGER.log(Level.SEVERE, () -> "****SelectAppErrorCode: " + jniErrorCode);
         if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> "****SelectAppErrorCode: " + jniErrorCode);
             throw new GenericException(LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
         }
     }
@@ -466,8 +466,8 @@ public class Asn1CardTokenUtil {
         }
         CRReadDataResDto crReadDataResDto = LocalNavalWebServiceApi.postReadData(reqData);
         jniErrorCode = crReadDataResDto.getRetVal();
+        LOGGER.log(Level.SEVERE, () -> "****ReadDataErrorCode: " + jniErrorCode);
         if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> "****ReadDataErrorCode: " + jniErrorCode);
             throw new GenericException(LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
         }
         return Base64.getDecoder().decode(crReadDataResDto.getResponse());
@@ -520,8 +520,8 @@ public class Asn1CardTokenUtil {
         }
         CRApiResDto crApiResDto = LocalNavalWebServiceApi.postStoreData(reqData);
         jniErrorCode = crApiResDto.getRetVal();
+        LOGGER.log(Level.SEVERE, () -> "****StoreDataErrorCode: " + jniErrorCode);
         if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> "****StoreDataErrorCode: " + jniErrorCode);
             throw new GenericException(LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
         }
     }
@@ -548,8 +548,8 @@ public class Asn1CardTokenUtil {
         }
         CRApiResDto crApiResDto = LocalNavalWebServiceApi.postVerifyCertificate(reqData);
         jniErrorCode = crApiResDto.getRetVal();
+        LOGGER.log(Level.SEVERE, () -> "****VerifyCertificateErrorCode: " + jniErrorCode);
         if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> "****VerifyCertificateErrorCode: " + jniErrorCode);
             throw new GenericException(LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
         }
     }
@@ -571,8 +571,8 @@ public class Asn1CardTokenUtil {
         }
         CRApiResDto crApiResDto = LocalNavalWebServiceApi.postPkiAuth(reqData);
         jniErrorCode = crApiResDto.getRetVal();
+        LOGGER.log(Level.SEVERE, () -> "****PkiAuthErrorCode: " + jniErrorCode);
         if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> "****PkiAuthErrorCode: " + jniErrorCode);
             throw new GenericException(LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
         }
     }
@@ -594,8 +594,8 @@ public class Asn1CardTokenUtil {
         }
         CRApiResDto crApiResDto = LocalNavalWebServiceApi.postWaitForRemoval(reqData);
         jniErrorCode = crApiResDto.getRetVal();
+        LOGGER.log(Level.SEVERE, () -> "****WaitForRemovalErrorCode: " + jniErrorCode);
         if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> "****WaitForRemovalErrorCode: " + jniErrorCode);
             throw new GenericException(LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
         }
     }
@@ -617,8 +617,8 @@ public class Asn1CardTokenUtil {
         }
         CRApiResDto crApiResDto = LocalNavalWebServiceApi.postVerifyPin(reqData);
         jniErrorCode = crApiResDto.getRetVal();
+        LOGGER.log(Level.SEVERE, () -> "****VerifyPinErrorCode: " + jniErrorCode + " Message: " + LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
         if (jniErrorCode != 0) {
-            LOGGER.log(Level.SEVERE, () -> "****VerifyPinErrorCode: " + jniErrorCode + " Message: " + LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
             if (-1310891072 == jniErrorCode) {
                 throw new GenericException("PIN attempts exhausted for the card.");
             }

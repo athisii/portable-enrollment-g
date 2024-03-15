@@ -277,6 +277,9 @@ public class CardLoginController extends AbstractBaseController {
                         }
                         continue; // starts from DeInitialize again.
                     } // else exit code is not zero
+                    else {
+                        LOGGER.log(Level.INFO, () -> "***Card: Unable to restart EnrollmentStationServices.");
+                    }
                 }
                 LOGGER.log(Level.INFO, () -> "****Communication error occurred even after restarting EnrollmentStationServices.");
                 throw new GenericException(ex.getMessage());

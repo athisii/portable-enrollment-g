@@ -196,19 +196,19 @@ public class ServerConfigController extends AbstractBaseController {
         String enrollmentStationId = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_ID);
         String enrollmentStationUnitId = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_ID);
         String enrollmentStationUnitCaption = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_CAPTION);
-        if (whitelistedCardUrl == null || whitelistedCardUrl.isBlank()) {
+        if (whitelistedCardUrl.isBlank()) {
             errorMessage += PropertyName.CARD_API_WHITELISTED_URL + commonText;
         }
-        if (mafisUrl == null || mafisUrl.isBlank()) {
+        if (mafisUrl.isBlank()) {
             errorMessage += PropertyName.MAFIS_API_URL + commonText;
         }
-        if (enrollmentStationId == null || enrollmentStationId.isBlank()) {
+        if (enrollmentStationId.isBlank()) {
             errorMessage += "\n" + PropertyName.ENROLLMENT_STATION_ID + commonText;
         }
-        if (enrollmentStationUnitId == null || enrollmentStationUnitId.isBlank()) {
+        if (enrollmentStationUnitId.isBlank()) {
             errorMessage += "\n" + PropertyName.ENROLLMENT_STATION_UNIT_ID + commonText;
         }
-        if (enrollmentStationUnitCaption == null || enrollmentStationUnitCaption.isBlank()) {
+        if (enrollmentStationUnitCaption.isBlank()) {
             errorMessage += "\n" + PropertyName.ENROLLMENT_STATION_UNIT_CAPTION + commonText;
         }
         if (!errorMessage.isBlank()) {

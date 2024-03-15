@@ -154,6 +154,7 @@ public class AdminConfigController extends AbstractBaseController {
     public void closeApp() {
         LOGGER.log(Level.INFO, "Application Close Call made");
         Platform.exit();
+        System.exit(0);
     }
 
     @FXML

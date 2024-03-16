@@ -291,7 +291,7 @@ public class CardLoginController implements MIDFingerAuth_Callback, BaseControll
         try {
             Process pr = Runtime.getRuntime().exec(CARD_API_SERVICE_RESTART_COMMAND);
             int exitCode = pr.waitFor();
-            LOGGER.log(Level.INFO, () -> "****Naval_WebServices restart exit code: " + exitCode);
+            LOGGER.log(Level.INFO, () -> "****EnrollmentStationServices restart exit code: " + exitCode);
             return exitCode == 0;
         } catch (IOException | InterruptedException ex) {
             LOGGER.log(Level.SEVERE, ex::getMessage);
@@ -326,7 +326,7 @@ public class CardLoginController implements MIDFingerAuth_Callback, BaseControll
                 // only catch GenericException for restart
             } catch (GenericException ex) {
                 if (counter == 0) {
-                    LOGGER.log(Level.INFO, () -> "****Communication error occurred. Restarting Naval_WebServices.");
+                    LOGGER.log(Level.INFO, () -> "****Communication error occurred. Restarting EnrollmentStationServices.");
                     if (restartApiService()) {
                         try {
                             Thread.sleep(2000); // needed to sleep after restarting
@@ -335,8 +335,11 @@ public class CardLoginController implements MIDFingerAuth_Callback, BaseControll
                         }
                         continue; // starts from DeInitialize again.
                     } // else exit code is not zero
+                    else {
+                        LOGGER.log(Level.INFO, () -> "****Unable to restart EnrollmentStationServices.");
+                    }
                 }
-                LOGGER.log(Level.INFO, () -> "****Communication error occurred. Unable to restart Naval_WebServices.");
+                LOGGER.log(Level.INFO, () -> "****Communication error occurred. Even after restarting EnrollmentStationServices.");
                 throw new GenericException(ex.getMessage());
             }
         }

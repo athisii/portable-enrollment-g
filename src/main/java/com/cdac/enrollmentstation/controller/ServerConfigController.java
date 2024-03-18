@@ -22,9 +22,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -70,6 +67,7 @@ public class ServerConfigController extends AbstractBaseController {
 
     @FXML
     private Button homeBtn;
+    private static final String WHITELISTED_CARD_FILE_PATH = PropertyFile.getProperty(PropertyName.CARD_WHITELISTED_FILE);
 
 
     @FXML
@@ -84,7 +82,7 @@ public class ServerConfigController extends AbstractBaseController {
 
 
     private void saveToFile(Unit unit) {
-        if (mafisUrlTextField.getText().isBlank() || isMalformedUrl(mafisUrlTextField.getText())) {
+        if (mafisUrlTextField.getText().isBlank()) {
             messageLabel.setText("Invalid mafis url.");
             return;
         }
@@ -93,6 +91,7 @@ public class ServerConfigController extends AbstractBaseController {
             return;
         }
 
+        PropertyFile.changePropertyValue(PropertyName.CARD_API_WHITELISTED_URL, whitelistedCardUrlTextField.getText());
         PropertyFile.changePropertyValue(PropertyName.MAFIS_API_URL, mafisUrlTextField.getText());
         PropertyFile.changePropertyValue(PropertyName.ENROLLMENT_STATION_ID, enrollmentStationIdTextField.getText());
         PropertyFile.changePropertyValue(PropertyName.ENROLLMENT_STATION_UNIT_ID, unit.getValue());
@@ -103,7 +102,7 @@ public class ServerConfigController extends AbstractBaseController {
 
     @FXML
     private void fetchBtnAction() {
-        if (isMalformedUrl(mafisUrlTextField.getText())) {
+        if (mafisUrlTextField.getText().isBlank()) {
             messageLabel.setText(("Not a valid url."));
             return;
         }
@@ -117,14 +116,9 @@ public class ServerConfigController extends AbstractBaseController {
     }
 
     private void downloadWhitelistedCardBtnAction() {
-        if (isMalformedUrl(whitelistedCardUrlTextField.getText())) {
+        if (whitelistedCardUrlTextField.getText().isBlank()) {
             messageLabel.setText(("Not a valid url."));
             return;
-        }
-        String whitelistedCardFilePath = PropertyFile.getProperty(PropertyName.CARD_WHITELISTED_FILE);
-        if (whitelistedCardFilePath.isBlank()) {
-            LOGGER.log(Level.SEVERE, () -> PropertyName.CARD_WHITELISTED_FILE + " is empty or no entry found in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
-            throw new GenericException(PropertyName.CARD_WHITELISTED_FILE + " is empty or no entry found in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
         }
         messageLabel.setText("Downloading operators card.");
         homeBtn.requestFocus();
@@ -133,6 +127,7 @@ public class ServerConfigController extends AbstractBaseController {
         App.getThreadPool().execute(() -> {
             List<CardWhitelistDetail> cardWhitelistDetails;
             try {
+                PropertyFile.changePropertyValue(PropertyName.CARD_API_WHITELISTED_URL, whitelistedCardUrlTextField.getText());
                 cardWhitelistDetails = CardWhitelistApi.fetchWhitelistedCard();
             } catch (GenericException ex) {
                 LOGGER.log(Level.SEVERE, ex.getMessage());
@@ -146,7 +141,7 @@ public class ServerConfigController extends AbstractBaseController {
             }
             try {
                 String cardWhitelistedString = Singleton.getObjectMapper().writeValueAsString(cardWhitelistDetails);
-                Files.writeString(Paths.get(whitelistedCardFilePath), cardWhitelistedString, StandardCharsets.UTF_8);
+                Files.writeString(Paths.get(WHITELISTED_CARD_FILE_PATH), cardWhitelistedString, StandardCharsets.UTF_8);
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, e.getMessage());
                 updateUi(GENERIC_ERR_MSG);
@@ -160,6 +155,7 @@ public class ServerConfigController extends AbstractBaseController {
 
     private void fetchUnits() {
         try {
+            PropertyFile.changePropertyValue(PropertyName.MAFIS_API_URL, mafisUrlTextField.getText());
             units = MafisServerApi.fetchAllUnits();
         } catch (GenericException ex) {
             updateUi(ex.getMessage());
@@ -225,31 +221,7 @@ public class ServerConfigController extends AbstractBaseController {
                 unitOptional.ifPresent(this::saveToFile);
             }
         });
-        // very important, fetchApi returns data based on previously saved url.
-        mafisUrlTextField.setOnKeyReleased(event -> {
-            String url = mafisUrlTextField.getText();
-            if (!url.isBlank() && !isMalformedUrl(url)) {
-                PropertyFile.changePropertyValue(PropertyName.MAFIS_API_URL, url);
-            }
-        });
-
-        whitelistedCardUrlTextField.setOnKeyReleased(event -> {
-            String url = whitelistedCardUrlTextField.getText();
-            if (!url.isBlank() && !isMalformedUrl(url)) {
-                PropertyFile.changePropertyValue(PropertyName.CARD_API_WHITELISTED_URL, url);
-            }
-        });
         downloadWhitelistedCardBtn.setOnAction(event -> downloadWhitelistedCardBtnAction());
-    }
-
-    public boolean isMalformedUrl(String url) {
-        try {
-            new URL(url).toURI();
-            return false;
-        } catch (MalformedURLException | URISyntaxException ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage());
-            return true;
-        }
     }
 
     private void updateUi(String message) {

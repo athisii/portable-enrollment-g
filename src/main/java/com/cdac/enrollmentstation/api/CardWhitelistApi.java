@@ -46,14 +46,14 @@ public class CardWhitelistApi {
     }
 
     public static String whitelistedCardApiUrl() {
-        String hotlistedCardApiUrl = PropertyFile.getProperty(PropertyName.CARD_API_WHITELISTED_URL);
-        if (hotlistedCardApiUrl == null || hotlistedCardApiUrl.isBlank()) {
+        String whitelistedUrl = PropertyFile.getProperty(PropertyName.CARD_API_WHITELISTED_URL);
+        if (whitelistedUrl.isBlank()) {
             throw new GenericException("'" + PropertyName.CARD_API_WHITELISTED_URL + "' not found or is empty in " + ApplicationConstant.DEFAULT_PROPERTY_FILE);
         }
 
-        if (hotlistedCardApiUrl.endsWith("/")) {
-            return hotlistedCardApiUrl + "AFSACSERVICE/service/cardWhitelistDetails";
+        if (whitelistedUrl.endsWith("/")) {
+            return whitelistedUrl + "AFSACSERVICE/service/cardWhitelistDetails";
         }
-        return hotlistedCardApiUrl + "/AFSACSERVICE/service/cardWhitelistDetails";
+        return whitelistedUrl + "/AFSACSERVICE/service/cardWhitelistDetails";
     }
 }

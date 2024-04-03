@@ -28,6 +28,8 @@ public class OnlineLoginController extends AbstractBaseController {
     private static final int MAX_LENGTH = 30;
     private static boolean isDone = false;
     @FXML
+    private Button editHostnameIpBtn;
+    @FXML
     private Button backBtn;
     @FXML
     private Button loginBtn;
@@ -44,6 +46,14 @@ public class OnlineLoginController extends AbstractBaseController {
     @FXML
     private void homeBtnAction() throws IOException {
         App.setRoot("login");
+    }
+
+    private void editHostnameIpBtnAction() {
+        try {
+            App.setRoot("hostname_ip");
+        } catch (IOException ex) {
+            LOGGER.log(Level.SEVERE, () -> "Error loading fxml: " + ex.getMessage());
+        }
     }
 
 
@@ -101,6 +111,7 @@ public class OnlineLoginController extends AbstractBaseController {
                 loginBtnAction();
             }
         });
+        editHostnameIpBtn.setOnAction(event -> editHostnameIpBtnAction());
         App.setNudLogin(true);
     }
 

@@ -41,6 +41,7 @@ public class App extends Application {
         primaryStage.setOnCloseRequest(event -> {
             event.consume();
             Platform.exit();  //Comment this line in production/deployment (Alt+f4 and close button)
+            System.exit(0);
         });
         scene = new Scene(loadFXML("login"), DisplayUtil.SCREEN_WIDTH, DisplayUtil.SCREEN_HEIGHT);
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource(getCssFileName())).toExternalForm());

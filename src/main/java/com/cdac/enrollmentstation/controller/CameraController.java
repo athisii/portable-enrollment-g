@@ -405,7 +405,7 @@ public class CameraController extends AbstractBaseController {
             Platform.runLater(() -> {
                 // camSlider.setVisible(true)
                 // brightness.setVisible(true)
-                messageLabel.setText("Valid image. Restart Camera if photo is not good.");
+                messageLabel.setText("Valid image. Restart Camera if photo is unclear.");
                 startStopCameraBtn.setText("Restart Camera");
                 enableControls(startStopCameraBtn, backBtn, savePhotoBtn);
             });

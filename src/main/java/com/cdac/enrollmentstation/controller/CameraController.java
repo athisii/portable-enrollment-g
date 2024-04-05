@@ -135,6 +135,7 @@ public class CameraController extends AbstractBaseController {
 
     private final AtomicInteger imageCaptureCount = new AtomicInteger(0);
     private volatile boolean validImage = false;
+    private volatile boolean stopBtnClicked = false;
 
 
     private ScheduledExecutorService scheduledExecutorService;
@@ -229,29 +230,34 @@ public class CameraController extends AbstractBaseController {
     }
 
     // action for start/stop button
-    public void startCamera(ActionEvent actionEvent) {
+    private void startCamera(ActionEvent actionEvent) {
         imageCaptureCount.getAndSet(0);
         validImage = false;
         // if active then stop it
         if (isCameraActive) {
-            isCameraActive = false;
+            stopBtnClicked = true;
+            disableControls(startStopCameraBtn);
             stopLive = true;
             startStopCameraBtn.setText("Start Camera");
             backBtn.setDisable(false);
-
             updateImageView(sunGlassIcon, NO_GLASSES_IMAGE);
             updateImageView(iconFrame, NO_MASK_IMAGE);
             updateImageView(msgIcon, null);
             updateImageView(resultImageView, null);
             // stop the camera and thread executor
-            stopAcquisition();
-
+            shutdownExecutorServiceAndReleaseResource();
+            enableControls(startStopCameraBtn);
         } else {
             // active status to be used by worker thread
-            isCameraActive = true;
             videoCapture = new VideoCapture(cameraId);
-            requireCameraOpened();
-            scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+            if (!videoCapture.isOpened()) {
+                LOGGER.log(Level.SEVERE, () -> "Unable to open camera.");
+                messageLabel.setText("Unable to start camera. Please check camera and try again.");
+                return;
+            }
+            isCameraActive = true;
+            stopLive = false;
+            stopBtnClicked = false;
             //disable controls during the countdown
             startStopCameraBtn.setText("Stop Camera");
             disableControls(startStopCameraBtn, backBtn, savePhotoBtn);
@@ -274,7 +280,7 @@ public class CameraController extends AbstractBaseController {
 
         while (COUNTDOWN.get() > 0) {
             try {
-                Platform.runLater(() -> messageLabel.setText("(" + COUNTDOWN.get() + ") Move your body to fit in red box"));
+                Platform.runLater(() -> messageLabel.setText("(" + COUNTDOWN.get() + ") Move your body to fit in the red box"));
                 Thread.sleep(TimeUnit.SECONDS.toMillis(1));
                 COUNTDOWN.decrementAndGet();
             } catch (InterruptedException ignored) {
@@ -287,6 +293,7 @@ public class CameraController extends AbstractBaseController {
             startStopCameraBtn.setDisable(false);
             messageLabel.setText("");
         });
+        scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
         scheduledExecutorService.scheduleWithFixedDelay(this::grabFrame, 0, FIXED_DELAY_TIME_IN_MILLIS, TimeUnit.MILLISECONDS);
 
     }
@@ -302,20 +309,15 @@ public class CameraController extends AbstractBaseController {
                 }
                 return;
             }
-
+            // 440x440 square box
             Imgproc.rectangle(matrix,                   //Matrix obj of the image
-                    new Point(100, 60),           //p1
-                    new Point(530, 475),           //p2
+                    new Point(100, 38),            //p1
+                    new Point(540, 478),           //p2
                     new Scalar(0, 0, 255),              //Scalar object for color
-                    5                                   //Thickness of the line
+                    4                                   //Thickness of the line
             );
-
             updateImageView(liveImageView, mat2Image(matrix));
         }
-        if (videoCapture.isOpened()) {
-            videoCapture.release();
-        }
-        stopLive = false;
     }
 
     public Image mat2Image(Mat mat) {
@@ -332,10 +334,14 @@ public class CameraController extends AbstractBaseController {
 
     private void grabFrame() {
         if (!isCameraActive) {
-            LOGGER.log(Level.INFO, () -> "***************Valid Image already captured. Just stop the current task******************");
+            LOGGER.log(Level.INFO, () -> "*** Valid photo already captured or camera already stopped.");
+            shutdownExecutorServiceAndReleaseResource();
             return;
         }
-        requireCameraOpened();
+        if (!videoCapture.isOpened()) {
+            LOGGER.log(Level.INFO, () -> "Camera is not opened.");
+            return;
+        }
         Mat matrix = new Mat();
         // read the current matrix
         videoCapture.read(matrix);
@@ -349,7 +355,7 @@ public class CameraController extends AbstractBaseController {
         this.imageCaptureCount.getAndIncrement();
         // stop camera after IMAGE_CAPTURE_LIMIT shots
         if (imageCaptureCount.get() > IMAGE_CAPTURE_LIMIT) {
-            stopAcquisition();
+            shutdownExecutorServiceAndReleaseResource();
             updateImageView(sunGlassIcon, NO_GLASSES_IMAGE);
             updateImageView(iconFrame, NO_MASK_IMAGE);
             updateImageView(msgIcon, null);
@@ -373,7 +379,6 @@ public class CameraController extends AbstractBaseController {
                 if (line.contains("Valid")) {
                     validImage = true;
                     stopLive = true;
-                    isCameraActive = false;
                 } else if (line.contains("Message=")) {
                     String subString = line.substring("Message= ".length());
                     Platform.runLater(() -> messageLabel.setText(subString));
@@ -390,13 +395,14 @@ public class CameraController extends AbstractBaseController {
         } catch (Exception ex) {
             Platform.runLater(() -> messageLabel.setText("Something went wrong while capturing photo."));
             LOGGER.log(Level.SEVERE, ex::getMessage);
+            shutdownExecutorServiceAndReleaseResource();
             Thread.currentThread().interrupt();
         }
 
     }
 
     private void updateUIOnValidImageAndNormalExit(int exitVal) throws IOException {
-        if (exitVal == 0 && validImage) {
+        if (exitVal == 0 && validImage && !stopBtnClicked) {
             Image image = new Image(Files.newInputStream(Paths.get(IMG_PHOTO_FILE)));
             resultImageView.setImage(image);
             updateImageView(iconFrame, TICK_GREEN_IMAGE);
@@ -405,11 +411,11 @@ public class CameraController extends AbstractBaseController {
             Platform.runLater(() -> {
                 // camSlider.setVisible(true)
                 // brightness.setVisible(true)
-                messageLabel.setText("Valid image. Restart Camera if photo is unclear.");
+                messageLabel.setText("Click 'Restart Camera' button if the left photo is unclear.");
                 startStopCameraBtn.setText("Restart Camera");
                 enableControls(startStopCameraBtn, backBtn, savePhotoBtn);
             });
-            stopAcquisition();
+            shutdownExecutorServiceAndReleaseResource();
         }
     }
 
@@ -428,14 +434,6 @@ public class CameraController extends AbstractBaseController {
             updateImageView(msgIcon, CHIN_DOWN_COLORED_IMAGE);
         } else if (message.contains("CHIN UP")) {
             updateImageView(msgIcon, CHIN_UP_COLOR_IMAGE);
-        }
-    }
-
-    private void requireCameraOpened() {
-        if (!videoCapture.isOpened()) {
-            LOGGER.log(Level.SEVERE, () -> "Unable to open camera.");
-            Platform.runLater(() -> messageLabel.setText("Unable to start camera. Please check camera"));
-            throw new GenericException("Unable to start the camera. Please try again");  // controls return immediately
         }
     }
 
@@ -466,21 +464,29 @@ public class CameraController extends AbstractBaseController {
         return new Image(inputStream);
     }
 
-    private void stopAcquisition() {
+    private void shutdownExecutorServiceAndReleaseResource() {
         if (scheduledExecutorService != null && !scheduledExecutorService.isShutdown()) {
             try {
                 // stop the timer
                 scheduledExecutorService.shutdown();
                 scheduledExecutorService.awaitTermination(EXECUTOR_SHUTDOWN_WAIT_TIME_IN_MILLIS, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException ex) {
+            } catch (Exception ex) {
+                if (ex instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
                 LOGGER.log(Level.INFO, ex::getMessage);
-                Thread.currentThread().interrupt();
+            }
+            stopLive = true;
+            try {
+                if (videoCapture.isOpened()) {
+                    videoCapture.release();
+                    isCameraActive = false;
+                }
+            } catch (Exception ex) {
+                LOGGER.log(Level.SEVERE, ex::getMessage);
+                Platform.runLater(() -> messageLabel.setText("Unable to close the camera."));
             }
         }
-        if (videoCapture.isOpened()) {
-            videoCapture.release();
-        }
-        isCameraActive = false;
     }
 
     private void disableControls(Node... nodes) {

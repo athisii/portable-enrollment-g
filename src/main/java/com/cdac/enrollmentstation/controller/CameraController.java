@@ -363,6 +363,7 @@ public class CameraController extends AbstractBaseController {
                 messageLabel.setText("Capture threshold reached. Start camera again.");
                 startStopCameraBtn.setText("Start Camera");
             });
+            enableControls(backBtn);
             return;
         }
         try {
@@ -397,6 +398,7 @@ public class CameraController extends AbstractBaseController {
             LOGGER.log(Level.SEVERE, ex::getMessage);
             shutdownExecutorServiceAndReleaseResource();
             Thread.currentThread().interrupt();
+            enableControls(backBtn);
         }
 
     }

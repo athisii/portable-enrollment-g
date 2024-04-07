@@ -19,8 +19,8 @@ def lombokVersion = '1.18.24'
 def jarDir = '/usr/share/enrollment/lib/'
 
 
-sourceCompatibility = '11'
-targetCompatibility = '11'
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
@@ -32,7 +32,7 @@ application {
 }
 
 javafx {
-    version = '11.0.2'
+    version = '17.0.10'
     modules = ['javafx.controls', 'javafx.fxml', 'javafx.swing']
 }
 

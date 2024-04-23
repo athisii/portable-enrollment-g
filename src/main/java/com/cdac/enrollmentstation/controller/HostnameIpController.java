@@ -1,6 +1,7 @@
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
+import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import javafx.application.Platform;
@@ -168,10 +169,13 @@ public class HostnameIpController extends AbstractBaseController {
 
     private void saveChanges() {
         try {
+            saveIpaddressToFile();
             if (!getHostname().equals(hostnameTextField.getText())) {
                 setHostname();
+                // reboot system
+                App.getThreadPool().execute(this::rebootSystem);
+                return;
             }
-            saveIpaddressToFile();
             restartNetworkingService();
         } catch (Exception ex) {
             enableControls(backBtn, homeBtn, saveBtn);
@@ -186,6 +190,38 @@ public class HostnameIpController extends AbstractBaseController {
         LOGGER.log(Level.INFO, () -> "System configuration saved successfully.");
         updateUI("System configuration updated successfully.");
     }
+
+    private void rebootSystem() {
+        try {
+            int counter = 5;
+            while (counter >= 1) {
+                updateUI("Rebooting system to take effect in " + counter + " second(s)...");
+                Thread.sleep(1000);
+                counter--;
+            }
+            Process process = Runtime.getRuntime().exec("reboot");
+            BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            String eline;
+            while ((eline = error.readLine()) != null) {
+                String finalEline = eline;
+                LOGGER.log(Level.INFO, () -> "***Error: " + finalEline);
+            }
+            error.close();
+            int exitVal = process.waitFor();
+            if (exitVal != 0) {
+                LOGGER.log(Level.INFO, () -> "***Error: Process Exit Value: " + exitVal);
+                updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+            }
+        } catch (Exception ex) {
+            if (ex instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            LOGGER.log(Level.INFO, () -> "**Error while rebooting: " + ex.getMessage());
+            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
+        }
+        enableControls(backBtn, homeBtn, saveBtn);
+    }
+
 
     private void updateUI(String message) {
         Platform.runLater(() -> messageLabel.setText(message));

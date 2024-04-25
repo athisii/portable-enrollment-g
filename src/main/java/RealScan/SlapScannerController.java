@@ -549,6 +549,21 @@ public class SlapScannerController extends AbstractBaseController {
     }
 
     private void checkLFD() {
+        String errorMessage = "Kindly place your left finger(s) in the middle of the scanner";
+        Map<String, Integer> mFingersToScanSeqMap;
+        if (FingerSetType.LEFT == fingerSetTypeToScan) {
+            mFingersToScanSeqMap = leftFingerToFingerTypeLinkedHashMap;
+        } else if (FingerSetType.RIGHT == fingerSetTypeToScan) {
+            mFingersToScanSeqMap = rightFingerToFingerTypeLinkedHashMap;
+            errorMessage = "Kindly place your right finger(s) in the middle of the scanner";
+        } else if (FingerSetType.THUMB == fingerSetTypeToScan) {
+            mFingersToScanSeqMap = thumbToFingerTypeLinkedHashMap;
+            errorMessage = "Kindly place your thumb(s) in the bottom middle of the scanner";
+        } else {
+            // for developers
+            throw new GenericException("Unsupported finger set type: ");
+        }
+
         RSLFDResult rsLfdResult = new RSLFDResult();
         /*
         RS_SetLFDLevel Error Codes:
@@ -558,29 +573,23 @@ public class SlapScannerController extends AbstractBaseController {
         jniReturnedCode = RS_GetLFDResult(deviceHandler, rsLfdResult);
         if (jniReturnedCode != RS_SUCCESS) {
             LOGGER.log(Level.SEVERE, () -> RS_GetErrString(jniReturnedCode));
-            throw new GenericException(GENERIC_RS_ERR_MSG);
+            throw new GenericException(errorMessage);
         }
-        Map<String, Integer> mFingersToScanSeqMap;
-        if (FingerSetType.LEFT == fingerSetTypeToScan) {
-            mFingersToScanSeqMap = leftFingerToFingerTypeLinkedHashMap;
-        } else if (FingerSetType.RIGHT == fingerSetTypeToScan) {
-            mFingersToScanSeqMap = rightFingerToFingerTypeLinkedHashMap;
-        } else if (FingerSetType.THUMB == fingerSetTypeToScan) {
-            mFingersToScanSeqMap = thumbToFingerTypeLinkedHashMap;
-        } else {
-            // for developers
-            throw new GenericException("Unsupported finger set type: ");
-        }
+
         if (mFingersToScanSeqMap.size() != rsLfdResult.nNumofFinger) {
             LOGGER.log(Level.SEVERE, () -> "Finger count different than specified");
             throw new GenericException("Finger count different than specified");
         }
-        for (int i = 0; i < mFingersToScanSeqMap.size(); i++) {
-            // exit immediately if fake fingerprint captured.
-            if (rsLfdResult.nResult[i] == RS_LFD_FAKE) {
-                int j = i; //used in lambda
-                LOGGER.log(Level.SEVERE, () -> "Fake fingerprint detected. Score: " + rsLfdResult.nScore[j]);
-                throw new GenericException("Quality standard not met or captured fake fingerprint. Kindly try again.");
+        if (FingerSetType.THUMB == fingerSetTypeToScan) {
+            LOGGER.log(Level.INFO, () -> "Not Checking LFD For Thumb");
+        } else {
+            for (int i = 0; i < mFingersToScanSeqMap.size(); i++) {
+                // exit immediately if fake fingerprint captured.
+                if (rsLfdResult.nResult[i] == RS_LFD_FAKE) {
+                    int j = i; // used in lambda
+                    LOGGER.log(Level.SEVERE, () -> "Fake fingerprint detected. Score: " + rsLfdResult.nScore[j]);
+                    throw new GenericException("Quality standard not met or captured fake fingerprint. Kindly try again.");
+                }
             }
         }
 

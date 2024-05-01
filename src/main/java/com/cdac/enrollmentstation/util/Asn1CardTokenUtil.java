@@ -617,7 +617,7 @@ public class Asn1CardTokenUtil {
         }
         CRApiResDto crApiResDto = LocalNavalWebServiceApi.postVerifyPin(reqData);
         jniErrorCode = crApiResDto.getRetVal();
-        LOGGER.log(Level.SEVERE, () -> "****VerifyPinErrorCode: " + jniErrorCode + " Message: " + LocalCardReaderErrMsgUtil.getMessage(jniErrorCode));
+        LOGGER.log(Level.SEVERE, () -> "****VerifyPinErrorCode: " + jniErrorCode);
         if (jniErrorCode != 0) {
             if (-1310891072 == jniErrorCode) {
                 throw new GenericException("PIN attempts exhausted for the card.");

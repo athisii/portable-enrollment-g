@@ -118,6 +118,7 @@ public class CardLoginController extends AbstractBaseController {
             enableControls(backBtn, cardPasswordField);
         } catch (Exception e) {
             // by App.setRoot()
+            LOGGER.log(Level.INFO, () -> "Error: " + e.getMessage());
             updateUI("Something went wrong. Kindly contact system admin.");
         }
     }

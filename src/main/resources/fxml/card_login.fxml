@@ -29,8 +29,8 @@
                        text=" CARD AUTHENTICATION"/>
             </HBox>
             <HBox alignment="CENTER" styleClass="padding-medium">
-                <Label styleClass="font-size-medium"
-                       text="Please place the card on the reader, enter PN and click the 'LOGIN' button."/>
+                <Label fx:id="displayLabel" styleClass="font-size-medium"
+                       text="Please place the card on the reader, enter Personal Number and click the 'LOGIN' button."/>
             </HBox>
             <Region styleClass="min-height-large"/>
             <HBox alignment="CENTER">

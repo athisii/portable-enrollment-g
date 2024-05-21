@@ -54,6 +54,8 @@ public class CardLoginController extends AbstractBaseController {
     @FXML
     private Label messageLabel;
     @FXML
+    private Label displayLabel;
+    @FXML
     private Label cardLabel;
     @FXML
     private PasswordField cardPasswordField;
@@ -95,18 +97,15 @@ public class CardLoginController extends AbstractBaseController {
             if (event.getCode().equals(KeyCode.ENTER) && (!isPnAuthCompleted)) {
                 loginBtnAction();
             }
-            if (isPnAuthCompleted && cardPasswordField.getText().length() == 4) {
-                cardPasswordField.setDisable(true);
-                authenticateByPin(cardPasswordField.getText());
-            }
             event.consume();
         });
         App.setNudLogin(false);
     }
 
-    private void authenticateByPin(String pinCode) {
+    private void authenticateByPin() {
+        disableControls(backBtn, loginBtn);
         try {
-            Asn1CardTokenUtil.verifyPin(handle, pinCode);
+            Asn1CardTokenUtil.verifyPin(handle, cardPasswordField.getText());
             App.setRoot("main_screen");
         } catch (NoReaderOrCardException | GenericException ex) {
             Platform.runLater(() -> cardPasswordField.clear());
@@ -118,6 +117,7 @@ public class CardLoginController extends AbstractBaseController {
             enableControls(backBtn, cardPasswordField);
         } catch (Exception e) {
             // by App.setRoot()
+            enableControls(backBtn, cardPasswordField);
             LOGGER.log(Level.INFO, () -> "Error: " + e.getMessage());
             updateUI("Something went wrong. Kindly contact system admin.");
         }
@@ -147,10 +147,13 @@ public class CardLoginController extends AbstractBaseController {
                 authenticateByPN(fileTypeToAsn1EncodedByteArrayMap.get(CardTokenFileType.STATIC));
             }
             isPnAuthCompleted = true;
-            enableControls(backBtn);
+            enableControls(backBtn, loginBtn);
             Platform.runLater(() -> {
+                displayLabel.setText("Please enter PIN and click the 'CONTINUE' button.");
                 messageLabel.setText("Kindly enter the PIN to continue.");
                 cardLabel.setText("    PIN:");
+                loginBtn.setText("CONTINUE");
+                loginBtn.setOnAction(event -> authenticateByPin());
                 cardPasswordField.clear();
             });
         } catch (Exception ex) {

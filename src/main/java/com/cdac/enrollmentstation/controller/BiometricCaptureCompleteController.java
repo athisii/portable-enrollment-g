@@ -37,6 +37,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
+import static com.cdac.enrollmentstation.constant.ApplicationConstant.SCENE_ROOT_ERR_MSG;
 
 /**
  * @author athisii, CDAC
@@ -77,7 +78,7 @@ public class BiometricCaptureCompleteController extends AbstractBaseController {
         try {
             App.setRoot("main_screen");
         } catch (IOException ex) {
-            LOGGER.log(Level.INFO, ex.getMessage());
+            LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
         }
     }
 
@@ -86,7 +87,7 @@ public class BiometricCaptureCompleteController extends AbstractBaseController {
         try {
             App.setRoot("biometric_enrollment");
         } catch (IOException ex) {
-            LOGGER.log(Level.INFO, ex.getMessage());
+            LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
         }
     }
 

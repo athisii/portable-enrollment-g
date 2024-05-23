@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
+import static com.cdac.enrollmentstation.constant.ApplicationConstant.SCENE_ROOT_ERR_MSG;
 import static com.cdac.enrollmentstation.util.Asn1CardTokenUtil.*;
 
 
@@ -115,10 +116,10 @@ public class CardLoginController extends AbstractBaseController {
             updateUI("Something went wrong. Kindly check Card API service.");
             Platform.runLater(() -> cardPasswordField.clear());
             enableControls(backBtn, cardPasswordField);
-        } catch (Exception e) {
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
             // by App.setRoot()
             enableControls(backBtn, cardPasswordField);
-            LOGGER.log(Level.INFO, () -> "Error: " + e.getMessage());
             updateUI("Something went wrong. Kindly contact system admin.");
         }
     }

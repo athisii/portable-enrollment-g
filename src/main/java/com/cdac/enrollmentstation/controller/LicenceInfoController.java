@@ -15,6 +15,8 @@ import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.cdac.enrollmentstation.constant.ApplicationConstant.SCENE_ROOT_ERR_MSG;
+
 public class LicenceInfoController extends AbstractBaseController {
     @FXML
     private Button homeBtn;
@@ -39,7 +41,7 @@ public class LicenceInfoController extends AbstractBaseController {
         try {
             App.setRoot("main_screen");
         } catch (IOException ex) {
-            LOGGER.log(Level.INFO, ex.getMessage());
+            LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
         }
     }
 
@@ -48,7 +50,7 @@ public class LicenceInfoController extends AbstractBaseController {
         try {
             App.setRoot("admin_config");
         } catch (IOException ex) {
-            LOGGER.log(Level.INFO, ex.getMessage());
+            LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
         }
     }
 

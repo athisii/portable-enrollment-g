@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.cdac.enrollmentstation.constant.ApplicationConstant.SCENE_ROOT_ERR_MSG;
+
 /**
  * @author athisii, CDAC
  * Created on 29/03/23
@@ -55,6 +57,7 @@ public class AdminAuthController extends AbstractBaseController {
                     try {
                         App.setRoot("admin_config");
                     } catch (IOException ex) {
+                        LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
                         throw new GenericException(ex.getMessage());
                     }
                 });

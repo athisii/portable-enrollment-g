@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.cdac.enrollmentstation.constant.ApplicationConstant.SCENE_ROOT_ERR_MSG;
+
 /**
  * @author athisii, CDAC
  * Created on 29/03/23
@@ -52,7 +54,7 @@ public class OnlineLoginController extends AbstractBaseController {
         try {
             App.setRoot("hostname_ip");
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, () -> "Error loading fxml: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
         }
     }
 
@@ -79,6 +81,7 @@ public class OnlineLoginController extends AbstractBaseController {
                     try {
                         App.setRoot("main_screen");
                     } catch (IOException ex) {
+                        LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
                         throw new GenericException(ex.getMessage());
                     }
                 });

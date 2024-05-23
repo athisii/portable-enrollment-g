@@ -19,6 +19,7 @@ module com.cdac.enrollmentstation {
 
     // fingerprint template conversions
     requires iengine.ansi.iso.main;
+    requires jna; //used by iengine
     requires sdk.commons.main;
 
 

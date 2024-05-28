@@ -20,6 +20,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.InputEvent;
 import javafx.scene.input.MouseEvent;
@@ -27,16 +28,15 @@ import javafx.scene.input.TouchEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-import javax.imageio.*;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.metadata.IIOMetadataNode;
-import javax.imageio.stream.ImageOutputStream;
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,10 +48,11 @@ import static com.cdac.enrollmentstation.constant.ApplicationConstant.SCENE_ROOT
  */
 public class SignatureController extends AbstractBaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(SignatureController.class);
-    private static final int PADDING = 10;
-    private static final int RAW_SIZE = 300;
-    private static final int DPI = 300;
-    private static final int COMPRESSED_SIZE = 100;
+    // 5x27mm aspect ratio
+    private static final int RAW_WIDTH = 432; // 27x16
+    private static final int RAW_HEIGHT = 80; // 5x16
+    private static final int COMPRESSED_WIDTH = 189; //27*7
+    private static final int COMPRESSED_HEIGHT = 35; //5*7
     private static final String IMG_SIGNATURE_FILE;
     private static final String IMG_SIGNATURE_COMPRESSED_FILE;
 
@@ -63,6 +64,13 @@ public class SignatureController extends AbstractBaseController {
             throw new GenericException(ex.getMessage());
         }
     }
+
+    private enum EventType {
+        DRAG, CLICK;
+    }
+
+    @FXML
+    private ImageView previewSignatureImageView;
 
     @FXML
     private Label confirmPaneLbl;
@@ -121,15 +129,52 @@ public class SignatureController extends AbstractBaseController {
             lastY = event.getTouchPoint().getY();
         });
 
-        canvas.setOnTouchMoved(this::onMoveAction);
-        canvas.setOnMouseDragged(this::onMoveAction);
+        canvas.setOnTouchMoved(touchEvent -> onAction(touchEvent, EventType.DRAG));
+        canvas.setOnMouseDragged(mouseEvent -> onAction(mouseEvent, EventType.DRAG));
         canvas.setOnMouseReleased(this::resetXAndY);
         canvas.setOnTouchReleased(this::resetXAndY);
+        canvas.setOnMouseClicked(mouseEvent -> onAction(mouseEvent, EventType.CLICK));
         arcLbl.setText("e-ARC: " + ArcDetailsHolder.getArcDetailsHolder().getArcDetail().getArcNo());
     }
 
-    private void onMoveAction(InputEvent event) {
-        if (lastX >= 0 && lastX <= canvas.getWidth() && lastY >= 0 && lastY <= canvas.getHeight()) {
+    private void onAction(InputEvent event, EventType eventType) {
+        // lastX = -1
+        // lastY = -1
+        if (eventType == EventType.CLICK) {
+            drawSignature(event, eventType);
+        } else if (eventType == EventType.DRAG && lastX >= 0 && lastX <= canvas.getWidth() && lastY >= 0 && lastY <= canvas.getHeight()) {
+            drawSignature(event, eventType);
+        }
+    }
+
+    private void drawSignature(InputEvent event, EventType eventType) {
+        double x;
+        double y;
+        if (event instanceof TouchEvent touchEvent) {
+            x = touchEvent.getTouchPoint().getX();
+            y = touchEvent.getTouchPoint().getY();
+        } else {
+            x = ((MouseEvent) event).getX();
+            y = ((MouseEvent) event).getY();
+        }
+        gc.beginPath();
+        // for dot
+        if (EventType.CLICK == eventType) {
+            // for the bounding box
+            if (x < minX) {
+                minX = x;
+            }
+            if (y < minY) {
+                minY = y;
+            }
+            if (x > maxX) {
+                maxX = x;
+            }
+            if (y > maxY) {
+                maxY = y;
+            }
+            gc.moveTo(x - 0.5, y); // mouse click event
+        } else {
             // for the bounding box
             if (lastX < minX) {
                 minX = lastX;
@@ -137,33 +182,20 @@ public class SignatureController extends AbstractBaseController {
             if (lastY < minY) {
                 minY = lastY;
             }
-
             if (lastX > maxX) {
                 maxX = lastX;
             }
             if (lastY > maxY) {
                 maxY = lastY;
             }
-            // drawing on the canvas
-            gc.beginPath();
             gc.moveTo(lastX, lastY);
-
-            double x;
-            double y;
-
-            if (event instanceof TouchEvent touchEvent) {
-                x = touchEvent.getTouchPoint().getX();
-                y = touchEvent.getTouchPoint().getY();
-            } else {
-                x = ((MouseEvent) event).getX();
-                y = ((MouseEvent) event).getY();
-            }
-            gc.lineTo(x, y);
-            gc.stroke();
-            lastX = x;
-            lastY = y;
-            isSigned = true;
         }
+        gc.lineTo(x, y);
+        gc.stroke();
+        lastX = x;
+        lastY = y;
+        isSigned = true;
+        showPreview();
     }
 
     private void resetXAndY(InputEvent event) {
@@ -208,6 +240,35 @@ public class SignatureController extends AbstractBaseController {
         minY = Double.MAX_VALUE;
         maxX = Double.MIN_VALUE;
         maxY = Double.MIN_VALUE;
+        previewSignatureImageView.setImage(null);
+    }
+
+    private void showPreview() {
+        AtomicInteger minXAtomicInt = new AtomicInteger((int) minX);
+        AtomicInteger minYAtomicInt = new AtomicInteger((int) minY);
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(Color.TRANSPARENT);
+        WritableImage writableImage = canvas.snapshot(params, null);
+
+        double finalMaxX = maxX;
+        double finalMaxY = maxY;
+        App.getThreadPool().execute(() -> {
+            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(writableImage, null);
+            // if less than 0, then set as 0
+            minXAtomicInt.set(Math.max(minXAtomicInt.get(), 0));
+            minYAtomicInt.set(Math.max(minYAtomicInt.get(), 0));
+
+            int width = (int) Math.min(finalMaxX - minXAtomicInt.get(), canvas.getWidth() - minXAtomicInt.get());
+            int height = (int) Math.min(finalMaxY - minYAtomicInt.get(), canvas.getHeight() - minYAtomicInt.get());
+            // throws error if width=0, height=0 for subImage
+            width = Math.max(1, width);
+            height = Math.max(1, height);
+            BufferedImage boundedBox = bufferedImage.getSubimage(minXAtomicInt.get(), minYAtomicInt.get(), width, height);
+            BufferedImageOp resampleOpOri = new ResampleOp(RAW_WIDTH, RAW_HEIGHT, ResampleOp.FILTER_LANCZOS);
+            BufferedImage filteredOri = resampleOpOri.filter(boundedBox, null);
+            Platform.runLater(() -> previewSignatureImageView.setImage(SwingFXUtils.toFXImage(filteredOri, null)));
+        });
+
     }
 
     private void saveSignatureBtnAction(ActionEvent event) {
@@ -223,61 +284,49 @@ public class SignatureController extends AbstractBaseController {
             // to make square box
             int width = (int) (maxX - minX);
             int height = (int) (maxY - minY);
-            if (width >= height) {
-                int extra = (width - height) / 2;
-                minY -= extra;
-                maxY += extra;
-            } else {
-                int extra = (height - width) / 2;
-                minX -= extra;
-                maxX += extra;
+
+            // just a check to ensure valid/big signature is provided.
+            if (width < 20 || height < 20) {
+                messageLabel.setText("Kindly provide a valid or larger signature.");
+                return;
             }
-            minX = Math.max(minX - PADDING, 0);
-            minY = Math.max(minY - PADDING, 0);
-            width = (int) Math.min(maxX - minX + PADDING, canvas.getWidth() - minX);
-            height = (int) Math.min(maxY - minY + PADDING, canvas.getHeight() - minY);
+
+            minX = Math.max(minX, 0);
+            minY = Math.max(minY, 0);
+            width = (int) Math.min(maxX - minX, canvas.getWidth() - minX);
+            height = (int) Math.min(maxY - minY, canvas.getHeight() - minY);
 
             BufferedImage boundedBox = image.getSubimage((int) minX, (int) minY, width, height);
-            BufferedImageOp resampleOpOri = new ResampleOp(RAW_SIZE, RAW_SIZE, ResampleOp.FILTER_LANCZOS);
+            BufferedImageOp resampleOpOri = new ResampleOp(RAW_WIDTH, RAW_HEIGHT, ResampleOp.FILTER_LANCZOS);
             BufferedImage filteredOri = resampleOpOri.filter(boundedBox, null);
-            BufferedImageOp resampleOpCompressed = new ResampleOp(COMPRESSED_SIZE, COMPRESSED_SIZE, ResampleOp.FILTER_LANCZOS);
+            BufferedImageOp resampleOpCompressed = new ResampleOp(COMPRESSED_WIDTH, COMPRESSED_HEIGHT, ResampleOp.FILTER_LANCZOS);
             BufferedImage filteredCompressed = resampleOpCompressed.filter(boundedBox, null);
-            ImageIO.write(filteredCompressed, "png", new File(IMG_SIGNATURE_COMPRESSED_FILE));
-            setMetadataAndSave(filteredOri);
+
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ImageIO.write(filteredOri, "png", byteArrayOutputStream);
+            byteArrayOutputStream.close();
+            byte[] data = byteArrayOutputStream.toByteArray();
+
+            if (data.length < 2048) {
+                LOGGER.log(Level.WARNING, () -> "Signature byte size: " + data.length);
+                messageLabel.setText("Kindly provide a valid or larger signature.");
+                return;
+            }
+            Path signaturePath = Paths.get(IMG_SIGNATURE_FILE);
+            Path signatureCompressedPath = Paths.get(IMG_SIGNATURE_COMPRESSED_FILE);
+            ImageIO.write(filteredOri, "png", signaturePath.toFile());
+            ImageIO.write(filteredCompressed, "png", signatureCompressedPath.toFile());
 
             SaveEnrollmentDetail saveEnrollmentDetail = ArcDetailsHolder.getArcDetailsHolder().getSaveEnrollmentDetail();
             saveEnrollmentDetail.setSignatureRequired(true);
-            saveEnrollmentDetail.setSignature(Base64.getEncoder().encodeToString(Files.readAllBytes(Path.of(IMG_SIGNATURE_FILE))));
-            saveEnrollmentDetail.setSignatureCompressed(Base64.getEncoder().encodeToString(Files.readAllBytes(Path.of(IMG_SIGNATURE_COMPRESSED_FILE))));
+            saveEnrollmentDetail.setSignature(Base64.getEncoder().encodeToString(Files.readAllBytes(signaturePath)));
+            saveEnrollmentDetail.setSignatureCompressed(Base64.getEncoder().encodeToString(Files.readAllBytes(signatureCompressedPath)));
             saveEnrollmentDetail.setEnrollmentStatus("SignatureCompleted");
             SaveEnrollmentDetailUtil.writeToFile(saveEnrollmentDetail);
             App.setRoot("biometric_capture_complete");
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
             messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
-        }
-    }
-
-    private void setMetadataAndSave(BufferedImage bufferedImage) {
-        try (ImageOutputStream imageOutputStream = ImageIO.createImageOutputStream(new File(IMG_SIGNATURE_FILE))) {
-            ImageWriter imageWriter = ImageIO.getImageWritersByFormatName("png").next();
-            ImageWriteParam imageWriterDefaultWriteParam = imageWriter.getDefaultWriteParam();
-            ImageTypeSpecifier imageTypeSpecifier = ImageTypeSpecifier.createFromBufferedImageType(BufferedImage.TYPE_INT_RGB);
-            IIOMetadata metadata = imageWriter.getDefaultImageMetadata(imageTypeSpecifier, imageWriterDefaultWriteParam);
-            IIOMetadataNode horiz = new IIOMetadataNode("HorizontalPixelSize");
-            horiz.setAttribute("value", Double.toString(DPI));
-            IIOMetadataNode vert = new IIOMetadataNode("VerticalPixelSize");
-            vert.setAttribute("value", Double.toString(DPI));
-            IIOMetadataNode dim = new IIOMetadataNode("Dimension");
-            dim.appendChild(horiz);
-            dim.appendChild(vert);
-            IIOMetadataNode root = new IIOMetadataNode("javax_imageio_1.0");
-            root.appendChild(dim);
-            metadata.mergeTree("javax_imageio_1.0", root);
-            imageWriter.setOutput(imageOutputStream);
-            imageWriter.write(new IIOImage(bufferedImage, null, metadata));
-        } catch (Exception e) {
-            throw new GenericException(e.getMessage());
         }
     }
 

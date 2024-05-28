@@ -82,7 +82,7 @@ public class HttpUtil {
      * Caller must handle the exception.
      *
      * @param httpRequest request payload
-     * @return HttpResponse<String>  or null if timeout exception occurred
+     * @return HttpResponse<String>
      * @throws ConnectionTimeoutException - on timeout or response status code not 200
      * @throws GenericException           - on Exception
      */
@@ -100,7 +100,11 @@ public class HttpUtil {
             throw new GenericException("Invalid url or ip address. Kindly try again.");
         }
         if (response == null || response.statusCode() != 200) {
-            LOGGER.log(Level.SEVERE, "Connection timeout or http response status code is not 200.");
+            if (response != null) {
+                LOGGER.log(Level.SEVERE, "**Status Code: {}", response.statusCode());
+            } else {
+                LOGGER.log(Level.SEVERE, "**Connection timeout.");
+            }
             throw new ConnectionTimeoutException("Connection timeout or http response status code is not 200.");
         }
         return response;

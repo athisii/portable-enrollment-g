@@ -239,16 +239,16 @@
 }
 
 .canvas-container {
-    -fx-pref-width: 621px;
-    -fx-pref-height: 115px;
+    -fx-pref-width: 638px;
+    -fx-pref-height: 118px;
     -fx-border-color: black;
     -fx-border-width: 2px;
     -fx-border-style: solid;
 }
 
 .signature-preview {
-    -fx-pref-width: 189px;
-    -fx-pref-height: 35px;
+    -fx-pref-width: 319px;
+    -fx-pref-height: 59px;
 }
 
 /* table style */

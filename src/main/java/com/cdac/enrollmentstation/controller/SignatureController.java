@@ -36,7 +36,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,10 +48,11 @@ import static com.cdac.enrollmentstation.constant.ApplicationConstant.SCENE_ROOT
 public class SignatureController extends AbstractBaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(SignatureController.class);
     // 5x27mm aspect ratio
-    private static final int RAW_WIDTH = 432; // 27x16
-    private static final int RAW_HEIGHT = 80; // 5x16
-    private static final int COMPRESSED_WIDTH = 189; //27*7
-    private static final int COMPRESSED_HEIGHT = 35; //5*7
+    private static final int PADDING = 3;
+    private static final int RAW_WIDTH = 319;
+    private static final int RAW_HEIGHT = 59;
+    private static final int COMPRESSED_WIDTH = 159;
+    private static final int COMPRESSED_HEIGHT = 29;//5*7
     private static final String IMG_SIGNATURE_FILE;
     private static final String IMG_SIGNATURE_COMPRESSED_FILE;
 
@@ -108,9 +108,11 @@ public class SignatureController extends AbstractBaseController {
     private double maxY = Double.MIN_VALUE;
 
     private GraphicsContext gc;
+    private boolean firstLoading = true;
+
 
     public void initialize() {
-        clearBtn.setOnAction(this::clearBtnAction);
+        clearBtn.setOnAction(event -> clearBtnAction());
         saveSignatureBtn.setOnAction(this::saveSignatureBtnAction);
         confirmNoBtn.setOnAction(this::confirmNo);
         confirmYesBtn.setOnAction(this::confirmYes);
@@ -141,9 +143,17 @@ public class SignatureController extends AbstractBaseController {
         // lastX = -1
         // lastY = -1
         if (eventType == EventType.CLICK) {
+            if (firstLoading) {
+                clearBtnAction();
+                firstLoading = false;
+            }
             drawSignature(event, eventType);
-        } else if (eventType == EventType.DRAG && lastX >= 0 && lastX <= canvas.getWidth() && lastY >= 0 && lastY <= canvas.getHeight()) {
+        } else if (eventType == EventType.DRAG && lastX >= 0 && lastX <= canvas.getWidth() && lastY >= 0 && lastY <= canvas.getHeight() && !firstLoading) {
             drawSignature(event, eventType);
+        }
+        if (firstLoading) {
+            clearBtnAction();
+            firstLoading = false;
         }
     }
 
@@ -162,10 +172,10 @@ public class SignatureController extends AbstractBaseController {
         if (EventType.CLICK == eventType) {
             // for the bounding box
             if (x < minX) {
-                minX = x;
+                minX = x > 0 ? x : 0;
             }
             if (y < minY) {
-                minY = y;
+                minY = y > 0 ? y : 0;
             }
             if (x > maxX) {
                 maxX = x;
@@ -173,7 +183,7 @@ public class SignatureController extends AbstractBaseController {
             if (y > maxY) {
                 maxY = y;
             }
-            gc.moveTo(x - 0.5, y); // mouse click event
+            gc.moveTo(x > 0 ? x - 1 : 0, y > 0 ? y - 1 : 0); // mouse click event
         } else {
             // for the bounding box
             if (lastX < minX) {
@@ -195,8 +205,43 @@ public class SignatureController extends AbstractBaseController {
         lastX = x;
         lastY = y;
         isSigned = true;
-        showPreview();
+        showPreview(minX, minY, maxX, maxY);
     }
+
+    private void showPreview(double minX, double minY, double maxX, double maxY) {
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(Color.TRANSPARENT);
+        WritableImage writableImage = canvas.snapshot(params, null);
+        App.getThreadPool().execute(() -> {
+            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(writableImage, null);
+            int width = (int) Math.min(maxX - minX, canvas.getWidth() - minX);
+            int height = (int) Math.min(maxY - minY, canvas.getHeight() - minY);
+            width = Math.max(1, width);
+            height = Math.max(1, height);
+            int bMinX = (int) minX;
+            int bMinY = (int) minY;
+
+            if (bMinX > PADDING) {
+                bMinX = bMinX - PADDING;
+                width = width + PADDING;
+            }
+            if (bMinY > PADDING) {
+                bMinY = bMinY - PADDING;
+                height = height + PADDING;
+            }
+            if (maxX + PADDING < canvas.getWidth()) {
+                width = width + PADDING;
+            }
+            if (maxY + PADDING < canvas.getHeight()) {
+                height = height + PADDING;
+            }
+            BufferedImage imageBoundedBox = bufferedImage.getSubimage(bMinX, bMinY, width, height);
+            BufferedImage resizedImage = resizeImage(width, height, imageBoundedBox, RAW_WIDTH, RAW_HEIGHT);
+            Platform.runLater(() -> previewSignatureImageView.setImage(SwingFXUtils.toFXImage(resizedImage, null)));
+        });
+
+    }
+
 
     private void resetXAndY(InputEvent event) {
         // for touch event, it can jump from Release to Drag event directly on tapping the screen.
@@ -232,7 +277,7 @@ public class SignatureController extends AbstractBaseController {
         enableControls(backBtn, clearBtn, saveSignatureBtn);
     }
 
-    private void clearBtnAction(ActionEvent event) {
+    private void clearBtnAction() {
         messageLabel.setText("Kindly sign in the centre of the black box");
         isSigned = false;
         gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
@@ -243,45 +288,16 @@ public class SignatureController extends AbstractBaseController {
         previewSignatureImageView.setImage(null);
     }
 
-    private void showPreview() {
-        AtomicInteger minXAtomicInt = new AtomicInteger((int) minX);
-        AtomicInteger minYAtomicInt = new AtomicInteger((int) minY);
-        SnapshotParameters params = new SnapshotParameters();
-        params.setFill(Color.TRANSPARENT);
-        WritableImage writableImage = canvas.snapshot(params, null);
-
-        double finalMaxX = maxX;
-        double finalMaxY = maxY;
-        App.getThreadPool().execute(() -> {
-            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(writableImage, null);
-            // if less than 0, then set as 0
-            minXAtomicInt.set(Math.max(minXAtomicInt.get(), 0));
-            minYAtomicInt.set(Math.max(minYAtomicInt.get(), 0));
-
-            int width = (int) Math.min(finalMaxX - minXAtomicInt.get(), canvas.getWidth() - minXAtomicInt.get());
-            int height = (int) Math.min(finalMaxY - minYAtomicInt.get(), canvas.getHeight() - minYAtomicInt.get());
-            // throws error if width=0, height=0 for subImage
-            width = Math.max(1, width);
-            height = Math.max(1, height);
-            BufferedImage boundedBox = bufferedImage.getSubimage(minXAtomicInt.get(), minYAtomicInt.get(), width, height);
-            BufferedImageOp resampleOpOri = new ResampleOp(RAW_WIDTH, RAW_HEIGHT, ResampleOp.FILTER_LANCZOS);
-            BufferedImage filteredOri = resampleOpOri.filter(boundedBox, null);
-            Platform.runLater(() -> previewSignatureImageView.setImage(SwingFXUtils.toFXImage(filteredOri, null)));
-        });
-
-    }
-
     private void saveSignatureBtnAction(ActionEvent event) {
         if (!isSigned) {
             messageLabel.setText("Kindly provide the signature. ");
             return;
         }
-        SnapshotParameters params = new SnapshotParameters();
-        params.setFill(Color.TRANSPARENT);
-        WritableImage writableImage = canvas.snapshot(params, null);
         try {
+            SnapshotParameters params = new SnapshotParameters();
+            params.setFill(Color.TRANSPARENT);
+            WritableImage writableImage = canvas.snapshot(params, null);
             BufferedImage image = SwingFXUtils.fromFXImage(writableImage, null);
-            // to make square box
             int width = (int) (maxX - minX);
             int height = (int) (maxY - minY);
 
@@ -291,31 +307,74 @@ public class SignatureController extends AbstractBaseController {
                 return;
             }
 
-            minX = Math.max(minX, 0);
-            minY = Math.max(minY, 0);
             width = (int) Math.min(maxX - minX, canvas.getWidth() - minX);
             height = (int) Math.min(maxY - minY, canvas.getHeight() - minY);
 
-            BufferedImage boundedBox = image.getSubimage((int) minX, (int) minY, width, height);
-            BufferedImageOp resampleOpOri = new ResampleOp(RAW_WIDTH, RAW_HEIGHT, ResampleOp.FILTER_LANCZOS);
-            BufferedImage filteredOri = resampleOpOri.filter(boundedBox, null);
-            BufferedImageOp resampleOpCompressed = new ResampleOp(COMPRESSED_WIDTH, COMPRESSED_HEIGHT, ResampleOp.FILTER_LANCZOS);
-            BufferedImage filteredCompressed = resampleOpCompressed.filter(boundedBox, null);
+            if (minX > PADDING) {
+                minX = minX - PADDING;
+                width = width + PADDING;
+            }
+            if (minY > PADDING) {
+                minY = minY - PADDING;
+                height = height + PADDING;
+            }
+            if (maxX + PADDING < canvas.getWidth()) {
+                width = width + PADDING;
+            }
+            if (maxY + PADDING < canvas.getHeight()) {
+                height = height + PADDING;
+            }
+
+            BufferedImage imageBoundedBox = image.getSubimage((int) minX, (int) minY, width, height);
+            BufferedImage resizedImage = resizeImage(width, height, imageBoundedBox, RAW_WIDTH, RAW_HEIGHT);
 
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            ImageIO.write(filteredOri, "png", byteArrayOutputStream);
+            ImageIO.write(resizedImage, "png", byteArrayOutputStream);
             byteArrayOutputStream.close();
             byte[] data = byteArrayOutputStream.toByteArray();
 
-            if (data.length < 2048) {
+            if (data.length < 1024) {
                 LOGGER.log(Level.WARNING, () -> "Signature byte size: " + data.length);
                 messageLabel.setText("Kindly provide a valid or larger signature.");
                 return;
             }
+
+            // Convert the resized BufferedImage to WritableImage
+            WritableImage wImage = new WritableImage(resizedImage.getWidth(), resizedImage.getHeight());
+            wImage = SwingFXUtils.toFXImage(resizedImage, wImage);
+            // Create a Canvas and draw the image on it
+            double rectWidthMid = RAW_WIDTH / (double) 2;
+            double rectHeightMid = RAW_HEIGHT / (double) 2;
+            Canvas imageCanvas = new Canvas(RAW_WIDTH, RAW_HEIGHT);
+            imageCanvas.getGraphicsContext2D().drawImage(wImage, rectWidthMid - (resizedImage.getWidth() / (double) 2), rectHeightMid - (resizedImage.getHeight() / (double) 2));
+
+            SnapshotParameters imageParams = new SnapshotParameters();
+            imageParams.setFill(Color.TRANSPARENT);
+            wImage = imageCanvas.snapshot(imageParams, null);
+            BufferedImage finalImage = SwingFXUtils.fromFXImage(wImage, null);
+
             Path signaturePath = Paths.get(IMG_SIGNATURE_FILE);
+            ImageIO.write(finalImage, "png", signaturePath.toFile());
+
+            // for compressed image
+            BufferedImage resizedImageCompressed = resizeImage(width, height, imageBoundedBox, COMPRESSED_WIDTH, COMPRESSED_HEIGHT);
+            // Convert the resized BufferedImage to WritableImage
+            wImage = new WritableImage(resizedImageCompressed.getWidth(), resizedImageCompressed.getHeight());
+            wImage = SwingFXUtils.toFXImage(resizedImageCompressed, wImage);
+            // Create a Canvas and draw the image on it
+            rectWidthMid = COMPRESSED_WIDTH / (double) 2;
+            rectHeightMid = COMPRESSED_HEIGHT / (double) 2;
+            Canvas imageCompressedCanvas = new Canvas(COMPRESSED_WIDTH, COMPRESSED_HEIGHT);
+            imageCompressedCanvas.getGraphicsContext2D().drawImage(wImage, rectWidthMid - (resizedImageCompressed.getWidth() / (double) 2), rectHeightMid - (resizedImageCompressed.getHeight() / (double) 2));
+
+            imageParams = new SnapshotParameters();
+            imageParams.setFill(Color.TRANSPARENT);
+            wImage = imageCompressedCanvas.snapshot(imageParams, null);
+            BufferedImage finalImageCompressed = SwingFXUtils.fromFXImage(wImage, null);
+
+
             Path signatureCompressedPath = Paths.get(IMG_SIGNATURE_COMPRESSED_FILE);
-            ImageIO.write(filteredOri, "png", signaturePath.toFile());
-            ImageIO.write(filteredCompressed, "png", signatureCompressedPath.toFile());
+            ImageIO.write(finalImageCompressed, "png", signatureCompressedPath.toFile());
 
             SaveEnrollmentDetail saveEnrollmentDetail = ArcDetailsHolder.getArcDetailsHolder().getSaveEnrollmentDetail();
             saveEnrollmentDetail.setSignatureRequired(true);
@@ -329,6 +388,72 @@ public class SignatureController extends AbstractBaseController {
             messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
+
+    private BufferedImage resizeImage(int width, int height, BufferedImage boundedBox, int requiredWidth, int requiredHeight) {
+        int[] widthHeight;
+        if (height > RAW_HEIGHT) {
+            if (width > RAW_WIDTH) {
+                widthHeight = shrinkUntilBothFit(width, height, requiredWidth, requiredHeight);
+                width = widthHeight[0];
+                height = widthHeight[1];
+            } else if (width < RAW_WIDTH) {
+                widthHeight = shrinkUntilHeightFit(width, height, requiredHeight);
+                width = widthHeight[0];
+                height = widthHeight[1];
+            }
+        } else if (height < RAW_HEIGHT) {
+            if (width > RAW_WIDTH) {
+                widthHeight = shrinkUntilWidthFit(width, height, requiredWidth);
+                width = widthHeight[0];
+                height = widthHeight[1];
+            } else if (width < RAW_WIDTH) {
+                widthHeight = enlargeBothUntilFit(width, height, requiredWidth, requiredHeight);
+                width = widthHeight[0];
+                height = widthHeight[1];
+            }
+        }
+        BufferedImageOp boundedBoxResampleOp = new ResampleOp(width, height, ResampleOp.FILTER_LANCZOS);
+        boundedBox = boundedBoxResampleOp.filter(boundedBox, null);
+        return boundedBox;
+    }
+
+    private int[] shrinkUntilBothFit(double w, double h, int requiredWidth, int requiredHeight) {
+        double hRem = requiredHeight / h;
+        double width = w * hRem;
+        double height = requiredHeight;
+
+        if (width > requiredWidth) {
+            double wRem = requiredWidth / width;
+            height = requiredHeight * wRem;
+        }
+        return new int[]{(int) width, (int) height};
+    }
+
+    private int[] shrinkUntilHeightFit(double w, double h, int requiredHeight) {
+        double hRem = requiredHeight / h;
+        double width = w * hRem;
+        return new int[]{(int) width, requiredHeight};
+    }
+
+    private int[] shrinkUntilWidthFit(double w, double h, int requiredWidth) {
+        double wRem = requiredWidth / w;
+        double height = h * wRem;
+        return new int[]{requiredWidth, (int) height};
+    }
+
+    private int[] enlargeBothUntilFit(double w, double h, int requiredWidth, int requiredHeight) {
+        double width = w;
+        double height = h;
+        double counter = 1;
+
+        while (width < requiredWidth && height < requiredHeight) {
+            width = w * counter;
+            height = h * counter;
+            counter += 0.1;
+        }
+        return new int[]{(int) width, (int) height};
+    }
+
 
     private void updateUi(String message) {
         Platform.runLater(() -> messageLabel.setText(message));
@@ -350,6 +475,7 @@ public class SignatureController extends AbstractBaseController {
     public void onUncaughtException() {
         LOGGER.log(Level.INFO, "***Unhandled exception occurred.");
         enableControls(backBtn);
+        clearBtnAction();
         updateUi("Something went wrong. Kindly try again.");
     }
 

@@ -22,9 +22,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.InputEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TouchEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
@@ -63,10 +61,6 @@ public class SignatureController extends AbstractBaseController {
         } catch (Exception ex) {
             throw new GenericException(ex.getMessage());
         }
-    }
-
-    private enum EventType {
-        DRAG, CLICK;
     }
 
     @FXML
@@ -108,7 +102,10 @@ public class SignatureController extends AbstractBaseController {
     private double maxY = Double.MIN_VALUE;
 
     private GraphicsContext gc;
-    private boolean firstLoading = true;
+    // sometimes, when touch screen is used, drag event is triggered even before mouse pressed event.
+    // which is unexpected.
+    private boolean mousePressedEventActivated = false;
+    private boolean forDot = false;
 
 
     public void initialize() {
@@ -122,90 +119,85 @@ public class SignatureController extends AbstractBaseController {
         gc.setLineWidth(2);
 
         canvas.setOnMousePressed(event -> {
+            LOGGER.info("**MousePressed**"); // to be removed
             lastX = event.getX();
             lastY = event.getY();
+            gc.beginPath();
+            gc.moveTo(lastX, lastY);
+            forDot = true;
+            mousePressedEventActivated = true;
         });
 
-        canvas.setOnTouchPressed(event -> {
-            lastX = event.getTouchPoint().getX();
-            lastY = event.getTouchPoint().getY();
+        // called by JavaFx even when mouse release outside
+        canvas.setOnMouseReleased(event -> {
+            LOGGER.info("**MouseReleased**");  // to be removed
+            mousePressedEventActivated = false;
         });
 
-        canvas.setOnTouchMoved(touchEvent -> onAction(touchEvent, EventType.DRAG));
-        canvas.setOnMouseDragged(mouseEvent -> onAction(mouseEvent, EventType.DRAG));
-        canvas.setOnMouseReleased(this::resetXAndY);
-        canvas.setOnTouchReleased(this::resetXAndY);
-        canvas.setOnMouseClicked(mouseEvent -> onAction(mouseEvent, EventType.CLICK));
+        // called by JavaFx even outside canvas (when mouse drag from inside and goes outside canvas)
+        canvas.setOnMouseDragged(this::onMouseDragAction);
+
+        // called by JavaFx after mouse-press and mouse-release cycle.
+        // not called by JavaFx when mouse pressed inside canvas but released outside the canvas
+        canvas.setOnMouseClicked(this::mousePressedReleasedCycleAction);
         arcLbl.setText("e-ARC: " + ArcDetailsHolder.getArcDetailsHolder().getArcDetail().getArcNo());
     }
 
-    private void onAction(InputEvent event, EventType eventType) {
-        // lastX = -1
-        // lastY = -1
-        if (eventType == EventType.CLICK) {
-            if (firstLoading) {
-                clearBtnAction();
-                firstLoading = false;
+    private void mousePressedReleasedCycleAction(MouseEvent mouseEvent) {
+        if (forDot) {
+            LOGGER.info("**MousePressedReleasedCycleAction**"); // to be removed
+            double x = mouseEvent.getX();
+            double y = mouseEvent.getY();
+            if (x >= 0 && x <= canvas.getWidth()) {
+                minX = Math.min(minX, x);
+                maxX = Math.max(maxX, x);
             }
-            drawSignature(event, eventType);
-        } else if (eventType == EventType.DRAG && lastX >= 0 && lastX <= canvas.getWidth() && lastY >= 0 && lastY <= canvas.getHeight() && !firstLoading) {
-            drawSignature(event, eventType);
-        }
-        if (firstLoading) {
-            clearBtnAction();
-            firstLoading = false;
+            if (y >= 0 && y <= canvas.getHeight()) {
+                minY = Math.min(minY, y);
+                maxY = Math.max(maxY, y);
+            }
+            gc.lineTo(x, y);
+            gc.stroke();
+            gc.closePath();
+            showPreview(minX, minY, maxX, maxY);
         }
     }
 
-    private void drawSignature(InputEvent event, EventType eventType) {
-        double x;
-        double y;
-        if (event instanceof TouchEvent touchEvent) {
-            x = touchEvent.getTouchPoint().getX();
-            y = touchEvent.getTouchPoint().getY();
-        } else {
-            x = ((MouseEvent) event).getX();
-            y = ((MouseEvent) event).getY();
+    private void onMouseDragAction(MouseEvent mouseEvent) {
+        double x = mouseEvent.getX();
+        double y = mouseEvent.getY();
+        if (x > 0 && x < canvas.getWidth() && y > 0 && y < canvas.getHeight() && mousePressedEventActivated) {
+            drawSignature(x, y);
+            showPreview(minX, minY, maxX, maxY);
         }
+        forDot = false;
+
+        if (!mousePressedEventActivated) {
+            LOGGER.warning("**Mouse dragged event triggered even without mouse pressed event called by JavaFx.");
+        }
+    }
+
+    private void drawSignature(double x, double y) {
         gc.beginPath();
-        // for dot
-        if (EventType.CLICK == eventType) {
-            // for the bounding box
-            if (x < minX) {
-                minX = x > 0 ? x : 0;
-            }
-            if (y < minY) {
-                minY = y > 0 ? y : 0;
-            }
-            if (x > maxX) {
-                maxX = x;
-            }
-            if (y > maxY) {
-                maxY = y;
-            }
-            gc.moveTo(x > 0 ? x - 1 : 0, y > 0 ? y - 1 : 0); // mouse click event
-        } else {
-            // for the bounding box
-            if (lastX < minX) {
-                minX = lastX;
-            }
-            if (lastY < minY) {
-                minY = lastY;
-            }
-            if (lastX > maxX) {
-                maxX = lastX;
-            }
-            if (lastY > maxY) {
-                maxY = lastY;
-            }
-            gc.moveTo(lastX, lastY);
+        // for the bounding box
+        if (lastX < minX) {
+            minX = lastX;
         }
+        if (lastY < minY) {
+            minY = lastY;
+        }
+        if (lastX > maxX) {
+            maxX = lastX;
+        }
+        if (lastY > maxY) {
+            maxY = lastY;
+        }
+        gc.moveTo(lastX, lastY);
         gc.lineTo(x, y);
         gc.stroke();
         lastX = x;
         lastY = y;
         isSigned = true;
-        showPreview(minX, minY, maxX, maxY);
     }
 
     private void showPreview(double minX, double minY, double maxX, double maxY) {
@@ -216,8 +208,7 @@ public class SignatureController extends AbstractBaseController {
             BufferedImage bufferedImage = SwingFXUtils.fromFXImage(writableImage, null);
             int width = (int) Math.min(maxX - minX, canvas.getWidth() - minX);
             int height = (int) Math.min(maxY - minY, canvas.getHeight() - minY);
-            width = Math.max(1, width);
-            height = Math.max(1, height);
+
             int bMinX = (int) minX;
             int bMinY = (int) minY;
 
@@ -239,14 +230,6 @@ public class SignatureController extends AbstractBaseController {
             BufferedImage resizedImage = resizeImage(width, height, imageBoundedBox, RAW_WIDTH, RAW_HEIGHT);
             Platform.runLater(() -> previewSignatureImageView.setImage(SwingFXUtils.toFXImage(resizedImage, null)));
         });
-
-    }
-
-
-    private void resetXAndY(InputEvent event) {
-        // for touch event, it can jump from Release to Drag event directly on tapping the screen.
-        lastX = -1;
-        lastY = -1;
     }
 
     private void backBtnAction(ActionEvent event) {
@@ -306,9 +289,6 @@ public class SignatureController extends AbstractBaseController {
                 messageLabel.setText("Kindly provide a valid or larger signature.");
                 return;
             }
-
-            width = (int) Math.min(maxX - minX, canvas.getWidth() - minX);
-            height = (int) Math.min(maxY - minY, canvas.getHeight() - minY);
 
             if (minX > PADDING) {
                 minX = minX - PADDING;

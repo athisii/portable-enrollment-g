@@ -119,7 +119,6 @@ public class SignatureController extends AbstractBaseController {
         gc.setLineWidth(2);
 
         canvas.setOnMousePressed(event -> {
-            LOGGER.info("**MousePressed**"); // to be removed
             lastX = event.getX();
             lastY = event.getY();
             gc.beginPath();
@@ -130,7 +129,6 @@ public class SignatureController extends AbstractBaseController {
 
         // called by JavaFx even when mouse release outside
         canvas.setOnMouseReleased(event -> {
-            LOGGER.info("**MouseReleased**");  // to be removed
             mousePressedEventActivated = false;
         });
 
@@ -145,7 +143,6 @@ public class SignatureController extends AbstractBaseController {
 
     private void mousePressedReleasedCycleAction(MouseEvent mouseEvent) {
         if (forDot) {
-            LOGGER.info("**MousePressedReleasedCycleAction**"); // to be removed
             double x = mouseEvent.getX();
             double y = mouseEvent.getY();
             if (x >= 0 && x <= canvas.getWidth()) {

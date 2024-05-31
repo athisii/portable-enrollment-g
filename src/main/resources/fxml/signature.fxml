@@ -47,7 +47,7 @@
                 </StackPane>
             </HBox>
             <HBox alignment="CENTER" styleClass="padding-medium">
-                <Label fx:id="messageLabel" text="Kindly sign in the centre of the black box"/>
+                <Label fx:id="messageLabel" text="Kindly sign inside the black box and click 'SAVE SIGNATURE' button to proceed."/>
             </HBox>
             <HBox alignment="CENTER">
                 <HBox fx:id="_canvasContainer" styleClass="canvas-container">
@@ -65,7 +65,13 @@
                     </HBox>
                 </VBox>
             </HBox>
-            <Region styleClass="min-height-small"/>
+            <Region styleClass="min-height-medium"/>
+            <VBox alignment="CENTER">
+                <Label styleClass="padding"
+                       text="Please provide your full signature which will be printed on your I-Card and"/>
+                <Label text="check the preview before submitting final signature."/>
+            </VBox>
+            <Region styleClass="min-height"/>
             <HBox alignment="CENTER">
                 <VBox fx:id="confirmVbox" styleClass="padding-small, confirm-box"
                       alignment="CENTER"

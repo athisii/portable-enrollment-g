@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ERR_MSG;
 
@@ -174,7 +173,7 @@ public class ServerConfigController extends AbstractBaseController {
             enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
             return;
         }
-        List<String> captions = units.stream().map(Unit::getCaption).collect(Collectors.toList());
+        List<String> captions = units.stream().map(Unit::getCaption).sorted().toList();
         Platform.runLater(() -> enrollmentStationUnitIdsComboBox.setItems(FXCollections.observableArrayList(captions)));
         String enrollmentStationUnitCaption = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_CAPTION);
         Platform.runLater(() -> enrollmentStationUnitIdsComboBox.getSelectionModel().select(enrollmentStationUnitCaption));

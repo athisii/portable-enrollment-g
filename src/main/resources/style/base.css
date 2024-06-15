@@ -16,6 +16,10 @@
     -fx-background-color: #FFF;
 }
 
+.bg-color-purple {
+    -fx-background-color: #CC99FF;
+}
+
 .bg-color-greenish-blue {
     -fx-background-color: #00C79C;
 }
@@ -286,4 +290,9 @@
     -fx-background-radius: 5px;
     -fx-background-color: #CC99FF;
     -fx-pref-width: 260px;
+}
+
+.drop-down-label {
+    -fx-min-width: 170;
+    -fx-max-width: 260;
 }

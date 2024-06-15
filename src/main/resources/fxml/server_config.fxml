@@ -32,7 +32,7 @@
             <HBox alignment="CENTER">
                 <HBox styleClass="border-color-darkblue, border-radius-medium, padding-small" alignment="CENTER">
                     <VBox styleClass="padding-medium">
-                        <HBox alignment="CENTER">
+                        <HBox>
                             <Label text="Whitelisted Card API URL:" focusTraversable="true"/>
                             <Region styleClass="min-width-small"/>
                             <TextField fx:id="whitelistedCardUrlTextField" styleClass="input-field"/>
@@ -43,14 +43,14 @@
                         </HBox>
                         <Region styleClass="min-height-medium"/>
                         <HBox>
-                            <VBox>
-                                <HBox alignment="CENTER">
+                            <VBox alignment="CENTER_LEFT">
+                                <HBox>
                                     <Label text="Mafis API Server URL :"/>
                                     <Region styleClass="min-width-small"/>
                                     <TextField fx:id="mafisUrlTextField" styleClass="input-field"/>
                                 </HBox>
                                 <Region styleClass="min-height-medium"/>
-                                <HBox alignment="CENTER">
+                                <HBox>
                                     <Label text="Enrolment Station ID :"/>
                                     <Region styleClass="min-width-small"/>
                                     <TextField fx:id="enrollmentStationIdTextField" styleClass="input-field"/>
@@ -59,7 +59,21 @@
                                 <HBox>
                                     <Label text="Enrolment Station Unit ID :"/>
                                     <Region styleClass="min-width-small"/>
-                                    <ComboBox fx:id="enrollmentStationUnitIdsComboBox"/>
+                                    <VBox alignment="CENTER">
+                                        <HBox fx:id="unitIdDropDownHBox" alignment="CENTER"
+                                              styleClass="bg-color-purple, bg-border-radius, padding, press-effect">
+                                            <Label fx:id="unitCaptionLabel" alignment="CENTER" styleClass="drop-down-label"
+                                                   text="Unit Id Caption"
+                                            />
+                                            <ImageView fx:id="downArrowImageView" preserveRatio="true">
+                                                <Image url="@../img/down_arrow.png"/>
+                                            </ImageView>
+                                            <ImageView fx:id="upArrowImageView" preserveRatio="true" visible="false">
+                                                <Image url="@../img/up_arrow.png"/>
+                                            </ImageView>
+                                        </HBox>
+                                        <VBox fx:id="hiddenVbox" visible="false"/>
+                                    </VBox>
                                 </HBox>
                             </VBox>
                             <Region styleClass="min-width-small"/>

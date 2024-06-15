@@ -17,14 +17,19 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -39,7 +44,18 @@ import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ER
 
 public class ServerConfigController extends AbstractBaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(ServerConfigController.class);
-    private List<Unit> units;
+    @FXML
+    private ImageView downArrowImageView;
+    @FXML
+    private ImageView upArrowImageView;
+    @FXML
+    private Label unitCaptionLabel;
+    @FXML
+    private HBox unitIdDropDownHBox;
+    @FXML
+    private VBox hiddenVbox;
+    private List<Unit> units = new ArrayList<>();
+    private List<String> sortedCaptions = new ArrayList<>();
     @FXML
     private TextField whitelistedCardUrlTextField;
     @FXML
@@ -60,8 +76,6 @@ public class ServerConfigController extends AbstractBaseController {
 
 
     @FXML
-    private ComboBox<String> enrollmentStationUnitIdsComboBox;
-    @FXML
     private Button backBtn;
 
     @FXML
@@ -80,45 +94,56 @@ public class ServerConfigController extends AbstractBaseController {
     }
 
 
-    private void saveToFile(Unit unit) {
-        if (mafisUrlTextField.getText().isBlank()) {
-            messageLabel.setText("Invalid mafis url.");
-            return;
-        }
-        if (enrollmentStationIdTextField.getText().isBlank()) {
-            messageLabel.setText("Enrolment station id is empty.");
-            return;
-        }
-
-        PropertyFile.changePropertyValue(PropertyName.CARD_API_WHITELISTED_URL, whitelistedCardUrlTextField.getText());
-        PropertyFile.changePropertyValue(PropertyName.MAFIS_API_URL, mafisUrlTextField.getText());
-        PropertyFile.changePropertyValue(PropertyName.ENROLLMENT_STATION_ID, enrollmentStationIdTextField.getText());
+    private void saveUnitIdAndCaption(Unit unit) {
         PropertyFile.changePropertyValue(PropertyName.ENROLLMENT_STATION_UNIT_ID, unit.getValue());
         PropertyFile.changePropertyValue(PropertyName.ENROLLMENT_STATION_UNIT_CAPTION, unit.getCaption());
-        messageLabel.setText("Updated successfully.");
+        messageLabel.setText("Enrolment Station Unit ID updated successfully.");
     }
 
 
     @FXML
     private void fetchBtnAction() {
-        if (mafisUrlTextField.getText().isBlank()) {
-            messageLabel.setText(("Not a valid url."));
-            return;
+        if (hiddenVbox.isVisible()) {
+            hiddenVbox.getChildren().remove(0, hiddenVbox.getChildren().size());
+            hiddenVbox.setVisible(false);
+            upArrowImageView.setVisible(false);
+            downArrowImageView.setVisible(true);
         }
         homeBtn.requestFocus();
         messageLabel.setText("Fetching units...");
-        disableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
-        enrollmentStationUnitIdsComboBox.setItems(FXCollections.observableArrayList());
-        enrollmentStationUnitIdsComboBox.setValue(null); // selected value
+        disableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, unitIdDropDownHBox, fetchUnitsBtn);
+        sortedCaptions = new ArrayList<>();
+        units = new ArrayList<>();
         App.getThreadPool().execute(this::fetchUnits);
-
     }
 
-    private void downloadWhitelistedCardBtnAction() {
-        if (whitelistedCardUrlTextField.getText().isBlank()) {
-            messageLabel.setText(("Not a valid url."));
+    private void fetchUnits() {
+        try {
+            units = MafisServerApi.fetchAllUnits();
+        } catch (GenericException ex) {
+            updateUi(ex.getMessage());
+            enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, unitIdDropDownHBox, fetchUnitsBtn);
+            return;
+        } catch (ConnectionTimeoutException ex) {
+            Platform.runLater(() -> {
+                messageLabel.setText("Connection timeout. Please try again.");
+                enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, unitIdDropDownHBox, fetchUnitsBtn);
+            });
             return;
         }
+
+        if (units.isEmpty()) {
+            updateUi("No units for selected mafis url.");
+            enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, unitIdDropDownHBox, fetchUnitsBtn);
+            return;
+        }
+        sortedCaptions = units.stream().map(Unit::getCaption).sorted().toList();
+        updateUi("Units fetched successfully.");
+        enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, unitIdDropDownHBox, fetchUnitsBtn);
+    }
+
+
+    private void downloadWhitelistedCardBtnAction() {
         messageLabel.setText("Downloading operators card.");
         homeBtn.requestFocus();
         disableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
@@ -126,7 +151,6 @@ public class ServerConfigController extends AbstractBaseController {
         App.getThreadPool().execute(() -> {
             List<CardWhitelistDetail> cardWhitelistDetails;
             try {
-                PropertyFile.changePropertyValue(PropertyName.CARD_API_WHITELISTED_URL, whitelistedCardUrlTextField.getText());
                 cardWhitelistDetails = CardWhitelistApi.fetchWhitelistedCard();
             } catch (GenericException ex) {
                 LOGGER.log(Level.SEVERE, ex.getMessage());
@@ -150,36 +174,6 @@ public class ServerConfigController extends AbstractBaseController {
             updateUi("Operators card downloaded successfully.");
             enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
         });
-    }
-
-    private void fetchUnits() {
-        try {
-            PropertyFile.changePropertyValue(PropertyName.MAFIS_API_URL, mafisUrlTextField.getText());
-            units = MafisServerApi.fetchAllUnits();
-        } catch (GenericException ex) {
-            updateUi(ex.getMessage());
-            enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
-            return;
-        } catch (ConnectionTimeoutException ex) {
-            Platform.runLater(() -> {
-                messageLabel.setText("Connection timeout. Please try again.");
-                enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
-            });
-            return;
-        }
-
-        if (units.isEmpty()) {
-            updateUi("No units for selected mafis url.");
-            enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
-            return;
-        }
-        List<String> captions = units.stream().map(Unit::getCaption).sorted().toList();
-        Platform.runLater(() -> enrollmentStationUnitIdsComboBox.setItems(FXCollections.observableArrayList(captions)));
-        String enrollmentStationUnitCaption = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_CAPTION);
-        Platform.runLater(() -> enrollmentStationUnitIdsComboBox.getSelectionModel().select(enrollmentStationUnitCaption));
-        updateUi("Units fetched successfully.");
-        enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
-
     }
 
     // calls automatically by JavaFX runtime
@@ -212,16 +206,111 @@ public class ServerConfigController extends AbstractBaseController {
         whitelistedCardUrlTextField.setText(whitelistedCardUrl);
         mafisUrlTextField.setText(mafisUrl);
         enrollmentStationIdTextField.setText(enrollmentStationId);
-        enrollmentStationUnitIdsComboBox.getSelectionModel().select(enrollmentStationUnitCaption);
-        enrollmentStationUnitIdsComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            // sometimes old and new value will be null.
-            if (newValue != null) {
-                Optional<Unit> unitOptional = units.stream().filter(u -> u.getCaption().equals(newValue)).findFirst();
-                unitOptional.ifPresent(this::saveToFile);
-            }
-        });
+        unitCaptionLabel.setText(enrollmentStationUnitCaption);
+
+        enrollmentStationIdTextField.textProperty().addListener((observable, oldValue, newValue) -> saveEnrollmentStationId(newValue));
+        mafisUrlTextField.textProperty().addListener((observable, oldValue, newValue) -> saveMafisUrl(newValue));
+        whitelistedCardUrlTextField.textProperty().addListener((observable, oldValue, newValue) -> saveWhiteListedCardUrl(newValue));
+
         downloadWhitelistedCardBtn.setOnAction(event -> downloadWhitelistedCardBtnAction());
+        unitIdDropDownHBox.setOnMouseClicked(this::toggleUnitCaptionListView);
     }
+
+    private void toggleUnitCaptionListView(MouseEvent mouseEvent) {
+        if (sortedCaptions.isEmpty() || units.isEmpty()) {
+            return;
+        }
+        if (hiddenVbox.isVisible()) {
+            hiddenVbox.getChildren().remove(0, hiddenVbox.getChildren().size());
+            hiddenVbox.setVisible(false);
+            upArrowImageView.setVisible(false);
+            downArrowImageView.setVisible(true);
+        } else {
+            hiddenVbox.setVisible(true);
+            downArrowImageView.setVisible(false);
+            upArrowImageView.setVisible(true);
+            TextField sarchTextField = new TextField();
+            sarchTextField.setPromptText("Search");
+            hiddenVbox.getChildren().add(sarchTextField);
+            ListView<String> listView = new ListView<>();
+            listView.setItems(FXCollections.observableArrayList(sortedCaptions));
+            listView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue != null) {
+                    Optional<Unit> unitOptional = units.stream().filter(u -> u.getCaption().equals(newValue)).findFirst();
+                    unitOptional.ifPresent(this::saveUnitIdAndCaption);
+                    unitCaptionLabel.setText(newValue);
+                    hiddenVbox.getChildren().remove(0, hiddenVbox.getChildren().size());
+                    hiddenVbox.setVisible(false);
+                    downArrowImageView.setVisible(true);
+                    upArrowImageView.setVisible(false);
+                }
+            });
+            sarchTextField.textProperty().addListener((observable, oldVal, newVal) -> searchFilter(newVal, listView));
+            hiddenVbox.getChildren().add(1, listView);
+        }
+    }
+
+    private void searchFilter(String value, ListView<String> listView) {
+        if (value.isEmpty()) {
+            listView.setItems(FXCollections.observableList(units.stream().map(Unit::getCaption).toList()));
+            return;
+        }
+        String valueUpper = value.toUpperCase();
+        listView.setItems(FXCollections.observableList(units.stream().map(Unit::getCaption).filter(caption -> caption.toUpperCase().contains(valueUpper)).toList()));
+    }
+
+
+    private void saveWhiteListedCardUrl(String newValue) {
+        if (newValue != null && !newValue.isBlank()) {
+            PropertyFile.changePropertyValue(PropertyName.CARD_API_WHITELISTED_URL, newValue);
+            enableControls(backBtn, enrollmentStationIdTextField, mafisUrlTextField, unitIdDropDownHBox, downloadWhitelistedCardBtn, homeBtn, fetchUnitsBtn);
+            if (hiddenVbox.isVisible()) {
+                hiddenVbox.setDisable(false);
+            }
+            updateUi("Whitelist Card API Url updated successfully");
+        } else {
+            updateUi("Enter a valid Whitelisted Card API Url");
+            disableControls(backBtn, homeBtn, enrollmentStationIdTextField, mafisUrlTextField, unitIdDropDownHBox, downloadWhitelistedCardBtn, fetchUnitsBtn);
+            if (hiddenVbox.isVisible()) {
+                hiddenVbox.setDisable(true);
+            }
+        }
+    }
+
+    private void saveMafisUrl(String newValue) {
+        if (newValue != null && !newValue.isBlank()) {
+            PropertyFile.changePropertyValue(PropertyName.MAFIS_API_URL, newValue);
+            enableControls(backBtn, enrollmentStationIdTextField, whitelistedCardUrlTextField, unitIdDropDownHBox, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
+            if (hiddenVbox.isVisible()) {
+                hiddenVbox.setDisable(false);
+            }
+            updateUi("Mafis API Server Url updated successfully");
+        } else {
+            updateUi("Enter a valid Mafis API Server Url");
+            disableControls(backBtn, homeBtn, enrollmentStationIdTextField, whitelistedCardUrlTextField, unitIdDropDownHBox, downloadWhitelistedCardBtn, fetchUnitsBtn);
+            if (hiddenVbox.isVisible()) {
+                hiddenVbox.setDisable(true);
+            }
+        }
+    }
+
+    private void saveEnrollmentStationId(String newValue) {
+        if (newValue != null && !newValue.isBlank()) {
+            PropertyFile.changePropertyValue(PropertyName.ENROLLMENT_STATION_ID, newValue);
+            enableControls(backBtn, mafisUrlTextField, whitelistedCardUrlTextField, unitIdDropDownHBox, homeBtn, downloadWhitelistedCardBtn, fetchUnitsBtn);
+            if (hiddenVbox.isVisible()) {
+                hiddenVbox.setDisable(false);
+            }
+            updateUi("Enrolment Station ID updated successfully");
+        } else {
+            updateUi("Enter a valid Enrolment Station ID");
+            disableControls(backBtn, homeBtn, mafisUrlTextField, whitelistedCardUrlTextField, unitIdDropDownHBox, downloadWhitelistedCardBtn, fetchUnitsBtn);
+            if (hiddenVbox.isVisible()) {
+                hiddenVbox.setDisable(true);
+            }
+        }
+    }
+
 
     private void updateUi(String message) {
         Platform.runLater((() -> messageLabel.setText(message)));

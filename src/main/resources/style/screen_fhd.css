@@ -227,3 +227,8 @@
     -fx-background-radius: 7px;
     -fx-pref-width: 364px;
 }
+
+.drop-down-label {
+    -fx-min-width: 200;
+    -fx-max-width: 360;
+}

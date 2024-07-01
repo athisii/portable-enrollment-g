@@ -58,14 +58,13 @@ public class SlapScannerController extends AbstractBaseController {
     private final int fingerprintLivenessValue; // value can be updated on UI too.
     private static final int FP_SEGMENT_WIDTH;
     private static final int FP_SEGMENT_HEIGHT;
-    private static final int FP_NFIQ_VALUE;
+    private final int fpNfiqValue;
 
 
     static {
         try {
             FP_SEGMENT_WIDTH = Integer.parseInt(PropertyFile.getProperty(PropertyName.FP_SEGMENT_WIDTH).trim());
             FP_SEGMENT_HEIGHT = Integer.parseInt(PropertyFile.getProperty(PropertyName.FP_SEGMENT_HEIGHT).trim());
-            FP_NFIQ_VALUE = Integer.parseInt(PropertyFile.getProperty(PropertyName.FP_NFIQ_VALUE).trim());
         } catch (RuntimeException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException("Not a number or no entry found.");
@@ -74,6 +73,7 @@ public class SlapScannerController extends AbstractBaseController {
 
     {
         try {
+            fpNfiqValue = Integer.parseInt(PropertyFile.getProperty(PropertyName.FP_NFIQ_VALUE).trim());
             fingerprintLivenessValue = Integer.parseInt(PropertyFile.getProperty(PropertyName.FINGERPRINT_LIVENESS_VALUE).trim());
         } catch (RuntimeException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
@@ -891,7 +891,7 @@ public class SlapScannerController extends AbstractBaseController {
                 throw new GenericException("Error occurred while segmenting fingerprint image. Kindly try again.");
             }
             int nFIQ = RS_GetQualityScore(rsImageInfoTemp.pbyImgBuf, rsImageInfoTemp.imageWidth, rsImageInfoTemp.imageHeight);
-            if (nFIQ > FP_NFIQ_VALUE) {
+            if (nFIQ > fpNfiqValue) {
                 LOGGER.log(Level.INFO, () -> "Quality too poor for finger: " + finger + ". NFIQ: " + nFIQ);
                 throw new GenericException("Quality too poor. Please try again.");
             }

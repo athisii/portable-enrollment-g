@@ -243,8 +243,8 @@
 }
 
 .canvas-container {
-    -fx-pref-width: 638px;
-    -fx-pref-height: 118px;
+    -fx-pref-width: 800px;
+    -fx-pref-height: 250px;
     -fx-border-color: black;
     -fx-border-width: 2px;
     -fx-border-style: solid;

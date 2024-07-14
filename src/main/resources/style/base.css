@@ -243,8 +243,8 @@
 }
 
 .canvas-container {
-    -fx-pref-width: 800px;
-    -fx-pref-height: 250px;
+    -fx-pref-width: 401px; /* dynamically changed based on aspect ratio of touchpad area (normally width > height) */
+    -fx-pref-height: 250px; /* based on available space with other UI components, height is fixed */
     -fx-border-color: black;
     -fx-border-width: 2px;
     -fx-border-style: solid;

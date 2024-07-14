@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.canvas.Canvas?>
+
+<!--   R = Record-->
+<!--   C = Clear-->
+<!--   S = Stop-->
+
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<BorderPane xmlns="http://javafx.com/javafx/11.0.14-internal"
+<BorderPane fx:id="borderPane" onKeyTyped="#keyTypeAction" xmlns="http://javafx.com/javafx/11.0.14-internal"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.cdac.enrollmentstation.controller.SignatureController">
     <top>
@@ -46,18 +50,39 @@
                     </HBox>
                 </StackPane>
             </HBox>
-            <HBox alignment="CENTER">
+            <VBox alignment="CENTER">
+                <Label styleClass="padding-small"
+                       text="Please provide your full signature which will be printed on your I-Card and check the preview before submitting final signature."/>
+            </VBox>
+            <Region styleClass="min-height"/>
+            <HBox alignment="CENTER" styleClass="padding">
                 <VBox alignment="CENTER">
-                    <Label styleClass="padding-small" fx:id="messageLabel"
-                           text="Kindly sign inside the black box and click 'SAVE SIGNATURE' button to proceed."/>
-                    <HBox fx:id="_canvasContainer" styleClass="canvas-container">
-                        <Canvas fx:id="canvas" width="${_canvasContainer.prefWidth}"
-                                height="${_canvasContainer.prefHeight}"/>
+                    <HBox alignment="CENTER">
+                        <VBox fx:id="vBoxCanvasContainer" styleClass="canvas-container">
+                            <!--    inject canvas dynamically -->
+                        </VBox>
                     </HBox>
                 </VBox>
-                <Region styleClass="min-width-large"/>
+                <Region styleClass="min-width-medium"/>
                 <VBox alignment="CENTER">
-                    <Label text="PREVIEW"/>
+                    <HBox alignment="CENTER">
+                        <ImageView fx:id="recordGifImgView" fitWidth="${_imgContainer1.prefWidth}"
+                                   fitHeight="${_imgContainer1.prefHeight}" preserveRatio="true" visible="false">
+                            <Image url="@../gif/record.gif"/>
+                        </ImageView>
+                        <Region styleClass="min-width"/>
+                        <ImageView fx:id="writingGifImgView" fitWidth="${_imgContainer1.prefWidth}"
+                                   fitHeight="${_imgContainer1.prefHeight}" preserveRatio="true" visible="false">
+                            <Image url="@../gif/writing.gif"/>
+                        </ImageView>
+                        <Region styleClass="min-width"/>
+                        <ImageView fx:id="stopGifImgView" fitWidth="${_imgContainer1.prefWidth}"
+                                   fitHeight="${_imgContainer1.prefHeight}" preserveRatio="true">
+                            <Image url="@../gif/stop.gif"/>
+                        </ImageView>
+                    </HBox>
+                    <Region styleClass="min-height-medium"/>
+                    <Label text="PREVIEW" styleClass="text-darkblue"/>
                     <HBox fx:id="_imgContainer1" styleClass="signature-preview, border-color-darkblue"
                           alignment="CENTER">
                         <ImageView fx:id="previewSignatureImageView" fitWidth="${_imgContainer1.prefWidth}"
@@ -65,11 +90,26 @@
                         </ImageView>
                     </HBox>
                 </VBox>
+                <Region styleClass="min-width-medium"/>
+                <VBox alignment="TOP_CENTER">
+                    <VBox alignment="BOTTOM_RIGHT"
+                          styleClass="border-radius-small, border-color-darkblue, padding-small">
+                        <HBox alignment="CENTER">
+                            <Label text="Touchpad Mode Control Keys" styleClass="font-size, text-darkblue"/>
+                        </HBox>
+                        <HBox alignment="CENTER">
+                            <VBox>
+                                <Label text="R = Record Signature" styleClass="font-size, text-darkblue"/>
+                                <Label text="S = Stop Recording" styleClass="font-size, text-darkblue"/>
+                                <Label text="C = Clear Signature" styleClass="font-size, text-darkblue"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </VBox>
             </HBox>
-            <Region styleClass="min-height-medium"/>
             <VBox alignment="CENTER">
-                <Label styleClass="padding"
-                       text="Please provide your full signature which will be printed on your I-Card and check the preview before submitting final signature."/>
+                <Label fx:id="messageLabel" styleClass="padding"
+                       text="Kindly sign on the touchpad and click 'SAVE SIGNATURE' button to proceed."/>
             </VBox>
             <Region styleClass="min-height"/>
             <HBox alignment="CENTER">

@@ -54,6 +54,8 @@ module com.cdac.enrollmentstation {
     opens com.cdac.enrollmentstation.logging to javafx.fxml;
     exports com.cdac.enrollmentstation.util;
     opens com.cdac.enrollmentstation.util to javafx.fxml;
+    exports com.cdac.enrollmentstation.jna;
+    opens com.cdac.enrollmentstation.jna to javafx.fxml;
 
     requires static lombok;
 }

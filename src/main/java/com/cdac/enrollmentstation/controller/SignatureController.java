@@ -5,6 +5,9 @@ import com.cdac.enrollmentstation.constant.ApplicationConstant;
 import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.dto.SaveEnrollmentDetail;
 import com.cdac.enrollmentstation.exception.GenericException;
+import com.cdac.enrollmentstation.jna.Touchpad;
+import com.cdac.enrollmentstation.jna.TouchpadEvent;
+import com.cdac.enrollmentstation.jna.TouchpadLib;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.model.ArcDetailsHolder;
 import com.cdac.enrollmentstation.util.PropertyFile;
@@ -14,6 +17,7 @@ import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
@@ -22,18 +26,23 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.robot.Robot;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,12 +62,42 @@ public class SignatureController extends AbstractBaseController {
     private static final int COMPRESSED_HEIGHT = 29;//5*7
     private static final String IMG_SIGNATURE_FILE;
     private static final String IMG_SIGNATURE_COMPRESSED_FILE;
+    private volatile boolean capture;
+    private volatile boolean firstPaint;
+    private final AtomicInteger concurrentWorkerCount = new AtomicInteger(0);
+    private static final TouchpadLib TOUCHPAD_LIB = TouchpadLib.INSTANCE;
+    private double scaledFactor;
+    private static final int TOUCHPAD_MAX_WIDTH;
+    private static final int TOUCHPAD_MAX_HEIGHT;
+    private static final String TOUCHPAD_DEVICE;
+    private static final String DEFAULT_MESSAGE = "Kindly sign on the touchpad and click 'SAVE SIGNATURE' button to proceed.";
 
     static {
         try {
+            String command = "cat /proc/bus/input/devices | egrep -B 2 -A 10 -i '.*touch.*' | grep event | awk '{print $3}'";
+            Process process = Runtime.getRuntime().exec(new String[]{"/bin/bash", "-c", command});
+            String eventNumber;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                eventNumber = reader.readLine();
+            }
+            int exitCode = process.waitFor();
+            if (exitCode != 0 || eventNumber == null) {
+                throw new GenericException("Either process not exited normally or no device input with name 'Touchpad' found.");
+            }
+
+            TOUCHPAD_DEVICE = "/dev/input/" + eventNumber;
+            Touchpad touchpad = new Touchpad(TOUCHPAD_DEVICE);
+            var touchpadInfo = touchpad.getDeviceInfo();
+            TOUCHPAD_MAX_WIDTH = touchpadInfo.width;
+            TOUCHPAD_MAX_HEIGHT = touchpadInfo.height;
+            LOGGER.log(Level.INFO, () -> "Touchpad device name:" + touchpad.getDeviceName() + ";width:" + TOUCHPAD_MAX_WIDTH + ";height:" + TOUCHPAD_MAX_HEIGHT);
+            touchpad.closeDevice(); // just destroy this touchpad instance after getting info about device
             IMG_SIGNATURE_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.IMG_SIGNATURE_FILE), PropertyName.IMG_SIGNATURE_FILE);
             IMG_SIGNATURE_COMPRESSED_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.IMG_SIGNATURE_COMPRESSED_FILE), PropertyName.IMG_SIGNATURE_COMPRESSED_FILE);
         } catch (Exception ex) {
+            if (ex instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             throw new GenericException(ex.getMessage());
         }
     }
@@ -87,9 +126,19 @@ public class SignatureController extends AbstractBaseController {
     private Button confirmNoBtn;
     @FXML
     private Label arcLbl;
+    @FXML
+    private BorderPane borderPane;
+    @FXML
+    private ImageView recordGifImgView;
+    @FXML
+    private ImageView writingGifImgView;
+    @FXML
+    private ImageView stopGifImgView;
 
 
     @FXML
+    private VBox vBoxCanvasContainer;
+
     private Canvas canvas;
     private boolean isSigned;
     private double lastX;
@@ -102,10 +151,7 @@ public class SignatureController extends AbstractBaseController {
     private double maxY = Double.MIN_VALUE;
 
     private GraphicsContext gc;
-    // sometimes, when touch screen is used, drag event is triggered even before mouse pressed event.
-    // which is unexpected.
-    private boolean mousePressedEventActivated = false;
-    private boolean forDot = false;
+    private static final Robot robot = new Robot();
 
 
     public void initialize() {
@@ -115,87 +161,22 @@ public class SignatureController extends AbstractBaseController {
         confirmYesBtn.setOnAction(this::confirmYes);
         backBtn.setOnAction(this::backBtnAction);
 
-        gc = canvas.getGraphicsContext2D();
-        gc.setLineWidth(2);
+        Platform.runLater(() -> {
+              /*
+                  Height aspect ratio canvas and touchpad
+                  scaled factor: 250/2176 = 0.1147
+              */
+            scaledFactor = vBoxCanvasContainer.getHeight() / TOUCHPAD_MAX_HEIGHT;
+            double canvasWidth = TOUCHPAD_MAX_WIDTH * scaledFactor;
+            double canvasHeight = TOUCHPAD_MAX_HEIGHT * scaledFactor;
+            canvas = new Canvas(canvasWidth, canvasHeight);
+            vBoxCanvasContainer.getChildren().add(canvas);
 
-        canvas.setOnMousePressed(event -> {
-            lastX = event.getX();
-            lastY = event.getY();
-            gc.beginPath();
-            gc.moveTo(lastX, lastY);
-            forDot = true;
-            mousePressedEventActivated = true;
+            gc = canvas.getGraphicsContext2D();
+            gc.setLineWidth(3);
         });
 
-        // called by JavaFx even when mouse release outside
-        canvas.setOnMouseReleased(event -> {
-            mousePressedEventActivated = false;
-        });
-
-        // called by JavaFx even outside canvas (when mouse drag from inside and goes outside canvas)
-        canvas.setOnMouseDragged(this::onMouseDragAction);
-
-        // called by JavaFx after mouse-press and mouse-release cycle.
-        // not called by JavaFx when mouse pressed inside canvas but released outside the canvas
-        canvas.setOnMouseClicked(this::mousePressedReleasedCycleAction);
         arcLbl.setText("e-ARC: " + ArcDetailsHolder.getArcDetailsHolder().getArcDetail().getArcNo());
-    }
-
-    private void mousePressedReleasedCycleAction(MouseEvent mouseEvent) {
-        if (forDot) {
-            double x = mouseEvent.getX();
-            double y = mouseEvent.getY();
-            if (x >= 0 && x <= canvas.getWidth()) {
-                minX = Math.min(minX, x);
-                maxX = Math.max(maxX, x);
-            }
-            if (y >= 0 && y <= canvas.getHeight()) {
-                minY = Math.min(minY, y);
-                maxY = Math.max(maxY, y);
-            }
-            gc.lineTo(x, y);
-            gc.stroke();
-            gc.closePath();
-            isSigned = true;
-            showPreview(minX, minY, maxX, maxY);
-        }
-    }
-
-    private void onMouseDragAction(MouseEvent mouseEvent) {
-        double x = mouseEvent.getX();
-        double y = mouseEvent.getY();
-        if (x > 0 && x < canvas.getWidth() && y > 0 && y < canvas.getHeight() && mousePressedEventActivated) {
-            drawSignature(x, y);
-            showPreview(minX, minY, maxX, maxY);
-        }
-        forDot = false;
-
-        if (!mousePressedEventActivated) {
-            LOGGER.warning("**Mouse dragged event triggered even without mouse pressed event called by JavaFx.");
-        }
-    }
-
-    private void drawSignature(double x, double y) {
-        gc.beginPath();
-        // for the bounding box
-        if (lastX < minX) {
-            minX = lastX;
-        }
-        if (lastY < minY) {
-            minY = lastY;
-        }
-        if (lastX > maxX) {
-            maxX = lastX;
-        }
-        if (lastY > maxY) {
-            maxY = lastY;
-        }
-        gc.moveTo(lastX, lastY);
-        gc.lineTo(x, y);
-        gc.stroke();
-        lastX = x;
-        lastY = y;
-        isSigned = true;
     }
 
     private void showPreview(double minX, double minY, double maxX, double maxY) {
@@ -451,9 +432,11 @@ public class SignatureController extends AbstractBaseController {
 
     @Override
     public void onUncaughtException() {
+        capture = false;
+        concurrentWorkerCount.set(0);
         LOGGER.log(Level.INFO, "***Unhandled exception occurred.");
         enableControls(backBtn);
-        clearBtnAction();
+        Platform.runLater(this::clearBtnAction);
         updateUi("Something went wrong. Kindly try again.");
     }
 
@@ -464,5 +447,154 @@ public class SignatureController extends AbstractBaseController {
             throw new GenericException(errorMessage);
         }
         return value;
+    }
+
+    public void keyTypeAction(KeyEvent keyEvent) {
+        if ("R".equalsIgnoreCase(keyEvent.getCharacter())) {
+            if (capture) {
+                //another worker is still running.
+                return;
+            }
+            capture = true;
+            recordGifImgView.setVisible(true);
+            Touchpad touchpad = new Touchpad(TOUCHPAD_DEVICE);
+            if (!touchpad.isInitialized()) {
+                LOGGER.log(Level.SEVERE, "Touchpad initialization failed with code");
+                messageLabel.setText("Touchpad initialization failed with code");
+                return;
+            }
+            messageLabel.setText(DEFAULT_MESSAGE);
+            disableControls(backBtn, clearBtn, saveSignatureBtn);
+            concurrentWorkerCount.getAndIncrement();
+            stopGifImgView.setVisible(false);
+            App.getThreadPool().execute(() -> startRecordingTouchpadEvent(touchpad));
+        }
+        if ("S".equalsIgnoreCase(keyEvent.getCharacter())) {
+            capture = false;
+            recordGifImgView.setVisible(false);
+            messageLabel.setText(DEFAULT_MESSAGE);
+            enableControls(backBtn, clearBtn, saveSignatureBtn);
+            stopGifImgView.setVisible(true);
+        }
+        if ("C".equalsIgnoreCase(keyEvent.getCharacter())) {
+            if (!capture) {
+                gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+                minX = Double.MAX_VALUE;
+                minY = Double.MAX_VALUE;
+                maxX = Double.MIN_VALUE;
+                maxY = Double.MIN_VALUE;
+                messageLabel.setText(DEFAULT_MESSAGE);
+                enableControls(backBtn, clearBtn, saveSignatureBtn);
+                previewSignatureImageView.setImage(null);
+            } else {
+                messageLabel.setText("You must stop the recording to clear the canvas.");
+            }
+        }
+    }
+
+    private void startRecordingTouchpadEvent(Touchpad touchpad) {
+        if (touchpad.isClosed()) {
+            LOGGER.log(Level.SEVERE, "Touchpad is already closed.");
+            return;
+        }
+        firstPaint = false;
+        TouchpadEvent touchpadEvent;
+        double x = 0;
+        double y = 0;
+        while (capture) {
+            touchpadEvent = touchpad.getNextEvent();  // blocking operation (wait for next event)
+            // don't execute the last event.
+            if (!capture) {
+                concurrentWorkerCount.getAndDecrement();
+                // when last event is collected, shutdown
+                touchpad.closeDevice();
+                return;
+            }
+            // disable concurrent paint
+            if (concurrentWorkerCount.get() > 1) {
+                concurrentWorkerCount.getAndDecrement();
+                touchpad.closeDevice();
+                return;
+            }
+            if (touchpadEvent.code == TOUCHPAD_LIB.getXCode()) {
+                /*
+                  Width aspect ratio canvas and touchpad
+                  scaled width: 401/3495 == 0.1147 (width_scaled)
+                  x = x * width_scaled
+                */
+
+                x = scaledFactor * touchpadEvent.x;
+                if (minX > x) {
+                    minX = x;
+                }
+                if (maxX < x) {
+                    maxX = x;
+                }
+            } else if (touchpadEvent.code == TOUCHPAD_LIB.getYCode()) {
+                /*
+                   Height aspect ratio canvas and touchpad
+                   scaled height: 250/2176 = 0.1149 (height_scaled)
+                   y = y * height_scaled
+                */
+                y = scaledFactor * touchpadEvent.y;
+                if (minY > y) {
+                    minY = y;
+                }
+                if (maxY < y) {
+                    maxY = y;
+                }
+            } else if (touchpadEvent.code == TOUCHPAD_LIB.getResetCode()) {
+                // filter same previous number
+                if (touchpadEvent.touch == TOUCHPAD_LIB.isTouched() && !(x == lastX && y == lastY)) {
+                    // thread safety
+                    double finalX = x;
+                    double finalY = y;
+                    double finalLastX = lastX;
+                    double finalLastY = lastY;
+                    boolean finalFirstPaint = firstPaint;
+                    // thread safety
+                    Platform.runLater(() -> {
+                        Point2D point2D = canvas.localToScreen(0, 0);
+                        robot.mouseMove(point2D.getX() + finalX, point2D.getY() + finalY);
+                        paintCanvas(finalX, finalY, finalFirstPaint, finalLastX, finalLastY);
+                    });
+                    lastX = x;
+                    lastY = y;
+                    isSigned = true;
+                }
+            } else if (touchpadEvent.code == TOUCHPAD_LIB.getTouchCode()) {
+                if (touchpadEvent.touch == TOUCHPAD_LIB.isTouched()) {
+                    firstPaint = true;
+                    Platform.runLater(() -> writingGifImgView.setVisible(true));
+                } else {
+                    lastX = -1;
+                    lastY = -1;
+                    firstPaint = false;
+                    double finalMinX = minX;
+                    double finalMinY = minY;
+                    double finalMaxX = maxX;
+                    double finalMaxY = maxY;
+                    Platform.runLater(() -> {
+                        writingGifImgView.setVisible(false);
+                        showPreview(finalMinX, finalMinY, finalMaxX, finalMaxY);
+                    });
+                }
+            }
+        }
+        // when last event is collected, shutdown
+        concurrentWorkerCount.getAndDecrement();
+        touchpad.closeDevice();
+    }
+
+    void paintCanvas(double x, double y, boolean isFirstPaintArg, double lastX, double lastY) {
+        gc.beginPath();
+        if (isFirstPaintArg) {
+            gc.moveTo(x, y);
+            firstPaint = false;
+        } else {
+            gc.moveTo(lastX, lastY);
+        }
+        gc.lineTo(x, y);
+        gc.stroke();
     }
 }

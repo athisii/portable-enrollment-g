@@ -7,19 +7,17 @@ import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public interface TouchpadLib extends Library {
     Logger LOGGER = ApplicationLog.getLogger(TouchpadLib.class);
-
     TouchpadLib INSTANCE = loadLibrary();
 
     static TouchpadLib loadLibrary() {
         try {
-            Path path = NativeUtil.loadNativeLibraryFromJar("touchpad.so");
-            return (TouchpadLib) Native.loadLibrary(path.toAbsolutePath().toString(), TouchpadLib.class);
+            NativeUtil.writeSoFromJarToSystem("touchpad.so");
+            return (TouchpadLib) Native.loadLibrary("touchpad.so", TouchpadLib.class);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, () -> "Error loading touchpad so " + e.getMessage());
             throw new GenericException("Failed to load native library");

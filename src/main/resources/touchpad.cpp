@@ -260,7 +260,7 @@ int isTouched()
     return IS_TOUCHED;
 }
 
-Touchpad* initDevice(char* deviceName)
+Touchpad* initDevice(const char* deviceName)
 {
     return new Touchpad(deviceName);
 }

@@ -74,7 +74,7 @@ public class SignatureController extends AbstractBaseController {
 
     static {
         try {
-            String command = "cat /proc/bus/input/devices | egrep -B 2 -A 10 -i '.*touch.*' | grep event | awk '{print $3}'";
+            String command = "cat /proc/bus/input/devices | egrep -B 2 -A 10 -i '.*touchpad.*' | grep event | awk '{print $3}'";
             Process process = Runtime.getRuntime().exec(new String[]{"/bin/bash", "-c", command});
             String eventNumber;
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
@@ -139,6 +139,7 @@ public class SignatureController extends AbstractBaseController {
     @FXML
     private VBox vBoxCanvasContainer;
 
+    @FXML
     private Canvas canvas;
     private boolean isSigned;
     private double lastX;
@@ -161,19 +162,27 @@ public class SignatureController extends AbstractBaseController {
         confirmYesBtn.setOnAction(this::confirmYes);
         backBtn.setOnAction(this::backBtnAction);
 
-        Platform.runLater(() -> {
-              /*
+        App.getThreadPool().execute(() -> {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            Platform.runLater(() -> {
+                /*
                   Height aspect ratio canvas and touchpad
                   scaled factor: 250/2176 = 0.1147
               */
-            scaledFactor = vBoxCanvasContainer.getHeight() / TOUCHPAD_MAX_HEIGHT;
-            double canvasWidth = TOUCHPAD_MAX_WIDTH * scaledFactor;
-            double canvasHeight = TOUCHPAD_MAX_HEIGHT * scaledFactor;
-            canvas = new Canvas(canvasWidth, canvasHeight);
-            vBoxCanvasContainer.getChildren().add(canvas);
+                scaledFactor = vBoxCanvasContainer.getPrefHeight() / TOUCHPAD_MAX_HEIGHT;
+                double canvasWidth = TOUCHPAD_MAX_WIDTH * scaledFactor;
+                double canvasHeight = TOUCHPAD_MAX_HEIGHT * scaledFactor;
+                canvas = new Canvas(canvasWidth, canvasHeight);
+                vBoxCanvasContainer.getChildren().add(canvas);
+                gc = canvas.getGraphicsContext2D();
+                gc.setLineWidth(3);
+            });
 
-            gc = canvas.getGraphicsContext2D();
-            gc.setLineWidth(3);
         });
 
         arcLbl.setText("e-ARC: " + ArcDetailsHolder.getArcDetailsHolder().getArcDetail().getArcNo());
@@ -183,32 +192,32 @@ public class SignatureController extends AbstractBaseController {
         SnapshotParameters params = new SnapshotParameters();
         params.setFill(Color.TRANSPARENT);
         WritableImage writableImage = canvas.snapshot(params, null);
-        App.getThreadPool().execute(() -> {
-            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(writableImage, null);
-            int width = (int) Math.min(maxX - minX, canvas.getWidth() - minX);
-            int height = (int) Math.min(maxY - minY, canvas.getHeight() - minY);
+        BufferedImage bufferedImage = SwingFXUtils.fromFXImage(writableImage, null);
+        int width = (int) Math.min(maxX - minX, canvas.getWidth() - minX);
+        int height = (int) Math.min(maxY - minY, canvas.getHeight() - minY);
 
-            int bMinX = (int) minX;
-            int bMinY = (int) minY;
+        int bMinX = (int) minX;
+        int bMinY = (int) minY;
 
-            if (bMinX > PADDING) {
-                bMinX = bMinX - PADDING;
-                width = width + PADDING;
-            }
-            if (bMinY > PADDING) {
-                bMinY = bMinY - PADDING;
-                height = height + PADDING;
-            }
-            if (maxX + PADDING < canvas.getWidth()) {
-                width = width + PADDING;
-            }
-            if (maxY + PADDING < canvas.getHeight()) {
-                height = height + PADDING;
-            }
+        if (bMinX > PADDING) {
+            bMinX = bMinX - PADDING;
+            width = width + PADDING;
+        }
+        if (bMinY > PADDING) {
+            bMinY = bMinY - PADDING;
+            height = height + PADDING;
+        }
+        if (maxX + PADDING < canvas.getWidth()) {
+            width = width + PADDING;
+        }
+        if (maxY + PADDING < canvas.getHeight()) {
+            height = height + PADDING;
+        }
+        if (width > 0 && height > 0) {
             BufferedImage imageBoundedBox = bufferedImage.getSubimage(bMinX, bMinY, width, height);
             BufferedImage resizedImage = resizeImage(width, height, imageBoundedBox, RAW_WIDTH, RAW_HEIGHT);
-            Platform.runLater(() -> previewSignatureImageView.setImage(SwingFXUtils.toFXImage(resizedImage, null)));
-        });
+            previewSignatureImageView.setImage(SwingFXUtils.toFXImage(resizedImage, null));
+        }
     }
 
     private void backBtnAction(ActionEvent event) {

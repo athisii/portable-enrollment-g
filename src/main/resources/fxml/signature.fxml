@@ -66,9 +66,9 @@
                 <Region styleClass="min-width-medium"/>
                 <VBox alignment="CENTER">
                     <HBox alignment="CENTER">
-                        <ImageView fx:id="recordGifImgView" fitWidth="${_imgContainer1.prefWidth}"
+                        <ImageView fx:id="startCapturingImgView" fitWidth="${_imgContainer1.prefWidth}"
                                    fitHeight="${_imgContainer1.prefHeight}" preserveRatio="true" visible="false">
-                            <Image url="@../gif/record.gif"/>
+                            <Image url="@../gif/pen.gif"/>
                         </ImageView>
                         <Region styleClass="min-width"/>
                         <ImageView fx:id="writingGifImgView" fitWidth="${_imgContainer1.prefWidth}"
@@ -99,8 +99,8 @@
                         </HBox>
                         <HBox alignment="CENTER">
                             <VBox>
-                                <Label text="R = Record Signature" styleClass="font-size, text-darkblue"/>
-                                <Label text="S = Stop Recording" styleClass="font-size, text-darkblue"/>
+                                <Label text="S = Start Capturing" styleClass="font-size, text-darkblue"/>
+                                <Label text="E = End Capturing  " styleClass="font-size, text-darkblue"/>
                                 <Label text="C = Clear Signature" styleClass="font-size, text-darkblue"/>
                             </VBox>
                         </HBox>

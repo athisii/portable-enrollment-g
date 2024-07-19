@@ -129,7 +129,7 @@ public class SignatureController extends AbstractBaseController {
     @FXML
     private BorderPane borderPane;
     @FXML
-    private ImageView recordGifImgView;
+    private ImageView startCapturingImgView;
     @FXML
     private ImageView writingGifImgView;
     @FXML
@@ -459,13 +459,13 @@ public class SignatureController extends AbstractBaseController {
     }
 
     public void keyTypeAction(KeyEvent keyEvent) {
-        if ("R".equalsIgnoreCase(keyEvent.getCharacter())) {
+        if ("S".equalsIgnoreCase(keyEvent.getCharacter())) {
             if (capture) {
                 //another worker is still running.
                 return;
             }
             capture = true;
-            recordGifImgView.setVisible(true);
+            startCapturingImgView.setVisible(true);
             Touchpad touchpad = new Touchpad(TOUCHPAD_DEVICE);
             if (!touchpad.isInitialized()) {
                 LOGGER.log(Level.SEVERE, "Touchpad initialization failed with code");
@@ -478,9 +478,9 @@ public class SignatureController extends AbstractBaseController {
             stopGifImgView.setVisible(false);
             App.getThreadPool().execute(() -> startRecordingTouchpadEvent(touchpad));
         }
-        if ("S".equalsIgnoreCase(keyEvent.getCharacter())) {
+        if ("E".equalsIgnoreCase(keyEvent.getCharacter())) {
             capture = false;
-            recordGifImgView.setVisible(false);
+            startCapturingImgView.setVisible(false);
             messageLabel.setText(DEFAULT_MESSAGE);
             enableControls(backBtn, clearBtn, saveSignatureBtn);
             stopGifImgView.setVisible(true);
@@ -574,7 +574,10 @@ public class SignatureController extends AbstractBaseController {
             } else if (touchpadEvent.code == TOUCHPAD_LIB.getTouchCode()) {
                 if (touchpadEvent.touch == TOUCHPAD_LIB.isTouched()) {
                     firstPaint = true;
-                    Platform.runLater(() -> writingGifImgView.setVisible(true));
+                    Platform.runLater(() -> {
+                        writingGifImgView.setVisible(true);
+                        startCapturingImgView.setVisible(false);
+                    });
                 } else {
                     lastX = -1;
                     lastY = -1;
@@ -585,6 +588,7 @@ public class SignatureController extends AbstractBaseController {
                     double finalMaxY = maxY;
                     Platform.runLater(() -> {
                         writingGifImgView.setVisible(false);
+                        startCapturingImgView.setVisible(true);
                         showPreview(finalMinX, finalMinY, finalMaxX, finalMaxY);
                     });
                 }

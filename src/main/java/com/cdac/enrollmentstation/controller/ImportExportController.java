@@ -201,7 +201,7 @@ public class ImportExportController extends AbstractBaseController {
             if (saveEnrollmentResDto.getErrorCode() != 0) {
                 String errorMessage = saveEnrollmentResDto.getDesc().toLowerCase();
                 LOGGER.log(Level.SEVERE, () -> "Error Desc: " + errorMessage);
-                if (!errorMessage.contains("already provided")) {
+                if (saveEnrollmentResDto.getErrorCode() == -1) {
                     continue;
                 }
             }

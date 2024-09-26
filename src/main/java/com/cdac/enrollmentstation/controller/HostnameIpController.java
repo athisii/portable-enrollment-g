@@ -1,15 +1,19 @@
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
+import com.cdac.enrollmentstation.api.DirectoryLookup;
 import com.cdac.enrollmentstation.constant.ApplicationConstant;
+import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
+import com.cdac.enrollmentstation.util.PropertyFile;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,6 +30,8 @@ import static com.cdac.enrollmentstation.constant.ApplicationConstant.SCENE_ROOT
 
 public class HostnameIpController extends AbstractBaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(HostnameIpController.class);
+    private static final String IP_REGEX = "^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$"; // ipv4 address
+
     @FXML
     private Label messageLabel;
     @FXML
@@ -43,14 +49,22 @@ public class HostnameIpController extends AbstractBaseController {
     @FXML
     private Button backBtn;
     @FXML
-    private Button homeBtn;
+    private TextField ldapUrl;
+    @FXML
+    private VBox confirmVbox;
+    @FXML
+    private Button confirmYesBtn;
+    @FXML
+    private Button confirmNoBtn;
 
     private String interfaceName;
 
     public void initialize() {
         backBtn.setOnAction(event -> backBtnAction());
         saveBtn.setOnAction(event -> saveBtnAction());
-        homeBtn.setOnAction(event -> homeBtnAction());
+        confirmNoBtn.setOnAction(event -> confirmNoBtnAction());
+        confirmYesBtn.setOnAction(event -> confirmYesBtnAction());
+
         interfaceName = getInterfaceName();
         setTextFieldValuesOnUI(); // only set after getting all required fields
 
@@ -61,37 +75,52 @@ public class HostnameIpController extends AbstractBaseController {
         dnsIpTextField.setOnKeyPressed(event -> clearMessageLabelIfNotBlank());
     }
 
+    private void confirmYesBtnAction() {
+        messageLabel.setText("Updating the system configuration. Please wait.");
+        confirmVbox.setVisible(false);
+        confirmVbox.setManaged(false);
+        App.getThreadPool().execute(this::saveChanges);
+    }
+
+    private void confirmNoBtnAction() {
+        confirmVbox.setVisible(false);
+        confirmVbox.setManaged(false);
+        enableControls(backBtn, saveBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrl);
+    }
+
     private void clearMessageLabelIfNotBlank() {
         if (!messageLabel.getText().isBlank()) {
             messageLabel.setText("");
         }
     }
 
-    private void homeBtnAction() {
-        try {
-            App.setRoot("login");
-        } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
-        }
-    }
-
-
     private void backBtnAction() {
         try {
-            App.setRoot("online_login");
+            if ("1".equals(PropertyFile.getProperty(PropertyName.INITIAL_SETUP).trim())) {
+                App.setRoot("online_login");
+            } else {
+                App.setRoot("admin_config");
+            }
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
         }
     }
 
     private void saveIpaddressToFile() throws IOException {
-        String content = "auto lo\niface lo inet loopback\n" + "\nauto " + interfaceName + "\niface " + interfaceName + " inet static" + "\naddress\t" + ipAddressTextField.getText() + "\nnetmask\t" + subnetMaskTextField.getText();
+        String content = "auto lo\niface lo inet loopback\n" + "\nauto " + interfaceName +
+                "\niface " + interfaceName + " inet static" +
+                "\naddress\t" + ipAddressTextField.getText() +
+                "\nnetmask\t" + subnetMaskTextField.getText();
 
         if (!defaultGatewayTextField.getText().isBlank()) {
             content += "\ngateway\t" + defaultGatewayTextField.getText();
         }
         if (!dnsIpTextField.getText().isBlank()) {
-            content += "\ndns-nameservers\t" + dnsIpTextField.getText();
+            String[] dnsIps = dnsIpTextField.getText().split(",");
+            content += "\ndns-nameservers\t";
+            for (String dnsIp : dnsIps) {
+                content += dnsIp.trim() + " ";
+            }
         }
         content += "\n";
         Files.writeString(Paths.get("/etc/network/interfaces"), content);
@@ -128,33 +157,65 @@ public class HostnameIpController extends AbstractBaseController {
     }
 
     private void saveBtnAction() {
-        String regex = "^[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?$"; // linux hostname
-        if (!hostnameTextField.getText().matches(regex)) {
+        String hostnameRegex = "^[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?$"; // linux hostname
+        if (!hostnameTextField.getText().matches(hostnameRegex)) {
             messageLabel.setText("Enter a valid hostname(alphanumeric chars).");
             return;
         }
-        regex = "^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$"; // ipv4 address
 
-        if (!ipAddressTextField.getText().matches(regex)) {
+        if (!ipAddressTextField.getText().matches(IP_REGEX)) {
             messageLabel.setText("Enter a valid ip address.");
             return;
         }
-        if (!subnetMaskTextField.getText().matches(regex)) {
+        if (!subnetMaskTextField.getText().matches(IP_REGEX)) {
             messageLabel.setText("Enter a valid subnet mask.");
             return;
         }
-        if (!defaultGatewayTextField.getText().isBlank() && (!defaultGatewayTextField.getText().matches(regex))) {
+        if (defaultGatewayTextField.getText().isBlank() || (!defaultGatewayTextField.getText().matches(IP_REGEX))) {
             messageLabel.setText("Enter a valid default gateway.");
             return;
         }
 
-        if (!dnsIpTextField.getText().isBlank() && (!dnsIpTextField.getText().matches(regex))) {
-            messageLabel.setText("Enter a valid dns ip.");
+        if (dnsIpTextField.getText().isBlank()) {
+            messageLabel.setText("DNS IP cannot be blank.");
             return;
         }
-        messageLabel.setText("Updating the system configuration. Please wait.");
-        disableControls(backBtn, homeBtn, saveBtn);
-        App.getThreadPool().execute(this::saveChanges);
+
+        String[] dnsIps = dnsIpTextField.getText().split(",");
+        StringBuilder tempDnsIp = new StringBuilder();
+        for (String dnsIp : dnsIps) {
+            if (!dnsIp.trim().matches(IP_REGEX)) {
+                messageLabel.setText("Enter a valid comma separated dns ip address(s).");
+                return;
+            }
+            // remove unnecessary commas 192.168.1.1,,,
+            tempDnsIp.append(dnsIp).append(",");
+        }
+        // if the last char is comma(,)
+        tempDnsIp.deleteCharAt(tempDnsIp.length() - 1);
+        dnsIpTextField.setText(tempDnsIp.toString());
+
+        if (ldapUrl.getText().isBlank()) {
+            messageLabel.setText("LDAP URL cannot be blank.");
+            return;
+        }
+
+        String[] ldapUrlParts = ldapUrl.getText().split(":");
+        if (ldapUrlParts.length < 2) {
+            messageLabel.setText("Invalid LDAP URL.");
+            return;
+        }
+
+        if (!"ldap".equalsIgnoreCase(ldapUrlParts[0]) && !"ldaps".equalsIgnoreCase(ldapUrlParts[0])) {
+            messageLabel.setText("Invalid LDAP URL scheme. Use either 'ldap' or 'ldaps'.");
+            return;
+        }
+        ldapUrl.setText(ldapUrl.getText().trim().toLowerCase()); // in case if user type in uppercase
+
+        // should ask for the confirmation before saving
+        confirmVbox.setVisible(true);
+        confirmVbox.setManaged(true);
+        disableControls(backBtn, saveBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrl);
     }
 
     private void disableControls(Node... nodes) {
@@ -172,23 +233,32 @@ public class HostnameIpController extends AbstractBaseController {
     private void saveChanges() {
         try {
             saveIpaddressToFile();
+            restartNetworkingService();
+//            // only do for production as there is no ldap connection in MISCOS
+            if ("0".equals(PropertyFile.getProperty(PropertyName.ENV).trim())) {
+                // test connection with the ldap server: only proceed if connection is established
+                DirectoryLookup.doLookup("test", "password");
+            }
+            PropertyFile.changePropertyValue(PropertyName.LDAP_URL, ldapUrl.getText().trim());
+            PropertyFile.changePropertyValue(PropertyName.INITIAL_SETUP, "0");
             if (!getHostname().equals(hostnameTextField.getText())) {
                 setHostname();
                 // reboot system
                 App.getThreadPool().execute(this::rebootSystem);
                 return;
             }
-            restartNetworkingService();
         } catch (Exception ex) {
-            enableControls(backBtn, homeBtn, saveBtn);
-            LOGGER.log(Level.INFO, () -> "***Error: " + ex.getMessage());
-            if (ex instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
+            if (!ApplicationConstant.INVALID_CREDENTIALS.equals(ex.getMessage())) {
+                enableControls(backBtn, saveBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrl);
+                LOGGER.log(Level.INFO, () -> "***Error: " + ex.getMessage());
+                if (ex instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
+                updateUI(ex.getMessage());
+                return;
             }
-            updateUI(ex.getMessage());
-            return;
         }
-        enableControls(backBtn, homeBtn, saveBtn);
+        enableControls(backBtn);
         LOGGER.log(Level.INFO, () -> "System configuration saved successfully.");
         updateUI("System configuration updated successfully.");
     }
@@ -221,9 +291,8 @@ public class HostnameIpController extends AbstractBaseController {
             LOGGER.log(Level.INFO, () -> "**Error while rebooting: " + ex.getMessage());
             updateUI(ApplicationConstant.GENERIC_ERR_MSG);
         }
-        enableControls(backBtn, homeBtn, saveBtn);
+        enableControls(backBtn);
     }
-
 
     private void updateUI(String message) {
         Platform.runLater(() -> messageLabel.setText(message));
@@ -242,10 +311,16 @@ public class HostnameIpController extends AbstractBaseController {
                 } else if (entry[0].equalsIgnoreCase("gateway")) {
                     defaultGatewayTextField.setText(entry[1]);
                 } else if (entry[0].equalsIgnoreCase("dns-nameservers")) {
-                    dnsIpTextField.setText(entry[1]);
+                    StringBuilder dnsIps = new StringBuilder();
+                    for (int i = 1; i < entry.length - 1; i++) {
+                        dnsIps.append(entry[i]).append(",");
+                    }
+                    dnsIps.append(entry[entry.length - 1]);
+                    dnsIpTextField.setText(dnsIps.toString());
                 }
             });
             hostnameTextField.setText(getHostname());
+            ldapUrl.setText(PropertyFile.getProperty(PropertyName.LDAP_URL));
         } catch (Exception ex) {
             LOGGER.log(Level.INFO, () -> "***Error: " + ex.getMessage());
             messageLabel.setText(ex.getMessage());
@@ -257,7 +332,7 @@ public class HostnameIpController extends AbstractBaseController {
             Process process = Runtime.getRuntime().exec("hostname");
             BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line = input.readLine();
-            if (line == null) {
+            if (line == null || line.isBlank()) {
                 LOGGER.log(Level.INFO, () -> "***Error: Received null value hostname");
                 throw new GenericException("Failed to get hostname.");
             }
@@ -290,7 +365,7 @@ public class HostnameIpController extends AbstractBaseController {
         int exitVal = process.waitFor();
         if (exitVal != 0) {
             LOGGER.log(Level.INFO, () -> "***Error: Process Exit Value: " + exitVal);
-            throw new GenericException("Something went wrong. Please try again.");
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
     }
 

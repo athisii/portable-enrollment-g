@@ -102,10 +102,10 @@
                         <ImageView fitWidth="${_imgContainerMedium4.prefWidth}"
                                    fitHeight="${_imgContainerMedium4.prefHeight}"
                                    preserveRatio="true">
-                            <Image url="@../img/close.png"/>
+                            <Image url="@../gif/settings.gif"/>
                         </ImageView>
                     </HBox>
-                    <Button styleClass="btn-large, press-effect" onAction="#closeApp" text="CLOSE APP"/>
+                    <Button fx:id="editHostnameBtn" styleClass="btn-large, press-effect" onAction="#editHostnameIp" text="EDIT HOSTNAME/IP"/>
                 </VBox>
                 <Region styleClass="min-width-medium"/>
                 <VBox alignment="BOTTOM_CENTER">
@@ -113,6 +113,18 @@
                           alignment="CENTER">
                         <ImageView fitWidth="${_imgContainerMedium5.prefWidth}"
                                    fitHeight="${_imgContainerMedium5.prefHeight}"
+                                   preserveRatio="true">
+                            <Image url="@../img/close.png"/>
+                        </ImageView>
+                    </HBox>
+                    <Button styleClass="btn-large, press-effect" onAction="#closeApp" text="CLOSE APP"/>
+                </VBox>
+                <Region styleClass="min-width-medium"/>
+                <VBox alignment="BOTTOM_CENTER">
+                    <HBox fx:id="_imgContainerMedium6" styleClass="img-container-medium, padding-small"
+                          alignment="CENTER">
+                        <ImageView fitWidth="${_imgContainerMedium6.prefWidth}"
+                                   fitHeight="${_imgContainerMedium6.prefHeight}"
                                    preserveRatio="true">
                             <Image url="@../img/back.png"/>
                         </ImageView>

@@ -38,6 +38,7 @@ public class AdminConfigController extends AbstractBaseController {
         }
     }
 
+
     @FXML
     private TextField nfiqTextField;
     @FXML
@@ -52,6 +53,8 @@ public class AdminConfigController extends AbstractBaseController {
     private TextField liveFpTextField;
     @FXML
     private Button liveFpBtn;
+    @FXML
+    private Button editHostnameBtn;
 
     @FXML
     private ComboBox<String> cameraComboBox;
@@ -83,6 +86,7 @@ public class AdminConfigController extends AbstractBaseController {
             liveFpBtn.setDisable(true);
             nfiqBtn.setDisable(true);
             serverConfigBtn.setDisable(true);
+            editHostnameBtn.setDisable(true);
         }
 
     }
@@ -178,6 +182,10 @@ public class AdminConfigController extends AbstractBaseController {
         App.setRoot("main_screen");
     }
 
+    @FXML
+    public void editHostnameIp() throws IOException {
+        App.setRoot("hostname_ip");
+    }
 
     @Override
     public void onUncaughtException() {

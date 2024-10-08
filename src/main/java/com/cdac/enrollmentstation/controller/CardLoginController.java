@@ -134,7 +134,11 @@ public class CardLoginController extends AbstractBaseController {
             fileTypeToAsn1EncodedByteArrayMap = startProcedureCallForPN();
         } catch (NoReaderOrCardException | GenericException ex) {
             cardPasswordField.clear();
-            updateUI(ex.getMessage());
+            if ("Selected File deactivated.".equalsIgnoreCase(ex.getMessage())) {
+                updateUI("The card is deactivated. Please activate it and try again.");
+            } else {
+                updateUI(ex.getMessage());
+            }
             enableControls(backBtn, loginBtn);
             return;
         } catch (ConnectionTimeoutException ex) {

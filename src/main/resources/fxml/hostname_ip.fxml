@@ -35,8 +35,11 @@
     </right>
     <center>
         <VBox alignment="CENTER">
-            <Label styleClass="padding-small, font-size"
-                   text="ONCE THE CONFIGURATION IS SAVED, IT CAN ONLY BE CHANGED AFTER AUTHENTICATION"/>
+            <Label styleClass="padding, font-size-small"
+                   text="KINDLY SET THE NETWORK CONFIGURATIONS."/>
+            <Label styleClass="font-size-small"
+                   text="ONCE SAVED, IT CAN ONLY BE CHANGED AFTER LOGGING IN."/>
+            <Region styleClass="min-height"/>
             <VBox alignment="CENTER" styleClass="border-color-darkblue, border-radius-medium">
                 <VBox>
                     <Region styleClass="min-height-large"/>
@@ -80,9 +83,9 @@
                 <Label fx:id="messageLabel"/>
                 <Region styleClass="min-height"/>
             </VBox>
-            <Region styleClass="min-height-medium"/>
+            <Region styleClass="min-height-small"/>
             <HBox alignment="CENTER">
-                <VBox fx:id="confirmVbox" styleClass="padding-small, confirm-box"
+                <VBox fx:id="confirmVbox" styleClass="padding, confirm-box"
                       alignment="CENTER"
                       managed="false"
                       visible="false">
@@ -96,7 +99,7 @@
                     </HBox>
                 </VBox>
             </HBox>
-            <Region styleClass="min-height-medium"/>
+            <Region styleClass="min-height-small"/>
             <HBox alignment="CENTER">
                 <Button fx:id="backBtn" styleClass="btn-medium, press-effect" text="BACK"/>
                 <Region styleClass="min-width-large"/>

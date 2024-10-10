@@ -56,12 +56,16 @@ public class HostnameIpController extends AbstractBaseController {
     private Button confirmYesBtn;
     @FXML
     private Button confirmNoBtn;
+    @FXML
+    private Button defaultBtn;
 
     private String interfaceName;
 
     public void initialize() {
         backBtn.setOnAction(event -> backBtnAction());
         saveBtn.setOnAction(event -> saveBtnAction());
+        defaultBtn.setOnAction(event -> defaultBtnAction());
+
         confirmNoBtn.setOnAction(event -> confirmNoBtnAction());
         confirmYesBtn.setOnAction(event -> confirmYesBtnAction());
 
@@ -73,7 +77,31 @@ public class HostnameIpController extends AbstractBaseController {
         subnetMaskTextField.setOnKeyPressed(event -> clearMessageLabelIfNotBlank());
         defaultGatewayTextField.setOnKeyPressed(event -> clearMessageLabelIfNotBlank());
         dnsIpTextField.setOnKeyPressed(event -> clearMessageLabelIfNotBlank());
+        ldapUrl.setOnKeyPressed(event -> clearMessageLabelIfNotBlank());
+
     }
+
+    private void defaultBtnAction() {
+        ipAddressTextField.setText("192.168.1.2");
+        subnetMaskTextField.setText("255.255.255.0");
+        defaultGatewayTextField.setText("192.168.1.1");
+        dnsIpTextField.setText("192.168.1.3");
+        ldapUrl.setText("ldap://192.168.1.4:389");
+        PropertyFile.changePropertyValue(PropertyName.LDAP_URL, ldapUrl.getText());
+        PropertyFile.changePropertyValue(PropertyName.INITIAL_SETUP, "1");
+        try {
+            saveIpaddressToFile();
+            restartNetworkingService();
+        } catch (Exception ex) {
+            if (ex instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            updateUI(ex.getMessage());
+            return;
+        }
+        messageLabel.setText("System configuration reset successfully.");
+    }
+
 
     private void confirmYesBtnAction() {
         messageLabel.setText("Updating the system configuration. Please wait.");
@@ -85,7 +113,7 @@ public class HostnameIpController extends AbstractBaseController {
     private void confirmNoBtnAction() {
         confirmVbox.setVisible(false);
         confirmVbox.setManaged(false);
-        enableControls(backBtn, saveBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrl);
+        enableControls(backBtn, saveBtn, defaultBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrl);
     }
 
     private void clearMessageLabelIfNotBlank() {
@@ -215,7 +243,7 @@ public class HostnameIpController extends AbstractBaseController {
         // should ask for the confirmation before saving
         confirmVbox.setVisible(true);
         confirmVbox.setManaged(true);
-        disableControls(backBtn, saveBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrl);
+        disableControls(backBtn, saveBtn, defaultBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrl);
     }
 
     private void disableControls(Node... nodes) {
@@ -249,7 +277,7 @@ public class HostnameIpController extends AbstractBaseController {
             }
         } catch (Exception ex) {
             if (!ApplicationConstant.INVALID_CREDENTIALS.equals(ex.getMessage())) {
-                enableControls(backBtn, saveBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrl);
+                enableControls(backBtn, saveBtn, defaultBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrl);
                 LOGGER.log(Level.INFO, () -> "***Error: " + ex.getMessage());
                 if (ex instanceof InterruptedException) {
                     Thread.currentThread().interrupt();

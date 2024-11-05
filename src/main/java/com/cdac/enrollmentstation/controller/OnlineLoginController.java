@@ -1,7 +1,9 @@
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
+import com.cdac.enrollmentstation.api.MafisServerApi;
 import com.cdac.enrollmentstation.constant.PropertyName;
+import com.cdac.enrollmentstation.dto.UserResDto;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.security.AuthUtil;
@@ -15,7 +17,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 
 import java.io.IOException;
@@ -31,9 +32,8 @@ import static com.cdac.enrollmentstation.constant.ApplicationConstant.SCENE_ROOT
 public class OnlineLoginController extends AbstractBaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(OnlineLoginController.class);
     private static final int MAX_LENGTH = 30;
-    private static boolean isDone = false;
-    @FXML
-    private Button editHostnameIpBtn;
+    private volatile boolean isDone = false;
+
     @FXML
     private Button backBtn;
     @FXML
@@ -46,27 +46,17 @@ public class OnlineLoginController extends AbstractBaseController {
     private PasswordField passwordField;
 
     @FXML
-    private TextField textField;
-    @FXML
-    private HBox hostnameVBox;
+    private TextField usernameTextField;
+
 
     @FXML
-    private void homeBtnAction() throws IOException {
+    private void backBtnAction() throws IOException {
         App.setRoot("login");
     }
 
-    private void editHostnameIpBtnAction() {
-        try {
-            App.setRoot("hostname_ip");
-        } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
-        }
-    }
-
-
     @FXML
     private void loginBtnAction() {
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(3), event -> {
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(5), event -> {
             if (!isDone) {
                 statusMsg.setText("The server is taking more time than expected. Kindly try again.");
                 enableControls(backBtn, loginBtn);
@@ -80,7 +70,11 @@ public class OnlineLoginController extends AbstractBaseController {
 
     private void authenticateUser() {
         try {
-            if (AuthUtil.authenticate(textField.getText(), passwordField.getText())) {
+            if (!"admin".equalsIgnoreCase(usernameTextField.getText())) {
+                MafisServerApi.validateUserCategory(new UserResDto(usernameTextField.getText(), PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_ID), "FES", PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_ID)));
+                LOGGER.info("Done validating user category.");
+            }
+            if (AuthUtil.authenticate(usernameTextField.getText(), passwordField.getText())) {
                 // must set on JavaFX thread.
                 Platform.runLater(() -> {
                     try {
@@ -95,7 +89,7 @@ public class OnlineLoginController extends AbstractBaseController {
             }
             LOGGER.log(Level.INFO, "Incorrect username or password.");
             updateUi("Wrong username or password.");
-        } catch (GenericException ex) {
+        } catch (Exception ex) {
             updateUi(ex.getMessage());
         }
         isDone = true;
@@ -106,9 +100,9 @@ public class OnlineLoginController extends AbstractBaseController {
 
     public void initialize() {
         //restrict the TextField Length
-        textField.textProperty().addListener((observable, oldValue, newValue) -> limitCharacters(textField, oldValue, newValue));
+        usernameTextField.textProperty().addListener((observable, oldValue, newValue) -> limitCharacters(usernameTextField, oldValue, newValue));
         passwordField.textProperty().addListener((observable, oldValue, newValue) -> limitCharacters(passwordField, oldValue, newValue));
-        textField.setOnKeyPressed(event -> {
+        usernameTextField.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
                 passwordField.requestFocus();
                 event.consume();
@@ -119,11 +113,6 @@ public class OnlineLoginController extends AbstractBaseController {
                 loginBtnAction();
             }
         });
-        editHostnameIpBtn.setOnAction(event -> editHostnameIpBtnAction());
-        if ("1".equals(PropertyFile.getProperty(PropertyName.INITIAL_SETUP).trim())) {
-            hostnameVBox.setVisible(true);
-            hostnameVBox.setManaged(true);
-        }
         App.setNudLogin(true);
     }
 
@@ -139,8 +128,8 @@ public class OnlineLoginController extends AbstractBaseController {
 
     private void clearPasswordField() {
         Platform.runLater(() -> {
-            textField.requestFocus();
-            textField.setText("");
+            usernameTextField.requestFocus();
+            usernameTextField.setText("");
             passwordField.setText("");
         });
     }

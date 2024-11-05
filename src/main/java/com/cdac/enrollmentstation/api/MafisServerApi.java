@@ -226,6 +226,29 @@ public class MafisServerApi {
         return enrollmentStationUnitId;
     }
 
+    /**
+     * Fetches all whitelisted card details.
+     * Caller must handle the exception.
+     *
+     * @throws GenericException exception on connection timeout, error, json parsing exception etc.
+     */
+
+    public static List<CardWhitelistDetail> fetchWhitelistedCard() {
+        HttpResponse<String> response = HttpUtil.sendHttpRequest(HttpUtil.createGetHttpRequest(getWhitelistedCardApiUrl()));
+        CardWhitelistResDto cardWhitelistResDto;
+        try {
+            cardWhitelistResDto = Singleton.getObjectMapper().readValue(response.body(), CardWhitelistResDto.class);
+        } catch (JsonProcessingException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+        }
+        if (cardWhitelistResDto.getErrorCode() != 0) {
+            LOGGER.log(Level.INFO, () -> ApplicationConstant.GENERIC_SERVER_ERR_MSG + cardWhitelistResDto.getDesc());
+            throw new GenericException(cardWhitelistResDto.getDesc());
+        }
+        return cardWhitelistResDto.getCardWhitelistDetails();
+    }
+
     public static String getArcUrl() {
         return getMafisApiUrl() + "/GetDetailsByARCNo";
     }
@@ -234,4 +257,33 @@ public class MafisServerApi {
         return getMafisApiUrl() + "/SaveEnrollment";
     }
 
+    public static String getWhitelistedCardApiUrl() {
+        return getMafisApiUrl() + "/GetCardWhitelistDetails";
+    }
+    public static void validateUserCategory(UserResDto userResDto) {
+        String jsonRequestData;
+        try {
+            jsonRequestData = Singleton.getObjectMapper().writeValueAsString(userResDto);
+        } catch (JsonProcessingException e) {
+            LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+        }
+
+        HttpResponse<String> response = HttpUtil.sendHttpRequest(HttpUtil.createPostHttpRequest(getUserUrl(), jsonRequestData));
+        CommonResDto commonResDto;
+        try {
+            commonResDto = Singleton.getObjectMapper().readValue(response.body(), CommonResDto.class);
+        } catch (JsonProcessingException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+        }
+        if (commonResDto.getErrorCode() != 0) {
+            LOGGER.log(Level.INFO, () -> ApplicationConstant.GENERIC_SERVER_ERR_MSG + commonResDto.getDesc());
+            throw new GenericException(commonResDto.getDesc());
+        }
+    }
+
+    public static String getUserUrl() {
+        return getMafisApiUrl() + "/GetDetailValidFesPesUser";
+    }
 }

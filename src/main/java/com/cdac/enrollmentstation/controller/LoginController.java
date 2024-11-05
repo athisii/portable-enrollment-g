@@ -1,7 +1,9 @@
 package com.cdac.enrollmentstation.controller;
 
 import com.cdac.enrollmentstation.App;
+import com.cdac.enrollmentstation.constant.PropertyName;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
+import com.cdac.enrollmentstation.util.PropertyFile;
 import javafx.fxml.FXML;
 
 import java.io.IOException;
@@ -13,8 +15,11 @@ public class LoginController extends AbstractBaseController {
 
     @FXML
     private void onlineLogin() throws IOException {
-        App.setRoot("online_login");
-
+        if ("1".equals(PropertyFile.getProperty(PropertyName.INITIAL_SETUP).trim())) {
+            App.setRoot("hostname_ip");
+        } else {
+            App.setRoot("online_login");
+        }
     }
 
     @FXML

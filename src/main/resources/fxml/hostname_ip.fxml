@@ -76,7 +76,7 @@
                     <HBox alignment="CENTER">
                         <Label text="LDAP URL" alignment="CENTER" styleClass="label-border-style"/>
                         <Region styleClass="min-width-medium"/>
-                        <TextField fx:id="ldapUrl" promptText="ldap://192.168.1.11:389" styleClass="input-field"/>
+                        <TextField fx:id="ldapUrlTextField" promptText="ldap://192.168.1.11:389" styleClass="input-field"/>
                     </HBox>
                 </VBox>
                 <Region styleClass="min-height-small"/>

@@ -50,7 +50,7 @@
                                 </ImageView>
                             </HBox>
                             <Region styleClass="min-width-medium"/>
-                            <TextField fx:id="textField" styleClass="input-field" promptText="Username"/>
+                            <TextField fx:id="usernameTextField" styleClass="input-field" promptText="Username"/>
                         </HBox>
                         <Region styleClass="min-height-medium"/>
                         <HBox alignment="CENTER">
@@ -71,28 +71,13 @@
                 </VBox>
                 <Region styleClass="min-height-medium"/>
                 <HBox alignment="CENTER">
-                    <Button fx:id="backBtn" styleClass="btn-medium, press-effect" onAction="#homeBtnAction"
+                    <Button fx:id="backBtn" styleClass="btn-medium, press-effect" onAction="#backBtnAction"
                             text="BACK"/>
                     <Region styleClass="min-width-medium"/>
                     <Button fx:id="loginBtn" styleClass="btn-medium, press-effect" onAction="#loginBtnAction"
                             text="LOGIN"/>
                 </HBox>
             </VBox>
-            <HBox fx:id="hostnameVBox" visible="false" managed="false">
-                <Region styleClass="min-width-xlarge"/>
-                <VBox alignment="CENTER">
-                    <HBox alignment="TOP_RIGHT" styleClass="padding">
-                        <HBox styleClass="img-container">
-                            <ImageView fitWidth="${_imgContainer.prefWidth}" fitHeight="${_imgContainer.prefHeight}"
-                                       preserveRatio="true">
-                                <Image url="@../gif/settings.gif"/>
-                            </ImageView>
-                        </HBox>
-                        <Button fx:id="editHostnameIpBtn" styleClass="padding-small, press-effect, bg-border-radius-small"
-                                text="EDIT HOSTNAME/IP"/>
-                    </HBox>
-                </VBox>
-            </HBox>
         </HBox>
     </center>
     <bottom>

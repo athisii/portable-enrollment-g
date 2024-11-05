@@ -24,8 +24,8 @@ import java.util.logging.Logger;
 public class App extends Application {
     private static final Logger LOGGER = ApplicationLog.getLogger(App.class);
     private static AbstractBaseController controller;
-
     private static volatile boolean isNudLogin;
+    private static volatile boolean hostnameChanged = false;
     private static Scene scene;
     // GLOBAL THREAD POOL for the application.
     private static final ExecutorService executorService;
@@ -71,6 +71,13 @@ public class App extends Application {
     public static void main(String[] args) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         launch();
+    }
+    public static void setHostnameChanged(boolean value) {
+        App.hostnameChanged = value;
+    }
+
+    public static boolean getHostnameChanged() {
+        return App.hostnameChanged;
     }
 
     public static ExecutorService getThreadPool() {

@@ -1,10 +1,7 @@
 package com.cdac.enrollmentstation.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.List;
 
 /**
  * @author athisii, CDAC
@@ -16,9 +13,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CardWhitelistResDto {
-    @JsonProperty("cardWhitelistDetails")
-    List<CardWhitelistDetail> cardWhitelistDetails;
-    int errorCode;
-    String desc;
+public class UserResDto {
+    String pno;
+    String deviceSerialNo;
+    String hardwareType;
+    String unitCode;
 }

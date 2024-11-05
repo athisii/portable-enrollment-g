@@ -49,7 +49,7 @@ public class HostnameIpController extends AbstractBaseController {
     @FXML
     private Button backBtn;
     @FXML
-    private TextField ldapUrl;
+    private TextField ldapUrlTextField;
     @FXML
     private VBox confirmVbox;
     @FXML
@@ -77,8 +77,7 @@ public class HostnameIpController extends AbstractBaseController {
         subnetMaskTextField.setOnKeyPressed(event -> clearMessageLabelIfNotBlank());
         defaultGatewayTextField.setOnKeyPressed(event -> clearMessageLabelIfNotBlank());
         dnsIpTextField.setOnKeyPressed(event -> clearMessageLabelIfNotBlank());
-        ldapUrl.setOnKeyPressed(event -> clearMessageLabelIfNotBlank());
-
+        ldapUrlTextField.setOnKeyPressed(event -> clearMessageLabelIfNotBlank());
     }
 
     private void defaultBtnAction() {
@@ -86,8 +85,8 @@ public class HostnameIpController extends AbstractBaseController {
         subnetMaskTextField.setText("255.255.255.0");
         defaultGatewayTextField.setText("192.168.1.1");
         dnsIpTextField.setText("192.168.1.3");
-        ldapUrl.setText("ldap://192.168.1.4:389");
-        PropertyFile.changePropertyValue(PropertyName.LDAP_URL, ldapUrl.getText());
+        ldapUrlTextField.setText("ldap://192.168.1.4:389");
+        PropertyFile.changePropertyValue(PropertyName.LDAP_URL, ldapUrlTextField.getText());
         PropertyFile.changePropertyValue(PropertyName.INITIAL_SETUP, "1");
         try {
             saveIpaddressToFile();
@@ -113,7 +112,7 @@ public class HostnameIpController extends AbstractBaseController {
     private void confirmNoBtnAction() {
         confirmVbox.setVisible(false);
         confirmVbox.setManaged(false);
-        enableControls(backBtn, saveBtn, defaultBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrl);
+        enableControls(backBtn, saveBtn, defaultBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrlTextField);
     }
 
     private void clearMessageLabelIfNotBlank() {
@@ -125,7 +124,7 @@ public class HostnameIpController extends AbstractBaseController {
     private void backBtnAction() {
         try {
             if ("1".equals(PropertyFile.getProperty(PropertyName.INITIAL_SETUP).trim())) {
-                App.setRoot("online_login");
+                App.setRoot("login");
             } else {
                 App.setRoot("admin_config");
             }
@@ -223,12 +222,12 @@ public class HostnameIpController extends AbstractBaseController {
         tempDnsIp.deleteCharAt(tempDnsIp.length() - 1);
         dnsIpTextField.setText(tempDnsIp.toString());
 
-        if (ldapUrl.getText().isBlank()) {
+        if (ldapUrlTextField.getText().isBlank()) {
             messageLabel.setText("LDAP URL cannot be blank.");
             return;
         }
 
-        String[] ldapUrlParts = ldapUrl.getText().split(":");
+        String[] ldapUrlParts = ldapUrlTextField.getText().split(":");
         if (ldapUrlParts.length < 2) {
             messageLabel.setText("Invalid LDAP URL.");
             return;
@@ -238,12 +237,12 @@ public class HostnameIpController extends AbstractBaseController {
             messageLabel.setText("Invalid LDAP URL scheme. Use either 'ldap' or 'ldaps'.");
             return;
         }
-        ldapUrl.setText(ldapUrl.getText().trim().toLowerCase()); // in case if user type in uppercase
+        ldapUrlTextField.setText(ldapUrlTextField.getText().trim().toLowerCase()); // in case if user type in uppercase
 
         // should ask for the confirmation before saving
         confirmVbox.setVisible(true);
         confirmVbox.setManaged(true);
-        disableControls(backBtn, saveBtn, defaultBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrl);
+        disableControls(backBtn, saveBtn, defaultBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrlTextField);
     }
 
     private void disableControls(Node... nodes) {
@@ -262,22 +261,20 @@ public class HostnameIpController extends AbstractBaseController {
         try {
             saveIpaddressToFile();
             restartNetworkingService();
+            PropertyFile.changePropertyValue(PropertyName.LDAP_URL, ldapUrlTextField.getText().trim());
 //            // only do for production as there is no ldap connection in MISCOS
             if ("0".equals(PropertyFile.getProperty(PropertyName.ENV).trim())) {
                 // test connection with the ldap server: only proceed if connection is established
                 DirectoryLookup.doLookup("test", "password");
             }
-            PropertyFile.changePropertyValue(PropertyName.LDAP_URL, ldapUrl.getText().trim());
-            PropertyFile.changePropertyValue(PropertyName.INITIAL_SETUP, "0");
             if (!getHostname().equals(hostnameTextField.getText())) {
                 setHostname();
-                // reboot system
-                App.getThreadPool().execute(this::rebootSystem);
-                return;
+                App.setHostnameChanged(true);
             }
+            App.setRoot("server_config");
         } catch (Exception ex) {
             if (!ApplicationConstant.INVALID_CREDENTIALS.equals(ex.getMessage())) {
-                enableControls(backBtn, saveBtn, defaultBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrl);
+                enableControls(backBtn, saveBtn, defaultBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrlTextField);
                 LOGGER.log(Level.INFO, () -> "***Error: " + ex.getMessage());
                 if (ex instanceof InterruptedException) {
                     Thread.currentThread().interrupt();
@@ -285,41 +282,9 @@ public class HostnameIpController extends AbstractBaseController {
                 updateUI(ex.getMessage());
                 return;
             }
+            LOGGER.log(Level.INFO, () -> "Error: " + ex.getMessage());
+            enableControls(backBtn);
         }
-        enableControls(backBtn);
-        LOGGER.log(Level.INFO, () -> "System configuration saved successfully.");
-        updateUI("System configuration updated successfully.");
-    }
-
-    private void rebootSystem() {
-        try {
-            int counter = 5;
-            while (counter >= 1) {
-                updateUI("Rebooting system to take effect in " + counter + " second(s)...");
-                Thread.sleep(1000);
-                counter--;
-            }
-            Process process = Runtime.getRuntime().exec("reboot");
-            BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            String eline;
-            while ((eline = error.readLine()) != null) {
-                String finalEline = eline;
-                LOGGER.log(Level.INFO, () -> "***Error: " + finalEline);
-            }
-            error.close();
-            int exitVal = process.waitFor();
-            if (exitVal != 0) {
-                LOGGER.log(Level.INFO, () -> "***Error: Process Exit Value: " + exitVal);
-                updateUI(ApplicationConstant.GENERIC_ERR_MSG);
-            }
-        } catch (Exception ex) {
-            if (ex instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
-            LOGGER.log(Level.INFO, () -> "**Error while rebooting: " + ex.getMessage());
-            updateUI(ApplicationConstant.GENERIC_ERR_MSG);
-        }
-        enableControls(backBtn);
     }
 
     private void updateUI(String message) {
@@ -348,7 +313,7 @@ public class HostnameIpController extends AbstractBaseController {
                 }
             });
             hostnameTextField.setText(getHostname());
-            ldapUrl.setText(PropertyFile.getProperty(PropertyName.LDAP_URL));
+            ldapUrlTextField.setText(PropertyFile.getProperty(PropertyName.LDAP_URL));
         } catch (Exception ex) {
             LOGGER.log(Level.INFO, () -> "***Error: " + ex.getMessage());
             messageLabel.setText(ex.getMessage());

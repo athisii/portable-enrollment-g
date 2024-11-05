@@ -33,19 +33,9 @@
                 <HBox styleClass="border-color-darkblue, border-radius-medium, padding-small" alignment="CENTER">
                     <VBox styleClass="padding-medium">
                         <HBox>
-                            <Label text="Whitelisted Card API URL:" focusTraversable="true"/>
-                            <Region styleClass="min-width-small"/>
-                            <TextField fx:id="whitelistedCardUrlTextField" styleClass="input-field"/>
-                            <Region styleClass="min-width-small"/>
-                            <Button fx:id="downloadWhitelistedCardBtn" styleClass="btn-large, press-effect"
-                                    onAction="#fetchBtnAction"
-                                    text="Download Whitelisted Card"/>
-                        </HBox>
-                        <Region styleClass="min-height-medium"/>
-                        <HBox>
                             <VBox alignment="CENTER_LEFT">
                                 <HBox>
-                                    <Label text="Mafis API Server URL :"/>
+                                    <Label focusTraversable="true" text="Mafis API Server URL :"/>
                                     <Region styleClass="min-width-small"/>
                                     <TextField fx:id="mafisUrlTextField" styleClass="input-field"/>
                                 </HBox>
@@ -77,11 +67,14 @@
                                 </HBox>
                             </VBox>
                             <Region styleClass="min-width-small"/>
-                            <HBox HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT">
+                            <VBox HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT">
+                                <Button fx:id="downloadWhitelistedCardBtn" styleClass="btn-large, press-effect"
+                                        text="Download Whitelisted Card"/>
+                                <Region styleClass="min-height-medium"/>
                                 <Button fx:id="fetchUnitsBtn" styleClass="btn-medium, press-effect"
                                         onAction="#fetchBtnAction"
-                                        text="FETCH"/>
-                            </HBox>
+                                        text="Fetch Units"/>
+                            </VBox>
                         </HBox>
                     </VBox>
                 </HBox>

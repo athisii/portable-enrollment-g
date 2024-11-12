@@ -101,7 +101,7 @@ public class MafisServerApi {
 
         if (base64EncodedUniqueKeyOptional.isEmpty()) {
             LOGGER.log(Level.SEVERE, "Unique key header not found in http response");
-            throw new GenericException("Unique Key not received from the server.");
+            throw new GenericException("There are some technical issues in saving biometric data. Kindly provide your biometrics again.");
         }
         // received base64 encoded encrypted secret key from server
         byte[] encryptedSecretKey = Base64.getDecoder().decode(base64EncodedUniqueKeyOptional.get());
@@ -242,6 +242,7 @@ public class MafisServerApi {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
+        LOGGER.log(Level.INFO, () -> "***ServerResponseErrorCode: " + cardWhitelistResDto.getErrorCode());
         if (cardWhitelistResDto.getErrorCode() != 0) {
             LOGGER.log(Level.INFO, () -> ApplicationConstant.GENERIC_SERVER_ERR_MSG + cardWhitelistResDto.getDesc());
             throw new GenericException(cardWhitelistResDto.getDesc());
@@ -277,6 +278,7 @@ public class MafisServerApi {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
         }
+        LOGGER.log(Level.INFO, () -> "***ServerResponseErrorCode: " + commonResDto.getErrorCode());
         if (commonResDto.getErrorCode() != 0) {
             LOGGER.log(Level.INFO, () -> ApplicationConstant.GENERIC_SERVER_ERR_MSG + commonResDto.getDesc());
             throw new GenericException(commonResDto.getDesc());

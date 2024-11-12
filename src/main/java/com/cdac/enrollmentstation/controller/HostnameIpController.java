@@ -271,6 +271,13 @@ public class HostnameIpController extends AbstractBaseController {
                 setHostname();
                 App.setHostnameChanged(true);
             }
+            // if user changes in the setting after login
+            if ("0".equals(PropertyFile.getProperty(PropertyName.INITIAL_SETUP).trim())) {
+                enableControls(backBtn, saveBtn, defaultBtn, hostnameTextField, ipAddressTextField, subnetMaskTextField, defaultGatewayTextField, dnsIpTextField, ldapUrlTextField);
+                PropertyFile.changePropertyValue(PropertyName.INITIAL_SETUP, "0"); // initial setup done.
+                updateUI("System configuration updated successfully.");
+                return;
+            }
             App.setRoot("server_config");
         } catch (Exception ex) {
             if (!ApplicationConstant.INVALID_CREDENTIALS.equals(ex.getMessage())) {

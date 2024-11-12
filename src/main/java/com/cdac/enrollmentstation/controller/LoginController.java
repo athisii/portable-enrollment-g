@@ -27,6 +27,10 @@ public class LoginController extends AbstractBaseController {
         App.setRoot("card_login");
     }
 
+    public void initialize() {
+        App.setNudLogin(false);
+    }
+
     @Override
     public void onUncaughtException() {
         LOGGER.log(Level.SEVERE, "***Unhandled exception occurred.");

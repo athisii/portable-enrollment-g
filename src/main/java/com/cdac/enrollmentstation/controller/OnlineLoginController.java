@@ -78,6 +78,7 @@ public class OnlineLoginController extends AbstractBaseController {
                 // must set on JavaFX thread.
                 Platform.runLater(() -> {
                     try {
+                        App.setNudLogin(true);
                         App.setRoot("main_screen");
                     } catch (IOException ex) {
                         LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
@@ -113,7 +114,6 @@ public class OnlineLoginController extends AbstractBaseController {
                 loginBtnAction();
             }
         });
-        App.setNudLogin(true);
     }
 
     private void limitCharacters(TextField textField, String oldValue, String newValue) {

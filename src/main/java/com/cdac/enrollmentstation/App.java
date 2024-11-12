@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 public class App extends Application {
     private static final Logger LOGGER = ApplicationLog.getLogger(App.class);
     private static AbstractBaseController controller;
-    private static volatile boolean isNudLogin;
+    private static volatile boolean isNudLogin = false;
     private static volatile boolean hostnameChanged = false;
     private static Scene scene;
     // GLOBAL THREAD POOL for the application.
@@ -72,6 +72,7 @@ public class App extends Application {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         launch();
     }
+
     public static void setHostnameChanged(boolean value) {
         App.hostnameChanged = value;
     }

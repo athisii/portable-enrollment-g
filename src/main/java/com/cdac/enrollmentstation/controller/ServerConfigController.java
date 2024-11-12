@@ -89,7 +89,7 @@ public class ServerConfigController extends AbstractBaseController {
             App.setHostnameChanged(false);
             disableControls(mafisUrlTextField, enrollmentStationIdTextField, fetchUnitsBtn, homeBtn, unitIdDropDownHBox, downloadWhitelistedCardBtn);
             App.getThreadPool().execute(this::rebootSystem);
-        } else if (App.isNudLogin()) {
+        } else if (App.isNudLogin() && "0".equalsIgnoreCase(PropertyFile.getProperty(PropertyName.INITIAL_SETUP).trim())) {
             App.setRoot("main_screen");
         } else {
             App.setRoot("login");

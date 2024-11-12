@@ -99,6 +99,8 @@ public class HostnameIpController extends AbstractBaseController {
             return;
         }
         messageLabel.setText("System configuration reset successfully.");
+        App.setNudLogin(false);
+        disableControls(saveBtn);
     }
 
 

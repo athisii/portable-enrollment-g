@@ -71,7 +71,10 @@ public class OnlineLoginController extends AbstractBaseController {
     private void authenticateUser() {
         try {
             if (!"admin".equalsIgnoreCase(usernameTextField.getText())) {
-                MafisServerApi.validateUserCategory(new UserResDto(usernameTextField.getText(), PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_ID), "FES", PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_ID)));
+                // Hardware Type Mapping:
+                // PES - 1
+                // FES - 2
+                MafisServerApi.validateUserCategory(new UserResDto(usernameTextField.getText(), PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_ID), "1", PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_ID)));
                 LOGGER.info("Done validating user category.");
             }
             if (AuthUtil.authenticate(usernameTextField.getText(), passwordField.getText())) {

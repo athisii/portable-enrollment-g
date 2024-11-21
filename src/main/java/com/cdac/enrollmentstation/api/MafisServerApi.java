@@ -16,7 +16,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.security.Key;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -97,25 +100,11 @@ public class MafisServerApi {
 
         HttpRequest postHttpRequest = HttpUtil.createPostHttpRequest(getSaveEnrollmentUrl(), base64EncodedEncryptedData, headersMap);
         HttpResponse<String> httpResponse = HttpUtil.sendHttpRequest(postHttpRequest);
-        Optional<String> base64EncodedUniqueKeyOptional = httpResponse.headers().firstValue(UNIQUE_KEY_HEADER);
-
-        if (base64EncodedUniqueKeyOptional.isEmpty()) {
-            LOGGER.log(Level.SEVERE, "Unique key header not found in http response");
-            throw new GenericException("There are some technical issues in saving biometric data. Kindly provide your biometrics again.");
-        }
-        // received base64 encoded encrypted secret key from server
-        byte[] encryptedSecretKey = Base64.getDecoder().decode(base64EncodedUniqueKeyOptional.get());
-        secret = PkiUtil.decrypt(encryptedSecretKey);
-        key = Aes256Util.genKey(secret);
-
-        // Received base64 encoded encrypted data
-        byte[] encryptedResponseBody = Base64.getDecoder().decode(httpResponse.body());
-        String receivedData = Aes256Util.decrypt(encryptedResponseBody, key);
 
         // response data from server
         SaveEnrollmentResDto saveEnrollmentResDto;
         try {
-            saveEnrollmentResDto = Singleton.getObjectMapper().readValue(receivedData, SaveEnrollmentResDto.class);
+            saveEnrollmentResDto = Singleton.getObjectMapper().readValue(httpResponse.body(), SaveEnrollmentResDto.class);
         } catch (JsonProcessingException ignored) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_READ_ERR_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
@@ -261,6 +250,7 @@ public class MafisServerApi {
     public static String getWhitelistedCardApiUrl() {
         return getMafisApiUrl() + "/GetCardWhitelistDetails";
     }
+
     public static void validateUserCategory(UserResDto userResDto) {
         String jsonRequestData;
         try {

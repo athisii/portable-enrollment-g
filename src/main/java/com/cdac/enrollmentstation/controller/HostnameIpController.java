@@ -92,9 +92,6 @@ public class HostnameIpController extends AbstractBaseController {
             saveIpaddressToFile();
             restartNetworkingService();
         } catch (Exception ex) {
-            if (ex instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
             updateUI(ex.getMessage());
             return;
         }
@@ -157,9 +154,10 @@ public class HostnameIpController extends AbstractBaseController {
 
 
     private String getInterfaceName() {
+        BufferedReader input = null;
         try {
             Process process = Runtime.getRuntime().exec("ip -o link show");
-            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            input = new BufferedReader(new InputStreamReader(process.getInputStream()));
             LinkedList<String> interfaces = new LinkedList<>();
             String line;
             while ((line = input.readLine()) != null) {
@@ -169,7 +167,6 @@ public class HostnameIpController extends AbstractBaseController {
                 LOGGER.log(Level.INFO, () -> "Error: Number of interfaces is less than 2 (including loopback)");
                 throw new GenericException("Failed to get interface name.");
             }
-            input.close();
             int exitVal = process.waitFor();
             if (exitVal != 0) {
                 LOGGER.log(Level.INFO, () -> "***Error: Process Exit Value: " + exitVal);
@@ -182,6 +179,14 @@ public class HostnameIpController extends AbstractBaseController {
                 Thread.currentThread().interrupt();
             }
             throw new GenericException(ex.getMessage());
+        } finally {
+            try {
+                if (input != null) {
+                    input.close();
+                }
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, e::getMessage);
+            }
         }
     }
 
@@ -330,15 +335,15 @@ public class HostnameIpController extends AbstractBaseController {
     }
 
     private String getHostname() {
+        BufferedReader input = null;
         try {
             Process process = Runtime.getRuntime().exec("hostname");
-            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            input = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line = input.readLine();
             if (line == null || line.isBlank()) {
                 LOGGER.log(Level.INFO, () -> "***Error: Received null value hostname");
                 throw new GenericException("Failed to get hostname.");
             }
-            input.close();
             int exitVal = process.waitFor();
             if (exitVal != 0) {
                 LOGGER.log(Level.INFO, () -> "***Error: Process Exit Value: " + exitVal);
@@ -351,23 +356,47 @@ public class HostnameIpController extends AbstractBaseController {
                 Thread.currentThread().interrupt();
             }
             throw new GenericException(ex.getMessage());
+        } finally {
+            try {
+                if (input != null) {
+                    input.close();
+                }
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, e::getMessage);
+            }
         }
     }
 
-    private void setHostname() throws IOException, InterruptedException {
+    private void setHostname() {
         String[] command = createCommand();
-        Process process = Runtime.getRuntime().exec(command);
-        BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-        String eline;
-        while ((eline = error.readLine()) != null) {
-            String finalEline = eline;
-            LOGGER.log(Level.INFO, () -> "***Error: " + finalEline);
-        }
-        error.close();
-        int exitVal = process.waitFor();
-        if (exitVal != 0) {
-            LOGGER.log(Level.INFO, () -> "***Error: Process Exit Value: " + exitVal);
-            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+        BufferedReader error = null;
+        try {
+            Process process = Runtime.getRuntime().exec(command);
+            error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            String eline;
+            while ((eline = error.readLine()) != null) {
+                String finalEline = eline;
+                LOGGER.log(Level.INFO, () -> "***Error: " + finalEline);
+            }
+            int exitVal = process.waitFor();
+            if (exitVal != 0) {
+                LOGGER.log(Level.INFO, () -> "***Error: Process Exit Value: " + exitVal);
+                throw new GenericException("Re-throwing error.");
+            }
+        } catch (Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            LOGGER.log(Level.INFO, () -> "***Error: " + e.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG); // to be caught by caller.
+        } finally {
+            try {
+                if (error != null) {
+                    error.close();
+                }
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, e::getMessage);
+            }
         }
     }
 
@@ -380,21 +409,36 @@ public class HostnameIpController extends AbstractBaseController {
     }
 
     private void restartNetworkingService() throws IOException, InterruptedException {
-        Process process = Runtime.getRuntime().exec("systemctl restart networking");
-        BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-        String eline;
-        while ((eline = error.readLine()) != null) {
-            String finalEline = eline;
-            LOGGER.log(Level.INFO, () -> "***Error: " + finalEline);
-        }
-        error.close();
-        int exitVal = process.waitFor();
-        if (exitVal != 0) {
-            LOGGER.log(Level.INFO, () -> "***Error: Process Exit Value: " + exitVal);
-            throw new GenericException("Failed to restart networking service.");
+        BufferedReader error = null;
+        try {
+            Process process = Runtime.getRuntime().exec("systemctl restart networking");
+            error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            String eline;
+            while ((eline = error.readLine()) != null) {
+                String finalEline = eline;
+                LOGGER.log(Level.INFO, () -> "***Error: " + finalEline);
+            }
+            int exitVal = process.waitFor();
+            if (exitVal != 0) {
+                LOGGER.log(Level.INFO, () -> "***Error: Process Exit Value: " + exitVal);
+                throw new GenericException("Re-throwing error.");
+            }
+        } catch (Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            LOGGER.log(Level.INFO, () -> "***Error: " + e.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG); // to be caught by caller.
+        } finally {
+            try {
+                if (error != null) {
+                    error.close();
+                }
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, e::getMessage);
+            }
         }
     }
-
 
     @Override
     public void onUncaughtException() {

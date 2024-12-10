@@ -10,12 +10,12 @@ import com.cdac.enrollmentstation.exception.ConnectionTimeoutException;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.exception.NoReaderOrCardException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
-import com.cdac.enrollmentstation.model.CardFp;
 import org.bouncycastle.asn1.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -179,50 +179,22 @@ public class Asn1CardTokenUtil {
      * @throws GenericException - on null, io
      */
     public static byte[] extractFromAsn1EncodedStaticData(byte[] bytes, int index) {
-        try {
-            ASN1InputStream asn1InputStream = new ASN1InputStream(new ByteArrayInputStream(bytes));
+        try (ASN1InputStream asn1InputStream = new ASN1InputStream(new ByteArrayInputStream(bytes))) {
             ASN1Primitive asn1Primitive = asn1InputStream.readObject();
             if (asn1Primitive instanceof ASN1Sequence) {
                 ASN1Sequence asn1Sequence = ASN1Sequence.getInstance(asn1Primitive);
                 ASN1Encodable asn1SequenceObject = asn1Sequence.getObjectAt(index);
-                if (asn1SequenceObject instanceof ASN1OctetString) {
+                if (asn1SequenceObject instanceof ASN1OctetString asn1OctetString) {
                     LOGGER.log(Level.INFO, "****ExtractFromAsn1EncodedStaticData: OctetString type parsed.");
-                    return ((ASN1OctetString) asn1SequenceObject).getOctets(); // encoded in hex
+                    return asn1OctetString.getOctets(); // encoded in hex
                 }
                 return asn1SequenceObject.toString().getBytes();
             }
-            if (asn1Primitive instanceof ASN1OctetString) {
+            if (asn1Primitive instanceof ASN1OctetString asn1OctetString) {
                 LOGGER.log(Level.INFO, "****ExtractFromAsn1EncodedStaticData: OctetString type parsed.");
-                return ((ASN1OctetString) asn1Primitive).getOctets();
+                return asn1OctetString.getOctets();
             }
             return asn1Primitive.toString().getBytes();
-        } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage());
-            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
-        }
-    }
-
-    /**
-     * Utility to decode ASN1 encoded fingerprint. Caller must handle the exception
-     *
-     * @param bytes - byte array of ASN1 encoded data.
-     * @return the string representation of data.
-     * @throws GenericException - on null, io
-     */
-    public static List<CardFp> extractFromAsn1EncodedFingerprintData(byte[] bytes) {
-        // TODO: to be tested and improved.
-        try {
-            ASN1InputStream asn1InputStream = new ASN1InputStream(new ByteArrayInputStream(bytes));
-            ASN1Primitive asn1Primitive = asn1InputStream.readObject();
-            Enumeration<ASN1Sequence> sequences = DERSet.getInstance(asn1Primitive).getObjects();
-            List<CardFp> fps = new ArrayList<>();
-            while (sequences.hasMoreElements()) {
-                ASN1Sequence sequence = sequences.nextElement();
-                String fpPosition = DERIA5String.getInstance(sequence.getObjectAt(0)).toString();
-                byte[] image = DEROctetString.getInstance(sequence.getObjectAt(1)).getOctets();
-                fps.add(new CardFp(fpPosition, image));
-            }
-            return fps;
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);

@@ -70,8 +70,8 @@ public class OnlineLoginController extends AbstractBaseController {
 
     private void authenticateUser() {
         try {
-            // PROD environment
-            if ("0".equals(PropertyFile.getProperty(PropertyName.ENV))) {
+            // allow admin to log in in dev env
+            if (!("admin".equals(usernameTextField.getText()) && "1".equals(PropertyFile.getProperty(PropertyName.ENV)))) {
                 LOGGER.log(Level.INFO, () -> "*****  Validating user category ********");
                 // Hardware Type Mapping:
                 //      PES - 1

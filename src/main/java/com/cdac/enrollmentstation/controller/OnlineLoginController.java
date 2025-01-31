@@ -3,7 +3,7 @@ package com.cdac.enrollmentstation.controller;
 import com.cdac.enrollmentstation.App;
 import com.cdac.enrollmentstation.api.MafisServerApi;
 import com.cdac.enrollmentstation.constant.PropertyName;
-import com.cdac.enrollmentstation.dto.UserResDto;
+import com.cdac.enrollmentstation.dto.UserReqDto;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.security.AuthUtil;
@@ -76,7 +76,7 @@ public class OnlineLoginController extends AbstractBaseController {
                 // Hardware Type Mapping:
                 //      PES - 1
                 //      FES - 2
-                MafisServerApi.validateUserCategory(new UserResDto(username, PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_ID), "1", PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_ID)));
+                MafisServerApi.validateUserCategory(new UserReqDto(username, PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_ID), "1", PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_ID)));
                 LOGGER.info("Done validating user category.");
             }
 

@@ -251,10 +251,10 @@ public class MafisServerApi {
         return getMafisApiUrl() + "/GetCardWhitelistDetails";
     }
 
-    public static void validateUserCategory(UserResDto userResDto) {
+    public static void validateUserCategory(UserReqDto userReqDto) {
         String jsonRequestData;
         try {
-            jsonRequestData = Singleton.getObjectMapper().writeValueAsString(userResDto);
+            jsonRequestData = Singleton.getObjectMapper().writeValueAsString(userReqDto);
         } catch (JsonProcessingException e) {
             LOGGER.log(Level.SEVERE, ApplicationConstant.JSON_WRITE_ER_MSG);
             throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);

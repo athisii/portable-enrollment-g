@@ -35,45 +35,42 @@
                         <HBox>
                             <VBox alignment="CENTER_LEFT">
                                 <HBox>
-                                    <Label focusTraversable="true" text="Mafis API Server URL :"/>
-                                    <Region styleClass="min-width-small"/>
-                                    <TextField fx:id="mafisUrlTextField" styleClass="input-field"/>
-                                </HBox>
-                                <Region styleClass="min-height-medium"/>
-                                <HBox>
-                                    <Label text="Enrolment Station ID :"/>
-                                    <Region styleClass="min-width-small"/>
-                                    <TextField fx:id="enrollmentStationIdTextField" styleClass="input-field"/>
-                                </HBox>
-                                <Region styleClass="min-height-medium"/>
-                                <HBox>
-                                    <Label text="Enrolment Station Unit ID :"/>
-                                    <Region styleClass="min-width-small"/>
                                     <VBox alignment="CENTER">
-                                        <HBox fx:id="unitIdDropDownHBox" alignment="CENTER"
-                                              styleClass="bg-color-purple, bg-border-radius, padding, press-effect">
-                                            <Label fx:id="unitCaptionLabel" alignment="CENTER" styleClass="drop-down-label"
-                                                   text="Unit Id Caption"
-                                            />
-                                            <ImageView fx:id="downArrowImageView" preserveRatio="true">
-                                                <Image url="@../img/down_arrow.png"/>
-                                            </ImageView>
-                                            <ImageView fx:id="upArrowImageView" preserveRatio="true" visible="false">
-                                                <Image url="@../img/up_arrow.png"/>
-                                            </ImageView>
-                                        </HBox>
-                                        <VBox fx:id="hiddenVbox" visible="false"/>
+                                        <Label text="Mafis API Server URL :" focusTraversable="true"/>
                                     </VBox>
+                                    <Region styleClass="min-width-small"/>
+                                    <TextField fx:id="mafisUrlTextField" styleClass="input-field-small"/>
+                                </HBox>
+                                <Region styleClass="min-height-medium"/>
+                                <HBox>
+                                    <VBox alignment="CENTER">
+                                        <Label text="Enrolment Station ID :"/>
+                                    </VBox>
+                                    <Region styleClass="min-width-small"/>
+                                    <Label fx:id="enrollmentStationIdTextField"
+                                           styleClass="border-color-black, padding, border-radius"/>
+                                </HBox>
+                                <Region styleClass="min-height-medium"/>
+                                <HBox>
+                                    <VBox alignment="CENTER">
+                                        <Label text="Enrolment Station Unit ID :"/>
+                                    </VBox>
+                                    <Region styleClass="min-width-small"/>
+                                    <Label fx:id="unitCaptionLabel" alignment="CENTER"
+                                           styleClass="border-color-black, padding, border-radius"
+                                           text="Unit Id Caption"
+                                    />
                                 </HBox>
                             </VBox>
                             <Region styleClass="min-width-small"/>
                             <VBox HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT">
+                                <Button fx:id="validateBtn" styleClass="btn-medium, press-effect"
+                                        onAction="#validateBtnAction"
+                                        text="VALIDATE"/>
+                                <Region styleClass="min-height-medium"/>
                                 <Button fx:id="downloadWhitelistedCardBtn" styleClass="btn-large, press-effect"
                                         text="Download Whitelisted Card"/>
-                                <Region styleClass="min-height-medium"/>
-                                <Button fx:id="fetchUnitsBtn" styleClass="btn-medium, press-effect"
-                                        onAction="#fetchBtnAction"
-                                        text="Fetch Units"/>
+
                             </VBox>
                         </HBox>
                     </VBox>

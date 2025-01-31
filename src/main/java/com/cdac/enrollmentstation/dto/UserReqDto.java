@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResDto {
+public class UserReqDto {
     String pno;
     String deviceSerialNo;
     String hardwareType;

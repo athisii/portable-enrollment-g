@@ -114,6 +114,9 @@
 .border-color-darkblue {
     -fx-border-color: darkblue;
 }
+.border-color-black {
+    -fx-border-color: black;
+}
 
 /* padding */
 .padding {

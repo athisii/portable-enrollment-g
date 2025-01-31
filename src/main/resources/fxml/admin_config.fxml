@@ -102,10 +102,11 @@
                         <ImageView fitWidth="${_imgContainerMedium4.prefWidth}"
                                    fitHeight="${_imgContainerMedium4.prefHeight}"
                                    preserveRatio="true">
-                            <Image url="@../gif/settings.gif"/>
+                            <Image url="@../img/reset_app.png"/>
                         </ImageView>
                     </HBox>
-                    <Button fx:id="editHostnameBtn" styleClass="btn-large, press-effect" onAction="#editHostnameIp" text="EDIT HOSTNAME/IP"/>
+                    <Button fx:id="deOnboardBtn" styleClass="btn-large, press-effect" onAction="#deOnboardAction"
+                            text="DE-ONBOARD SYSTEM"/>
                 </VBox>
                 <Region styleClass="min-width-medium"/>
                 <VBox alignment="BOTTOM_CENTER">

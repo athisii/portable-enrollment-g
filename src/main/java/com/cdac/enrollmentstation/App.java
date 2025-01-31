@@ -15,6 +15,7 @@ import javafx.stage.StageStyle;
 import org.opencv.core.Core;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,6 +30,8 @@ public class App extends Application {
     private static Scene scene;
     // GLOBAL THREAD POOL for the application.
     private static final ExecutorService executorService;
+    private static volatile String pno;
+    private static List<String> enrollmentStationIds;
 
     static {
         int processorCount = Runtime.getRuntime().availableProcessors();
@@ -91,6 +94,22 @@ public class App extends Application {
 
     public static boolean isNudLogin() {
         return isNudLogin;
+    }
+
+    public static void setPno(String pno) {
+        App.pno = pno;
+    }
+
+    public static String getPno() {
+        return App.pno;
+    }
+
+    public static void setEnrollmentStationIds(List<String> enrollmentStationIds) {
+        App.enrollmentStationIds = enrollmentStationIds != null ? enrollmentStationIds.stream().sorted().toList() : null;
+    }
+
+    public static List<String> getEnrollmentStationIds() {
+        return App.enrollmentStationIds;
     }
 
     public static String getCssFileName() {

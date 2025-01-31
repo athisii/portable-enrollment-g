@@ -31,7 +31,7 @@
                             </ImageView>
                         </HBox>
                         <Region styleClass="min-height-medium"/>
-                        <Button styleClass="btn-large, press-effect" onAction="#offlineLogin"
+                        <Button fx:id="idLoginBtn" styleClass="btn-large, press-effect" onAction="#offlineLogin"
                                 text="I-CARD LOGIN"/>
                     </VBox>
                     <Region styleClass="min-width-xlarge"/>
@@ -48,6 +48,12 @@
                                 text="NUD LOGIN"/>
                     </VBox>
                 </HBox>
+                <VBox fx:id="onboardMsgVBox" alignment="BASELINE_CENTER" managed="false">
+                    <Region styleClass="min-height-xlarge"/>
+                    <Region styleClass="min-height-xlarge"/>
+                    <Label styleClass="font-size-medium"
+                           text="Kindly click the NUD LOGIN button to onboard the system."/>
+                </VBox>
             </VBox>
         </VBox>
     </center>

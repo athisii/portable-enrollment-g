@@ -54,7 +54,7 @@ public class AdminConfigController extends AbstractBaseController {
     @FXML
     private Button liveFpBtn;
     @FXML
-    private Button editHostnameBtn;
+    private Button deOnboardBtn;
 
     @FXML
     private ComboBox<String> cameraComboBox;
@@ -86,7 +86,7 @@ public class AdminConfigController extends AbstractBaseController {
             liveFpBtn.setDisable(true);
             nfiqBtn.setDisable(true);
             serverConfigBtn.setDisable(true);
-            editHostnameBtn.setDisable(true);
+            deOnboardBtn.setDisable(true);
         }
 
     }
@@ -183,8 +183,8 @@ public class AdminConfigController extends AbstractBaseController {
     }
 
     @FXML
-    public void editHostnameIp() throws IOException {
-        App.setRoot("hostname_ip");
+    public void deOnboardAction() throws IOException {
+        App.setRoot("de_onboard");
     }
 
     @Override

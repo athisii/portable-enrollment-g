@@ -76,7 +76,7 @@ public class OnlineLoginController extends AbstractBaseController {
                 // Hardware Type Mapping:
                 //      PES - 1
                 //      FES - 2
-                MafisServerApi.validateUserCategory(new UserReqDto(username, PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_ID), "1", PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_ID)));
+                MafisServerApi.validateUserCategory(new UserReqDto(username, PropertyFile.getProperty(PropertyName.DEVICE_SERIAL_NO), "1", PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_ID)));
                 LOGGER.info("Done validating user category.");
             }
 

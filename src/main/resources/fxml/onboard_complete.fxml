@@ -22,7 +22,7 @@
                         <Image url="@../gif/settings.gif"/>
                     </ImageView>
                 </HBox>
-                <Label styleClass="press-effect, padding-small, bg-border-radius-small" text="SERVER CONFIGURATION"/>
+                <Label styleClass="press-effect, padding-small, bg-border-radius-small" text="UNIT CONFIGURATION"/>
             </HBox>
             <HBox alignment="CENTER" styleClass="padding-medium">
                 <Label fx:id="messageLabel"/>

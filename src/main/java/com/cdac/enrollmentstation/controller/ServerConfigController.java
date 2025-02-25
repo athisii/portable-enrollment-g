@@ -36,6 +36,8 @@ import static com.cdac.enrollmentstation.constant.ApplicationConstant.GENERIC_ER
 public class ServerConfigController extends AbstractBaseController {
     private static final Logger LOGGER = ApplicationLog.getLogger(ServerConfigController.class);
     @FXML
+    private Label serialNoOfDevice;
+    @FXML
     private Label unitCaptionLabel;
 
     @FXML
@@ -151,6 +153,7 @@ public class ServerConfigController extends AbstractBaseController {
         String enrollmentStationId = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_ID);
         String enrollmentStationUnitId = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_ID);
         String enrollmentStationUnitCaption = PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_UNIT_CAPTION);
+        String deviceSerialNumber = PropertyFile.getProperty(PropertyName.DEVICE_SERIAL_NO);
         if (whitelistedCardUrl.isBlank()) {
             errorMessage += PropertyName.CARD_API_WHITELISTED_URL + commonText;
         }
@@ -166,12 +169,16 @@ public class ServerConfigController extends AbstractBaseController {
         if (enrollmentStationUnitCaption.isBlank()) {
             errorMessage += "\n" + PropertyName.ENROLLMENT_STATION_UNIT_CAPTION + commonText;
         }
+        if (deviceSerialNumber.isBlank()) {
+            errorMessage += "\n" + PropertyName.DEVICE_SERIAL_NO + commonText;
+        }
         if (!errorMessage.isBlank()) {
             throw new GenericException(errorMessage);
         }
         mafisUrlTextField.setText(mafisUrl);
         enrollmentStationIdTextField.setText(enrollmentStationId);
         unitCaptionLabel.setText(enrollmentStationUnitCaption);
+        serialNoOfDevice.setText(deviceSerialNumber);
         downloadWhitelistedCardBtn.setOnAction(event -> downloadWhitelistedCardBtnAction());
 
         // hides in prod

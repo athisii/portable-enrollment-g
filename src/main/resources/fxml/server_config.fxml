@@ -40,7 +40,7 @@
                                                minWidth="${serialNoTxtLbl.width}"/>
                                     </VBox>
                                     <Region styleClass="min-width-small"/>
-                                    <TextField fx:id="mafisUrlTextField" styleClass="input-field-small" disable="true"/>
+                                    <TextField fx:id="mafisUrlTextField" styleClass="input-field-small"/>
                                 </HBox>
                                 <Region styleClass="min-height-medium"/>
                                 <HBox>

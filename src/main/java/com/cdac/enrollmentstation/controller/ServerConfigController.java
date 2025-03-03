@@ -79,7 +79,7 @@ public class ServerConfigController extends AbstractBaseController {
     private void validateBtnAction() {
         homeBtn.requestFocus();
         messageLabel.setText("Validating MAFIS URL...");
-        disableControls(backBtn, homeBtn, validateBtn);
+        disableControls(backBtn, homeBtn, validateBtn, mafisUrlTextField, downloadWhitelistedCardBtn);
         App.getThreadPool().execute(() -> validateServer(mafisUrlTextField.getText()));
     }
 
@@ -94,27 +94,27 @@ public class ServerConfigController extends AbstractBaseController {
             LOGGER.info("Done validating user category.");
         } catch (GenericException ex) {
             updateUi(ex.getMessage());
-            enableControls(backBtn, homeBtn, validateBtn);
+            enableControls(backBtn, homeBtn, validateBtn, mafisUrlTextField, downloadWhitelistedCardBtn);
             PropertyFile.changePropertyValue(PropertyName.MAFIS_API_URL, oldMafisUrl);
             Platform.runLater(() -> mafisUrlTextField.setText(oldMafisUrl));
             return;
         } catch (ConnectionTimeoutException ex) {
             Platform.runLater(() -> {
                 messageLabel.setText("Connection timeout. Please try again.");
-                enableControls(backBtn, homeBtn, validateBtn);
+                enableControls(backBtn, homeBtn, validateBtn, mafisUrlTextField, downloadWhitelistedCardBtn);
                 mafisUrlTextField.setText(oldMafisUrl);
             });
             PropertyFile.changePropertyValue(PropertyName.MAFIS_API_URL, oldMafisUrl);
             return;
         }
         updateUi("MAFIS URL updated successfully.");
-        enableControls(backBtn, homeBtn, validateBtn);
+        enableControls(backBtn, homeBtn, validateBtn, mafisUrlTextField, downloadWhitelistedCardBtn);
     }
 
     private void downloadWhitelistedCardBtnAction() {
         messageLabel.setText("Downloading operators card.");
         homeBtn.requestFocus();
-        disableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, validateBtn);
+        disableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, validateBtn, mafisUrlTextField);
         // should only download allowed personal number.
         App.getThreadPool().execute(() -> {
             List<CardWhitelistDetail> cardWhitelistDetails;
@@ -123,10 +123,10 @@ public class ServerConfigController extends AbstractBaseController {
             } catch (GenericException ex) {
                 LOGGER.log(Level.SEVERE, ex.getMessage());
                 updateUi(ex.getMessage());
-                enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, validateBtn);
+                enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, validateBtn, mafisUrlTextField);
                 return;
             } catch (ConnectionTimeoutException ex) {
-                enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, validateBtn);
+                enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, validateBtn, mafisUrlTextField);
                 updateUi("Connection timeout or received an unexpected value from the server.");
                 return;
             }
@@ -136,11 +136,11 @@ public class ServerConfigController extends AbstractBaseController {
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, e.getMessage());
                 updateUi(GENERIC_ERR_MSG);
-                enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, validateBtn);
+                enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, validateBtn, mafisUrlTextField);
                 return;
             }
             updateUi("Operators card downloaded successfully.");
-            enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, validateBtn);
+            enableControls(backBtn, homeBtn, downloadWhitelistedCardBtn, validateBtn, mafisUrlTextField);
         });
     }
 
@@ -182,11 +182,11 @@ public class ServerConfigController extends AbstractBaseController {
         downloadWhitelistedCardBtn.setOnAction(event -> downloadWhitelistedCardBtnAction());
 
         // hides in prod
-        if ("0".equals(PropertyFile.getProperty(PropertyName.ENV))) {
-            validateBtn.setManaged(false);
-            mafisUrlTextField.setDisable(false);
-            mafisUrlTextField.setEditable(false);
-        }
+//        if ("0".equals(PropertyFile.getProperty(PropertyName.ENV))) {
+//            validateBtn.setManaged(false);
+//            mafisUrlTextField.setDisable(false);
+//            mafisUrlTextField.setEditable(false);
+//        }
     }
 
     private void updateUi(String message) {
@@ -209,7 +209,7 @@ public class ServerConfigController extends AbstractBaseController {
     @Override
     public void onUncaughtException() {
         LOGGER.log(Level.INFO, "***Unhandled exception occurred.");
-        enableControls(backBtn, validateBtn, homeBtn, downloadWhitelistedCardBtn);
+        enableControls(backBtn, validateBtn, homeBtn, downloadWhitelistedCardBtn, mafisUrlTextField);
         updateUi("Received an invalid data from the server.");
     }
 }

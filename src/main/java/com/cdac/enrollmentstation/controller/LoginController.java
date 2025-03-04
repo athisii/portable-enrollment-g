@@ -38,6 +38,7 @@ public class LoginController extends AbstractBaseController {
         if ("1".equals(PropertyFile.getProperty(PropertyName.INITIAL_SETUP).trim())) {
             idLoginBtn.setDisable(true);
             onboardMsgVBox.setManaged(true);
+            onboardMsgVBox.setVisible(true);
         }
     }
 

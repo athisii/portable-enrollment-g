@@ -65,7 +65,7 @@ public class AdminAuthController extends AbstractBaseController {
             }
             LOGGER.log(Level.INFO, "Incorrect username or password.");
             updateUi("Wrong username or password.");
-        } catch (GenericException ex) {
+        } catch (Exception ex) {
             updateUi(ex.getMessage());
         }
         // clean up UI on failure

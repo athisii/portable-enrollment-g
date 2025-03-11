@@ -113,7 +113,7 @@ public class DeOnboardController extends AbstractBaseController {
             restartNetworkingService();
             Platform.runLater(() -> {
                 try {
-                    App.setRoot("main_screen");
+                    App.setRoot("login");
                 } catch (IOException e) {
                     LOGGER.log(Level.SEVERE, e.getMessage(), e);
                 }

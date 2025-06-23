@@ -7,8 +7,8 @@ import com.cdac.enrollmentstation.dto.*;
 import com.cdac.enrollmentstation.exception.GenericException;
 import com.cdac.enrollmentstation.logging.ApplicationLog;
 import com.cdac.enrollmentstation.security.Aes256Util;
+import com.cdac.enrollmentstation.security.DHUtil;
 import com.cdac.enrollmentstation.security.HmacUtil;
-import com.cdac.enrollmentstation.security.PkiUtil;
 import com.cdac.enrollmentstation.util.PropertyFile;
 import com.cdac.enrollmentstation.util.Singleton;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,10 +16,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.security.Key;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,6 +30,8 @@ import java.util.logging.Logger;
 public class MafisServerApi {
     private static final String UNIQUE_KEY_HEADER = "UniqueKey";
     private static final String HASH_KEY_HEADER = "HashKey";
+    private static final String PUBLIC_KEY_HEADER = "PublicKey";
+    private static final String ENROLLMENT_STATION_ID_HEADER = "EnrollmentStationId";
 
     private static final Logger LOGGER = ApplicationLog.getLogger(MafisServerApi.class);
 
@@ -76,27 +77,32 @@ public class MafisServerApi {
      * @throws GenericException exception on error, json parsing exception etc.
      */
     public static SaveEnrollmentResDto postEnrollment(String data) {
+        // Generates key pair
+        KeyPair keyPair = DHUtil.generateKeyPair("EC", "secp256r1");
+        // Exchanges public keys with the server.
+        byte[] mafisPublicKeyBytes = MafisServerApi.exchangePublicKey(PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_ID), Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()));
+        // Obtains Mafis' public key
+        PublicKey mafisPublicKey = DHUtil.generatePublicKey(mafisPublicKeyBytes, "EC");
+        // Generates shared secret
+        byte[] sharedSecretBytes = DHUtil.generateSharedSecretBytes(keyPair.getPrivate(), mafisPublicKey, "ECDH");
+        // only uses first 32 bytes
+        byte[] secret = Arrays.copyOfRange(sharedSecretBytes, 0, 32);
+        Key key = Aes256Util.genKey(secret);
+
         // to avoid encrypt/decrypt problems
         data = data.replace("\n", "");
-        // assigns random secret key at each call
-        String secret = Aes256Util.genUuid();
-
-        // for sending base64 encoded encrypted SECRET KEY to server in HEADER
-        byte[] pkiEncryptedUniqueKey = PkiUtil.encrypt(secret);
-        String base64EncodedPkiEncryptedUniqueKey = Base64.getEncoder().encodeToString(pkiEncryptedUniqueKey);
 
         // encrypts the actual data passed from the method's argument
-        Key key = Aes256Util.genKey(secret);
         byte[] encryptedData = Aes256Util.encrypt(data, key);
         String base64EncodedEncryptedData = Base64.getEncoder().encodeToString(encryptedData);
 
         // hashKey header
         String messageDigest = HmacUtil.genHmacSha256(base64EncodedEncryptedData, secret);
 
-        // need to add unique-key, hash value in request header
+        // need to add enrollment-station-id, hash value in request header
         Map<String, String> headersMap = new HashMap<>();
-        headersMap.put(UNIQUE_KEY_HEADER, base64EncodedPkiEncryptedUniqueKey);
         headersMap.put(HASH_KEY_HEADER, messageDigest);
+        headersMap.put(ENROLLMENT_STATION_ID_HEADER, PropertyFile.getProperty(PropertyName.ENROLLMENT_STATION_ID));
 
         HttpRequest postHttpRequest = HttpUtil.createPostHttpRequest(getSaveEnrollmentUrl(), base64EncodedEncryptedData, headersMap);
         HttpResponse<String> httpResponse = HttpUtil.sendHttpRequest(postHttpRequest);
@@ -339,4 +345,37 @@ public class MafisServerApi {
         return getMafisApiUrl() + "/GetOnBoardFPDevice";
     }
 
+    public static byte[] exchangePublicKey(String enrollmentStationId, String base64EncodedPublicKey) {
+        Map<String, String> headersMap = new HashMap<>();
+        headersMap.put(ENROLLMENT_STATION_ID_HEADER, enrollmentStationId);
+        headersMap.put(PUBLIC_KEY_HEADER, base64EncodedPublicKey);
+        HttpResponse<String> response = HttpUtil.sendHttpRequest(HttpUtil.createHttpRequest(HttpUtil.MethodType.GET, getExchangePublicKeyUrl(), null, headersMap));
+        CommonResDto commonResDto;
+        try {
+            commonResDto = Singleton.getObjectMapper().readValue(response.body(), CommonResDto.class);
+        } catch (JsonProcessingException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            throw new GenericException(ApplicationConstant.GENERIC_ERR_MSG);
+        }
+        LOGGER.log(Level.INFO, () -> "***ServerResponseErrorCode: " + commonResDto.getErrorCode());
+        if (commonResDto.getErrorCode() != 0) {
+            LOGGER.log(Level.INFO, () -> ApplicationConstant.GENERIC_SERVER_ERR_MSG + commonResDto.getDesc());
+            throw new GenericException(commonResDto.getDesc());
+        }
+        String base64EncodedMafisPublicKey = response.headers().firstValue(PUBLIC_KEY_HEADER).orElseThrow(() -> {
+            LOGGER.log(Level.INFO, "ServerResponseError:: Public key header not found.");
+            return new GenericException("Error occurred while exchanging keys. Please try again.");
+        });
+
+        try {
+            return Base64.getDecoder().decode(base64EncodedMafisPublicKey);
+        } catch (Exception ex) {
+            LOGGER.log(Level.INFO, "ServerResponseError:: Received invalid base64 public key from the server.");
+            throw new GenericException("Error occurred while decoding base64 public key. Please try again.");
+        }
+    }
+
+    public static String getExchangePublicKeyUrl() {
+        return getMafisApiUrl() + "/ExchangePublicKey";
+    }
 }

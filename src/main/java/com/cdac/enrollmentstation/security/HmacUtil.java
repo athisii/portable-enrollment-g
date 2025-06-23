@@ -40,9 +40,9 @@ public class HmacUtil {
     });
 
 
-    public static String genHmacSha256(String message, String key) {
+    public static String genHmacSha256(String message, byte[] secret) {
         try {
-            MAC_THREAD_LOCAL.get().init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), ALGORITHM));
+            MAC_THREAD_LOCAL.get().init(new SecretKeySpec(secret, ALGORITHM));
             byte[] bytes = MAC_THREAD_LOCAL.get().doFinal(message.getBytes(StandardCharsets.UTF_8));
             return bytesToHex(bytes);
         } catch (Exception ex) {

@@ -30,7 +30,7 @@
                         <HBox fx:id="_imgContainer1" styleClass="img-container">
                             <ImageView fx:id="refreshIcon" fitWidth="${_imgContainer1.prefWidth}"
                                        fitHeight="${_imgContainer1.prefHeight}" preserveRatio="true">
-                                <Image url="@../img/ezgif.com-resize.png"/>
+                                <Image url="@../img/reload.png"/>
                             </ImageView>
                         </HBox>
                     </HBox>

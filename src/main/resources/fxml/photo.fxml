@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cdac.enrollmentstation.controller.PhotoController">
+    <top>
+        <HBox styleClass="padding, bg-color-bright-blue">
+            <ImageView preserveRatio="true">
+                <Image url="@../img/navy_logo.png"/>
+            </ImageView>
+        </HBox>
+    </top>
+    <center>
+        <VBox>
+            <HBox styleClass="padding">
+                <HBox fx:id="_imgContainer" styleClass="img-container">
+                    <ImageView fitWidth="${_imgContainer.prefWidth}" fitHeight="${_imgContainer.prefHeight}"
+                               preserveRatio="true">
+                        <Image url="@../gif/camera.gif"/>
+                    </ImageView>
+                </HBox>
+                <Label styleClass="press-effect, padding-small, bg-border-radius-small" text="CAPTURE PHOTOGRAPH"/>
+            </HBox>
+            <HBox styleClass="padding, bg-color-darkblue">
+                <Label fx:id="arcLbl" styleClass="padding, text-white" text="00001-A-AB12"/>
+            </HBox>
+            <HBox alignment="CENTER">
+                <StackPane>
+                    <ProgressBar prefWidth="${progressBareLength.width}" progress="0.60"/>
+                    <HBox fx:id="progressBareLength" styleClass="min-height-xlarge, padding">
+                        <Button styleClass="btn-progress, btn-progress-completed, press-effect" text="1"/>
+                        <Region styleClass="min-width-xlarge"/>
+                        <Button styleClass="btn-progress, btn-progress-completed, press-effect" text="2"/>
+                        <Region styleClass="min-width-xlarge"/>
+                        <Button styleClass="btn-progress, btn-progress-completed, press-effect" text="3"/>
+                        <Region styleClass="min-width-xlarge"/>
+                        <Button styleClass="btn-progress, btn-progress-completed, press-effect" text="4"/>
+                        <Region styleClass="min-width-xlarge"/>
+                        <Button styleClass="btn-progress, press-effect" text="5"/>
+                        <Region styleClass="min-width-xlarge"/>
+                        <Button styleClass="btn-progress, press-effect" text="6"/>
+                    </HBox>
+                </StackPane>
+            </HBox>
+            <HBox styleClass="padding-small, img-container" alignment="CENTER">
+                <Label fx:id="messageLabel" text="Adjust camera height, and press 'Start Camera' button."/>
+            </HBox>
+            <Region styleClass="min-height-small"/>
+            <HBox alignment="CENTER">
+                <HBox styleClass="padding-medium, border-color-darkblue, border-radius-medium" alignment="CENTER">
+                    <HBox fx:id="_imgContainerXlarge1" styleClass="img-container-xlarge" alignment="CENTER">
+                        <ImageView fx:id="resultImageView" fitWidth="${_imgContainerXlarge1.prefWidth}"
+                                   fitHeight="${_imgContainerXlarge1.prefHeight}" preserveRatio="true"/>
+                    </HBox>
+                    <Region styleClass="min-width-large"/>
+                    <VBox alignment="CENTER" styleClass="padding, border-radius-small, border-color-darkblue">
+                        <HBox fx:id="_imgContainerXlarge2" styleClass="img-container-xlarge" alignment="CENTER">
+                            <ImageView fx:id="liveImageView" fitWidth="${_imgContainerXlarge2.prefWidth}"
+                                       fitHeight="${_imgContainerXlarge2.prefHeight}"
+                                       preserveRatio="true">
+                                <Image url="@../img/webcam.png"/>
+                            </ImageView>
+                        </HBox>
+                        <Button fx:id="startStopCameraBtn" styleClass="btn-medium, press-effect, text-white"
+                                text="START CAMERA"/>
+                    </VBox>
+                    <Region styleClass="min-width-small"/>
+                    <HBox alignment="CENTER">
+                        <HBox fx:id="_imgContainerLarge2" styleClass="img-container-large"
+                              alignment="CENTER">
+                            <ImageView fx:id="msgIcon" fitWidth="${_imgContainerLarge2.prefWidth}"
+                                       fitHeight="${_imgContainerLarge2.prefHeight}" preserveRatio="true"/>
+                        </HBox>
+                    </HBox>
+                    <Region styleClass="min-width-medium"/>
+                    <VBox alignment="CENTER">
+                        <HBox fx:id="_imgContainerMedium1" styleClass="img-container-medium" alignment="CENTER">
+                            <ImageView fx:id="iconFrame" fitWidth="${_imgContainerMedium1.prefWidth}"
+                                       fitHeight="${_imgContainerMedium1.prefHeight}" preserveRatio="true">
+                                <Image url="@../img/no_mask.png"/>
+                            </ImageView>
+                        </HBox>
+                        <Region styleClass="min-height-medium"/>
+                        <HBox fx:id="_imgContainerMedium2" styleClass="img-container-medium" alignment="CENTER">
+                            <ImageView fx:id="sunGlassIcon" fitWidth="${_imgContainerMedium2.prefWidth}"
+                                       fitHeight="${_imgContainerMedium2.prefHeight}" preserveRatio="true">
+                                <Image url="@../img/no_goggles.png"/>
+                            </ImageView>
+                        </HBox>
+                    </VBox>
+                </HBox>
+            </HBox>
+            <Region styleClass="min-height-small"/>
+            <HBox alignment="CENTER">
+                <VBox fx:id="confirmVbox" styleClass="padding-small, confirm-box"
+                      alignment="CENTER"
+                      visible="false">
+                    <Label fx:id="confirmPaneLbl" styleClass="padding-small"/>
+                    <HBox alignment="CENTER">
+                        <Button fx:id="confirmYesBtn" styleClass="bg-border-radius-small, press-effect" text="Yes"/>
+                        <Region styleClass="min-width-medium"/>
+                        <Button fx:id="confirmNoBtn" styleClass="bg-border-radius-small, press-effect" text="No"/>
+                    </HBox>
+                </VBox>
+            </HBox>
+            <Region styleClass="min-height-small"/>
+            <HBox alignment="CENTER">
+                <Button fx:id="backBtn" styleClass="btn-medium, press-effect" text="BACK"/>
+                <Region styleClass="min-width-medium"/>
+                <Button fx:id="savePhotoBtn" styleClass="btn-medium, press-effect" text="SAVE PHOTO"/>
+            </HBox>
+        </VBox>
+    </center>
+    <bottom>
+        <HBox styleClass="padding, bg-color-bright-blue" alignment="CENTER">
+            <Label styleClass="text-white" text="${controller.appVersion}"/>
+        </HBox>
+    </bottom>
+</BorderPane>

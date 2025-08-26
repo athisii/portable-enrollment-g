@@ -19,7 +19,7 @@
                     <HBox fx:id="_imgContainer" styleClass="img-container">
                         <ImageView fitWidth="${_imgContainer.prefWidth}" fitHeight="${_imgContainer.prefHeight}"
                                    preserveRatio="true">
-                            <Image url="@../img/home_new.png"/>
+                            <Image url="@../img/home.png"/>
                         </ImageView>
                     </HBox>
                     <Label styleClass="press-effect, padding-small, bg-border-radius-small" text="HOME"/>
@@ -55,7 +55,7 @@
                         <ImageView fitWidth="${_imgContainerXLarge.prefWidth}"
                                    fitHeight="${_imgContainerXLarge.prefHeight}"
                                    preserveRatio="true">
-                            <Image url="@../img/import_export_new.png"/>
+                            <Image url="@../img/import_export.png"/>
                         </ImageView>
                     </HBox>
                     <Region styleClass="min-height-medium"/>

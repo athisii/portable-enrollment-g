@@ -71,6 +71,8 @@ public class SignatureController extends AbstractBaseController {
     private static final int TOUCHPAD_MAX_HEIGHT;
     private static final String TOUCHPAD_DEVICE;
     private static final String DEFAULT_MESSAGE = "Kindly sign on the touchpad and click 'SAVE SIGNATURE' button to proceed.";
+    private static final int IMG_SIGNATURE_COMPRESSED_MIN_SIZE_IN_BYTES;
+    private static final int IMG_SIGNATURE_COMPRESSED_MAX_SIZE_IN_BYTES;
 
     static {
         try {
@@ -92,8 +94,10 @@ public class SignatureController extends AbstractBaseController {
             TOUCHPAD_MAX_HEIGHT = touchpadInfo.height;
             LOGGER.log(Level.INFO, () -> "Touchpad device name:" + touchpad.getDeviceName() + ";width:" + TOUCHPAD_MAX_WIDTH + ";height:" + TOUCHPAD_MAX_HEIGHT);
             touchpad.closeDevice(); // just destroy this touchpad instance after getting info about device
-            IMG_SIGNATURE_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.IMG_SIGNATURE_FILE), PropertyName.IMG_SIGNATURE_FILE);
-            IMG_SIGNATURE_COMPRESSED_FILE = requireNonBlank(PropertyFile.getProperty(PropertyName.IMG_SIGNATURE_COMPRESSED_FILE), PropertyName.IMG_SIGNATURE_COMPRESSED_FILE);
+            IMG_SIGNATURE_FILE = PropertyFile.getProperty(PropertyName.IMG_SIGNATURE_FILE);
+            IMG_SIGNATURE_COMPRESSED_FILE = PropertyFile.getProperty(PropertyName.IMG_SIGNATURE_COMPRESSED_FILE);
+            IMG_SIGNATURE_COMPRESSED_MIN_SIZE_IN_BYTES = Integer.parseInt(PropertyFile.getProperty(PropertyName.IMG_SIGNATURE_COMPRESSED_MIN_SIZE));
+            IMG_SIGNATURE_COMPRESSED_MAX_SIZE_IN_BYTES = Integer.parseInt(PropertyFile.getProperty(PropertyName.IMG_SIGNATURE_COMPRESSED_MAX_SIZE));
         } catch (Exception ex) {
             if (ex instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
@@ -301,12 +305,16 @@ public class SignatureController extends AbstractBaseController {
             byteArrayOutputStream.close();
             byte[] data = byteArrayOutputStream.toByteArray();
 
-            if (data.length < 1024) {
+            if (data.length < IMG_SIGNATURE_COMPRESSED_MIN_SIZE_IN_BYTES) {
                 LOGGER.log(Level.WARNING, () -> "Signature byte size: " + data.length);
-                messageLabel.setText("Kindly provide a valid or larger signature.");
+                messageLabel.setText("Kindly provide a larger signature.");
                 return;
             }
-
+            if (data.length > IMG_SIGNATURE_COMPRESSED_MAX_SIZE_IN_BYTES) {
+                LOGGER.log(Level.WARNING, () -> "Signature byte size: " + data.length);
+                messageLabel.setText("Kindly provide a smaller signature.");
+                return;
+            }
             // Convert the resized BufferedImage to WritableImage
             WritableImage wImage = new WritableImage(resizedImage.getWidth(), resizedImage.getHeight());
             wImage = SwingFXUtils.toFXImage(resizedImage, wImage);
@@ -447,15 +455,6 @@ public class SignatureController extends AbstractBaseController {
         enableControls(backBtn);
         Platform.runLater(this::clearBtnAction);
         updateUi("Something went wrong. Kindly try again.");
-    }
-
-    private static String requireNonBlank(String value, String propertyName) {
-        if (value == null || value.isBlank()) {
-            String errorMessage = propertyName + " value is null or blank in " + ApplicationConstant.DEFAULT_PROPERTY_FILE;
-            LOGGER.log(Level.SEVERE, errorMessage);
-            throw new GenericException(errorMessage);
-        }
-        return value;
     }
 
     public void keyTypeAction(KeyEvent keyEvent) {

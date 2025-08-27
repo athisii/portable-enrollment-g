@@ -58,6 +58,8 @@ public class SlapScannerController extends AbstractBaseController {
     private final int fingerprintLivenessValue; // value can be updated on UI too.
     private static final int FP_SEGMENT_WIDTH;
     private static final int FP_SEGMENT_HEIGHT;
+    private static final int FPS_MAX_TOTAL_SIZE_IN_BYTES;
+
     private final int fpNfiqValue;
 
 
@@ -65,7 +67,8 @@ public class SlapScannerController extends AbstractBaseController {
         try {
             FP_SEGMENT_WIDTH = Integer.parseInt(PropertyFile.getProperty(PropertyName.FP_SEGMENT_WIDTH).trim());
             FP_SEGMENT_HEIGHT = Integer.parseInt(PropertyFile.getProperty(PropertyName.FP_SEGMENT_HEIGHT).trim());
-        } catch (RuntimeException ex) {
+            FPS_MAX_TOTAL_SIZE_IN_BYTES = Integer.parseInt(PropertyFile.getProperty(PropertyName.FPS_MAX_TOTAL_SIZE));
+        } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException("Not a number or no entry found.");
         }
@@ -91,7 +94,7 @@ public class SlapScannerController extends AbstractBaseController {
     private volatile int deviceHandler;
     private volatile int captureMode; // to be used when setting capture mode.
     private volatile int slapType; // to be used during segmentation.
-    private volatile boolean duplicateFpFound;
+    private volatile boolean conditionNotMet;
     private final RSDeviceInfo deviceInfo = new RSDeviceInfo();
     private static final AnsiIso ansiIso = new AnsiIso(); // for template conversion
     // GLOBAL map that stores scanned fingerprints. (fingerType -> RSImageInfo mapping)
@@ -321,14 +324,14 @@ public class SlapScannerController extends AbstractBaseController {
         fingerSetTypeToScan = FingerSetType.LEFT;
         Platform.runLater(this::clearFingerprintOnUI);
         // display the message for 2 seconds.
-        if (duplicateFpFound) {
+        if (conditionNotMet) {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
-        duplicateFpFound = false;
+        conditionNotMet = false;
         if (!isDeviceInitialised) {
             LOGGER.log(Level.SEVERE, "Device is not initialised. Status of isDeviceInitialised is 'false'.");
             updateUi(GENERIC_RS_ERR_MSG);
@@ -629,7 +632,7 @@ public class SlapScannerController extends AbstractBaseController {
         jniReturnedCode = RS_SetCaptureMode(deviceHandler, captureMode, RS_AUTO_SENSITIVITY_NORMAL, true);
 
         if (jniReturnedCode != RS_SUCCESS) {
-            LOGGER.log(Level.SEVERE, () -> "***RS_SetCaptureModeError: "+ RS_GetErrString(jniReturnedCode));
+            LOGGER.log(Level.SEVERE, () -> "***RS_SetCaptureModeError: " + RS_GetErrString(jniReturnedCode));
             throw new GenericException(GENERIC_RS_ERR_MSG);
         }
          /*
@@ -644,7 +647,7 @@ public class SlapScannerController extends AbstractBaseController {
 
         jniReturnedCode = RS_GetLastError();
         if (jniReturnedCode != RS_SUCCESS) {
-            LOGGER.log(Level.SEVERE, () ->  RS_GetErrString(jniReturnedCode));
+            LOGGER.log(Level.SEVERE, () -> RS_GetErrString(jniReturnedCode));
             throw new GenericException(GENERIC_RS_ERR_MSG);
         }
 
@@ -660,7 +663,7 @@ public class SlapScannerController extends AbstractBaseController {
          */
             jniReturnedCode = RS_SetLFDLevel(deviceHandler, fingerprintLivenessValue);
             if (jniReturnedCode != RS_SUCCESS) {
-                LOGGER.log(Level.SEVERE, () ->  RS_GetErrString(jniReturnedCode));
+                LOGGER.log(Level.SEVERE, () -> RS_GetErrString(jniReturnedCode));
                 throw new GenericException(GENERIC_RS_ERR_MSG);
             }
         }
@@ -806,7 +809,7 @@ public class SlapScannerController extends AbstractBaseController {
 
     // throws GenericException
     private Map<Integer, RSImageInfo> segmentSlapImage(RSImageInfo rsImageInfo) {
-        duplicateFpFound = false;
+        conditionNotMet = false;
         Map<String, Integer> mFingersToScanSeqMap;
         if (FingerSetType.LEFT == fingerSetTypeToScan) {
             mFingersToScanSeqMap = leftFingerToFingerTypeLinkedHashMap;
@@ -1054,44 +1057,36 @@ public class SlapScannerController extends AbstractBaseController {
 
         Set<Fp> fps = new HashSet<>();
         String fingerPositionString;
+        int totalFingerprintsSizeInBytes = 0;
 
         for (Integer finger : fingerSet) {
-            switch (finger) {
-                case RS_FGP_RIGHT_THUMB: // 1
-                    fingerPositionString = "RT";
-                    break;
-                case RS_FGP_RIGHT_INDEX: // 2
-                    fingerPositionString = "RI";
-                    break;
-                case RS_FGP_RIGHT_MIDDLE: // 3
-                    fingerPositionString = "RM";
-                    break;
-                case RS_FGP_RIGHT_RING:  // 4
-                    fingerPositionString = "RR";
-                    break;
-                case RS_FGP_RIGHT_LITTLE:  // 5
-                    fingerPositionString = "RL";
-                    break;
-                case RS_FGP_LEFT_THUMB:  // 6
-                    fingerPositionString = "LT";
-                    break;
-                case RS_FGP_LEFT_INDEX:  // 7
-                    fingerPositionString = "LI";
-                    break;
-                case RS_FGP_LEFT_MIDDLE:  // 8
-                    fingerPositionString = "LM";
-                    break;
-                case RS_FGP_LEFT_RING:  // 9
-                    fingerPositionString = "LR";
-                    break;
-                case RS_FGP_LEFT_LITTLE:  // 10
-                    fingerPositionString = "LL";
-                    break;
-                default:
+            fingerPositionString = switch (finger) {
+                case RS_FGP_RIGHT_THUMB -> // 1
+                        "RT";
+                case RS_FGP_RIGHT_INDEX -> // 2
+                        "RI";
+                case RS_FGP_RIGHT_MIDDLE -> // 3
+                        "RM";
+                case RS_FGP_RIGHT_RING ->  // 4
+                        "RR";
+                case RS_FGP_RIGHT_LITTLE ->  // 5
+                        "RL";
+                case RS_FGP_LEFT_THUMB ->  // 6
+                        "LT";
+                case RS_FGP_LEFT_INDEX ->  // 7
+                        "LI";
+                case RS_FGP_LEFT_MIDDLE ->  // 8
+                        "LM";
+                case RS_FGP_LEFT_RING ->  // 9
+                        "LR";
+                case RS_FGP_LEFT_LITTLE ->  // 10
+                        "LL";
+                default -> {
                     // meant for developers
                     LOGGER.log(Level.SEVERE, "Unsupported finger type.");
                     throw new GenericException("Unsupported finger type.");
-            }
+                }
+            };
             // check if GLOBAL FingerType to RSImageInfo Map has this finger key-value mapping.
             RSImageInfo rsImageInfo = scannedFingerTypeToRsImageInfoMap.get(finger);
             if (rsImageInfo == null) {
@@ -1115,6 +1110,7 @@ public class SlapScannerController extends AbstractBaseController {
             byte[] image = imageAndIsoTemplateMap.get("image");
             byte[] template = imageAndIsoTemplateMap.get("template");
 
+
             if (image == null || template == null) {
                 LOGGER.log(Level.SEVERE, "Either image or template is null");
                 Platform.runLater(this::clearFingerprintOnUI);
@@ -1122,6 +1118,8 @@ public class SlapScannerController extends AbstractBaseController {
                 enableControls(leftScanBtn);
                 return;
             }
+
+            totalFingerprintsSizeInBytes += template.length;
 
             isoTemplates.add(template);
 
@@ -1132,10 +1130,18 @@ public class SlapScannerController extends AbstractBaseController {
             fps.add(fp);
         }
 
+        if (totalFingerprintsSizeInBytes > FPS_MAX_TOTAL_SIZE_IN_BYTES) {
+            LOGGER.log(Level.SEVERE, "Scanned duplicate fingerprints.");
+            updateUi("Total fingerprints size exceeded the allowed limit. Rescanning..");
+            conditionNotMet = true;
+            rescanFromStart();
+            return;
+        }
+
         if (checkDuplicateFp(isoTemplates)) {
             LOGGER.log(Level.SEVERE, "Scanned duplicate fingerprints.");
             updateUi("Duplicate fingerprints found. Rescanning from the start....");
-            duplicateFpFound = true;
+            conditionNotMet = true;
             rescanFromStart();
             return;
         }

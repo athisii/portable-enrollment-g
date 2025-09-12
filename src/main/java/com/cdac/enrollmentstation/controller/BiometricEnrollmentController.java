@@ -108,48 +108,47 @@ public class BiometricEnrollmentController extends AbstractBaseController {
 
     private void continueBtnAction() {
         ArcDetail arcDetail = ArcDetailsHolder.getArcDetailsHolder().getArcDetail();
-
-        if (arcDetail.getBiometricOptions().trim().equalsIgnoreCase("photo")) {
+        if (arcDetail.getBiometricOptions().trim().equalsIgnoreCase("both") || arcDetail.getBiometricOptions().trim().equalsIgnoreCase("biometric") || arcDetail.getBiometricOptions().trim().equalsIgnoreCase("photo")) {
+            SaveEnrollmentDetail saveEnrollmentDetail;
             try {
-                App.setRoot("photo");
-            } catch (IOException ex) {
-                LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
+                saveEnrollmentDetail = SaveEnrollmentDetailUtil.readFromFile();
+            } catch (GenericException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage());
+                messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
+                return;
             }
-        } else if (arcDetail.getBiometricOptions().trim().equalsIgnoreCase("both") || arcDetail.getBiometricOptions().trim().equalsIgnoreCase("biometric")) {
-            setNextScreen();
+
+            // different e-ARC number is entered.
+            if (saveEnrollmentDetail.getArcNo() == null || !arcDetail.getArcNo().equals(saveEnrollmentDetail.getArcNo())) {
+                startNewEnrollment(arcDetail);
+            } else {
+                // same e-ARC number is entered as the one saved in saveEnrollment.txt file.
+                ArcDetailsHolder.getArcDetailsHolder().setSaveEnrollmentDetail(saveEnrollmentDetail);
+                changeScreenBasedOnEnrollmentStatus(arcDetail);
+            }
         } else {
             messageLabel.setText("Biometric capturing not required for e-ARC number: " + tempArc);
             LOGGER.log(Level.INFO, "Biometric capturing not required for given e-ARC Number");
         }
-
     }
 
-    private void setNextScreen() {
-        SaveEnrollmentDetail saveEnrollmentDetail;
-        try {
-            saveEnrollmentDetail = SaveEnrollmentDetailUtil.readFromFile();
-        } catch (GenericException ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage());
-            messageLabel.setText(ApplicationConstant.GENERIC_ERR_MSG);
-            return;
-        }
-
-        // different e-ARC number is entered.
-        if (saveEnrollmentDetail.getArcNo() == null || !ArcDetailsHolder.getArcDetailsHolder().getArcDetail().getArcNo().equals(saveEnrollmentDetail.getArcNo())) {
+    private void startNewEnrollment(ArcDetail arcDetail) {
+        if (arcDetail.getBiometricOptions().trim().equalsIgnoreCase("both")) {
             try {
                 App.setRoot("slap_scanner");
             } catch (IOException ex) {
                 LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
             }
         } else {
-            // same e-ARC number is entered as the one saved in saveEnrollment.txt file.
-            ArcDetailsHolder.getArcDetailsHolder().setSaveEnrollmentDetail(saveEnrollmentDetail);
-            changeScreenBasedOnEnrollmentStatus();
+            try {
+                App.setRoot("photo");
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
+            }
         }
-
     }
 
-    private void changeScreenBasedOnEnrollmentStatus() {
+    private void changeScreenBasedOnEnrollmentStatus(ArcDetail arcDetail) {
         switch (ArcDetailsHolder.getArcDetailsHolder().getSaveEnrollmentDetail().getEnrollmentStatus()) {
             case "FingerPrintCompleted":
                 try {
@@ -161,8 +160,8 @@ public class BiometricEnrollmentController extends AbstractBaseController {
 
             case "IrisCompleted":
                 try {
-                    if ("biometric".equalsIgnoreCase(ArcDetailsHolder.getArcDetailsHolder().getArcDetail().getBiometricOptions().trim())) {
-                        if (ArcDetailsHolder.getArcDetailsHolder().getArcDetail().isSignatureRequired()) {
+                    if ("biometric".equalsIgnoreCase(arcDetail.getBiometricOptions().trim())) {
+                        if (arcDetail.isSignatureRequired()) {
                             App.setRoot("signature");
                             return;
                         }
@@ -176,7 +175,7 @@ public class BiometricEnrollmentController extends AbstractBaseController {
                 break;
             case "PhotoCompleted":
                 try {
-                    if (ArcDetailsHolder.getArcDetailsHolder().getArcDetail().isSignatureRequired()) {
+                    if (arcDetail.isSignatureRequired()) {
                         App.setRoot("signature");
                         return;
                     }
@@ -194,11 +193,7 @@ public class BiometricEnrollmentController extends AbstractBaseController {
                 }
                 break;
             default:
-                try {
-                    App.setRoot("slap_scanner");
-                } catch (IOException ex) {
-                    LOGGER.log(Level.SEVERE, SCENE_ROOT_ERR_MSG, ex);
-                }
+                startNewEnrollment(arcDetail);
                 break;
         }
     }

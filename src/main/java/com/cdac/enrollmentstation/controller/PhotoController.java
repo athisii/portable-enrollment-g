@@ -68,6 +68,8 @@ public class PhotoController extends AbstractBaseController {
     private static final Image CHIN_DOWN_COLORED_IMAGE;
     private static final Image CHIN_UP_COLOR_IMAGE;
     private static final Image TICK_GREEN_IMAGE;
+    private static final int IMG_PHOTO_MIN_SIZE_IN_BYTES;
+    private static final int IMG_PHOTO_MAX_SIZE_IN_BYTES;
     private static final int IMG_PHOTO_COMPRESSED_MIN_SIZE_IN_BYTES;
     private static final int IMG_PHOTO_COMPRESSED_MAX_SIZE_IN_BYTES;
 
@@ -77,6 +79,8 @@ public class PhotoController extends AbstractBaseController {
             IMG_PHOTO_FILE = PropertyFile.getProperty(PropertyName.IMG_PHOTO_FILE);
             IMG_PHOTO_COMPRESSED_FILE = PropertyFile.getProperty(PropertyName.IMG_PHOTO_COMPRESSED_FILE);
             PYTHON_IMAGE_PROCESSOR_COMMAND = PropertyFile.getProperty(PropertyName.PYTHON_IMAGE_PROCESSOR_COMMAND);
+            IMG_PHOTO_MIN_SIZE_IN_BYTES = Integer.parseInt(PropertyFile.getProperty(PropertyName.IMG_PHOTO_MIN_SIZE));
+            IMG_PHOTO_MAX_SIZE_IN_BYTES = Integer.parseInt(PropertyFile.getProperty(PropertyName.IMG_PHOTO_MAX_SIZE));
             IMG_PHOTO_COMPRESSED_MIN_SIZE_IN_BYTES = Integer.parseInt(PropertyFile.getProperty(PropertyName.IMG_PHOTO_COMPRESSED_MIN_SIZE));
             IMG_PHOTO_COMPRESSED_MAX_SIZE_IN_BYTES = Integer.parseInt(PropertyFile.getProperty(PropertyName.IMG_PHOTO_COMPRESSED_MAX_SIZE));
             // loads --> /img/
@@ -91,7 +95,6 @@ public class PhotoController extends AbstractBaseController {
             CHIN_DOWN_COLORED_IMAGE = loadFileFromFaceCodeDirectory("chin_down_colored.png");
             CHIN_UP_COLOR_IMAGE = loadFileFromFaceCodeDirectory("chin_up_color.png");
             TICK_GREEN_IMAGE = loadFileFromFaceCodeDirectory("tick.png");
-
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             throw new GenericException("Some property values are missing or blank or some files are missing in facecode directory");
@@ -384,11 +387,11 @@ public class PhotoController extends AbstractBaseController {
             String line;
             while ((line = input.readLine()) != null) {
                 if (line.contains("Valid")) {
-                    byte[] bytes = Files.readAllBytes(Path.of(PropertyFile.getProperty(PropertyName.IMG_PHOTO_COMPRESSED_FILE)));
-                    LOGGER.log(Level.INFO, () -> "Compressed photo size in bytes: " + bytes.length);
-                    if (bytes.length >= IMG_PHOTO_COMPRESSED_MIN_SIZE_IN_BYTES && bytes.length <= IMG_PHOTO_COMPRESSED_MAX_SIZE_IN_BYTES) {
+                    if (validatePhoto() && validatePhotoCompressed()) {
                         validImage = true;
                         stopLive = true;
+                    } else {
+                        Platform.runLater(() -> messageLabel.setText("Photo file size is outside the allowed range. Recapturing.."));
                     }
                 } else if (line.contains("Message=")) {
                     String subString = line.substring("Message= ".length());
@@ -420,6 +423,18 @@ public class PhotoController extends AbstractBaseController {
                 LOGGER.log(Level.SEVERE, e::getMessage);
             }
         }
+    }
+
+    private boolean validatePhoto() throws IOException {
+        byte[] bytes = Files.readAllBytes(Path.of(IMG_PHOTO_FILE));
+        LOGGER.log(Level.INFO, () -> "Photo size in bytes: " + bytes.length);
+        return bytes.length >= IMG_PHOTO_MIN_SIZE_IN_BYTES && bytes.length <= IMG_PHOTO_MAX_SIZE_IN_BYTES;
+    }
+
+    private boolean validatePhotoCompressed() throws IOException {
+        byte[] bytes = Files.readAllBytes(Path.of(IMG_PHOTO_COMPRESSED_FILE));
+        LOGGER.log(Level.INFO, () -> "Compressed photo size in bytes: " + bytes.length);
+        return bytes.length >= IMG_PHOTO_COMPRESSED_MIN_SIZE_IN_BYTES && bytes.length <= IMG_PHOTO_COMPRESSED_MAX_SIZE_IN_BYTES;
     }
 
     private void updateUIOnValidImageAndNormalExit(int exitVal) throws IOException {
